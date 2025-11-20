@@ -40,3 +40,4 @@
 /home/MestreVerde/Programação/programação/C#/Student_final/obj/Debug/net9.0/Student final.pdb
 /home/MestreVerde/Programação/programação/C#/Student_final/obj/Debug/net9.0/Student final.genruntimeconfig.cache
 /home/MestreVerde/Programação/programação/C#/Student_final/obj/Debug/net9.0/ref/Student final.dll
+/home/MestreVerde/Programação/programação/C#/Student_final/obj/Debug/net9.0/Student final.sourcelink.json

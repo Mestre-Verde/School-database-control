@@ -1,22 +1,38 @@
-using static System.Console; // <-- Permite usar Write e WriteLine sem precisar de Console.
-using System.Text.Json;
-using System.Reflection;
-using System.Linq.Expressions;
 /// <summary>
 /// Nesta class ela é responsável por tudo que seja relacionado com a base de dados, nenhuma class sem ser esta pode manusiar nos ficheiros.
 /// Tambem é responsavel por verificar se os ficheiros existem 
 /// </summary>
+using static System.Console; // <-- Permite usar Write e WriteLine sem precisar de Console.
+using System.Text.Json;
+using System.Reflection;
+using System.Linq.Expressions;
+
 
 // Classe estática — não precisa ser instanciada
 internal static class FileManager
 {
     // 🗂️ Caminhos dos ficheiros principais do programa
-    internal static string CourseFilePath { get; } = "Course.cs";                 // Código fonte de cursos
-    internal static string StudentFilePath { get; } = "Person.cs";                // Código fonte de pessoas
+    internal static string ClassDirectory { get; } = "classes/";
+    internal static string CourseFilePath { get; } = "classes/Course.cs";                 // Código fonte de cursos
+    internal static string StudentFilePath { get; } = "classes/Person.cs";                // Código fonte de pessoas
     private static string DataBaseDirectory { get; } = "data/";               // Pasta onde ficam os ficheiros de dados
     private static string StudentsJSONPath { get; } = "data/students.json";      // Dados dos estudantes
     private static string TeachersJSONPath { get; } = "data/teachers.json";      // Dados dos professores
     private static string CoursesJSONPath { get; } = "data/courses.json";         // Dados dos cursos
+    /* private static readonly string[] files =
+     [
+         ClassDirectory,
+         CourseFilePath,
+         StudentFilePath,
+         StudentsJSONPath,
+         TeachersJSONPath,
+         CoursesJSONPath
+     ];*/
+    private static readonly string[] files = [.. typeof(FileManager)
+    .GetProperties(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public)
+    .Where(p => p.PropertyType == typeof(string) && p.Name.EndsWith("Path", StringComparison.OrdinalIgnoreCase) || p.Name.EndsWith("Directory", StringComparison.OrdinalIgnoreCase))
+    .Select(p => p.GetValue(null)?.ToString()!)];
+
 
     internal enum DataBaseType// Enum para percorrer os caminhos das base de dados.
     {
@@ -83,15 +99,6 @@ internal static class FileManager
     // Verifica se todos os ficheiros necessários existem e cria os que faltam
     internal static bool StartupCheckFilesWithProgress(bool setup = true)
     {
-        string[] files =
-        [
-        CourseFilePath,
-        StudentFilePath,
-        StudentsJSONPath,
-        TeachersJSONPath,
-        CoursesJSONPath
-    ];
-
         int total = files.Length;
         int count = 0;
         List<string> missingFiles = [];
