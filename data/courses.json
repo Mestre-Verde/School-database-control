@@ -1,0 +1,30 @@
+{
+  "0": {
+    "Name_s": "Mestrado em Eletrecidade e Eletr\u00F3nica Geral",
+    "ID_i": 0,
+    "Type_e": 7,
+    "Duration_f": 4.5,
+    "Subjects_l": []
+  },
+  "1": {
+    "Name_s": "",
+    "ID_i": 1,
+    "Type_e": 0,
+    "Duration_f": 0,
+    "Subjects_l": []
+  },
+  "2": {
+    "Name_s": "engeniering of player",
+    "ID_i": 2,
+    "Type_e": 6,
+    "Duration_f": 10,
+    "Subjects_l": []
+  },
+  "3": {
+    "Name_s": "Master in roubo",
+    "ID_i": 3,
+    "Type_e": 7,
+    "Duration_f": 2.5,
+    "Subjects_l": []
+  }
+}

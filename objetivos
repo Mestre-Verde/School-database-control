@@ -1,0 +1,8 @@
+ls() é um comando de inspeção avançado. Ele lista objetos existentes e pode filtrar 
+por qualquer campo (nome, ID, idade, tipo, duração etc.). Sempre é case-insensitive 
+para texto. Diferente de Search(), que retorna resultados para outras funções, ls() 
+exibe os dados diretamente ao usuário, nunca modifica nada.
+
+
+------------------____-___--_________-----------___
+

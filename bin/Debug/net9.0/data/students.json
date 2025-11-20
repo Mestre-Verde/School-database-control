@@ -1,0 +1,18 @@
+{
+  "0": {
+    "ID_i": 0,
+    "Name_s": "Carlos",
+    "Age_by": 12,
+    "Gender_c": " ",
+    "BirthDate_dt": "2025-11-06T09:31:12.9653333+00:00",
+    "Nationality": 4
+  },
+  "1": {
+    "ID_i": 1,
+    "Name_s": "a",
+    "Age_by": 2,
+    "Gender_c": " ",
+    "BirthDate_dt": "2025-11-06T09:56:25.0026278+00:00",
+    "Nationality": 4
+  }
+}

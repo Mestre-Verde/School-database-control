@@ -1,0 +1,42 @@
+/home/MestreVerde/Programação/programação/C#/Students_course/Student final/bin/Debug/net9.0/Student final
+/home/MestreVerde/Programação/programação/C#/Students_course/Student final/bin/Debug/net9.0/Student final.deps.json
+/home/MestreVerde/Programação/programação/C#/Students_course/Student final/bin/Debug/net9.0/Student final.runtimeconfig.json
+/home/MestreVerde/Programação/programação/C#/Students_course/Student final/bin/Debug/net9.0/Student final.dll
+/home/MestreVerde/Programação/programação/C#/Students_course/Student final/bin/Debug/net9.0/Student final.pdb
+/home/MestreVerde/Programação/programação/C#/Students_course/Student final/obj/Debug/net9.0/Student final.GeneratedMSBuildEditorConfig.editorconfig
+/home/MestreVerde/Programação/programação/C#/Students_course/Student final/obj/Debug/net9.0/Student final.AssemblyInfoInputs.cache
+/home/MestreVerde/Programação/programação/C#/Students_course/Student final/obj/Debug/net9.0/Student final.AssemblyInfo.cs
+/home/MestreVerde/Programação/programação/C#/Students_course/Student final/obj/Debug/net9.0/Student final.csproj.CoreCompileInputs.cache
+/home/MestreVerde/Programação/programação/C#/Students_course/Student final/obj/Debug/net9.0/Student final.dll
+/home/MestreVerde/Programação/programação/C#/Students_course/Student final/obj/Debug/net9.0/refint/Student final.dll
+/home/MestreVerde/Programação/programação/C#/Students_course/Student final/obj/Debug/net9.0/Student final.pdb
+/home/MestreVerde/Programação/programação/C#/Students_course/Student final/obj/Debug/net9.0/Student final.genruntimeconfig.cache
+/home/MestreVerde/Programação/programação/C#/Students_course/Student final/obj/Debug/net9.0/ref/Student final.dll
+/home/MestreVerde/Programação/programação/C#/Student final/bin/Debug/net9.0/Student final
+/home/MestreVerde/Programação/programação/C#/Student final/bin/Debug/net9.0/Student final.deps.json
+/home/MestreVerde/Programação/programação/C#/Student final/bin/Debug/net9.0/Student final.runtimeconfig.json
+/home/MestreVerde/Programação/programação/C#/Student final/bin/Debug/net9.0/Student final.dll
+/home/MestreVerde/Programação/programação/C#/Student final/bin/Debug/net9.0/Student final.pdb
+/home/MestreVerde/Programação/programação/C#/Student final/obj/Debug/net9.0/Student final.GeneratedMSBuildEditorConfig.editorconfig
+/home/MestreVerde/Programação/programação/C#/Student final/obj/Debug/net9.0/Student final.AssemblyInfoInputs.cache
+/home/MestreVerde/Programação/programação/C#/Student final/obj/Debug/net9.0/Student final.AssemblyInfo.cs
+/home/MestreVerde/Programação/programação/C#/Student final/obj/Debug/net9.0/Student final.csproj.CoreCompileInputs.cache
+/home/MestreVerde/Programação/programação/C#/Student final/obj/Debug/net9.0/Student final.dll
+/home/MestreVerde/Programação/programação/C#/Student final/obj/Debug/net9.0/refint/Student final.dll
+/home/MestreVerde/Programação/programação/C#/Student final/obj/Debug/net9.0/Student final.pdb
+/home/MestreVerde/Programação/programação/C#/Student final/obj/Debug/net9.0/Student final.genruntimeconfig.cache
+/home/MestreVerde/Programação/programação/C#/Student final/obj/Debug/net9.0/ref/Student final.dll
+/home/MestreVerde/Programação/programação/C#/Student_final/bin/Debug/net9.0/Student final
+/home/MestreVerde/Programação/programação/C#/Student_final/bin/Debug/net9.0/Student final.deps.json
+/home/MestreVerde/Programação/programação/C#/Student_final/bin/Debug/net9.0/Student final.runtimeconfig.json
+/home/MestreVerde/Programação/programação/C#/Student_final/bin/Debug/net9.0/Student final.dll
+/home/MestreVerde/Programação/programação/C#/Student_final/bin/Debug/net9.0/Student final.pdb
+/home/MestreVerde/Programação/programação/C#/Student_final/obj/Debug/net9.0/Student final.GeneratedMSBuildEditorConfig.editorconfig
+/home/MestreVerde/Programação/programação/C#/Student_final/obj/Debug/net9.0/Student final.AssemblyInfoInputs.cache
+/home/MestreVerde/Programação/programação/C#/Student_final/obj/Debug/net9.0/Student final.AssemblyInfo.cs
+/home/MestreVerde/Programação/programação/C#/Student_final/obj/Debug/net9.0/Student final.csproj.CoreCompileInputs.cache
+/home/MestreVerde/Programação/programação/C#/Student_final/obj/Debug/net9.0/Student final.dll
+/home/MestreVerde/Programação/programação/C#/Student_final/obj/Debug/net9.0/refint/Student final.dll
+/home/MestreVerde/Programação/programação/C#/Student_final/obj/Debug/net9.0/Student final.pdb
+/home/MestreVerde/Programação/programação/C#/Student_final/obj/Debug/net9.0/Student final.genruntimeconfig.cache
+/home/MestreVerde/Programação/programação/C#/Student_final/obj/Debug/net9.0/ref/Student final.dll
