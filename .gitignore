@@ -33,6 +33,7 @@ bld/
 [Oo]ut/
 [Ll]og/
 [Ll]ogs/
+.Student_final.sln
 
 # Build results on 'Bin' directories
 **/[Bb]in/*
