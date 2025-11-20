@@ -162,6 +162,11 @@ internal class Course
             else WriteLine($"❌ Erro ao remover: ID={s.ID_i}, Nome='{s.Name_s}'");
         }
     }
+    
+    internal static protected void Select()
+    {
+        // seleciona um estudante e professor, e manuseia os dados
+    }
 }
 
 
@@ -170,7 +175,7 @@ internal class Discipline
     internal string Name_s { get; private set; }
     internal int ECTS_i { get; private set; }
     internal string Professor_s { get; private set; }
-    private Dictionary<int ,Student> alunosInscritos = [];
+    private Dictionary<int, Student> alunosInscritos = [];
 
     private Discipline(string name, int ects, string professor)
     {

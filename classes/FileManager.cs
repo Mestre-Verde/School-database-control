@@ -19,21 +19,15 @@ internal static class FileManager
     private static string StudentsJSONPath { get; } = "data/students.json";      // Dados dos estudantes
     private static string TeachersJSONPath { get; } = "data/teachers.json";      // Dados dos professores
     private static string CoursesJSONPath { get; } = "data/courses.json";         // Dados dos cursos
-    /* private static readonly string[] files =
-     [
+    private static readonly string[] files =
+    [
          ClassDirectory,
          CourseFilePath,
          StudentFilePath,
          StudentsJSONPath,
          TeachersJSONPath,
          CoursesJSONPath
-     ];*/
-    private static readonly string[] files = [.. typeof(FileManager)
-    .GetProperties(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public)
-    .Where(p => p.PropertyType == typeof(string) && p.Name.EndsWith("Path", StringComparison.OrdinalIgnoreCase) || p.Name.EndsWith("Directory", StringComparison.OrdinalIgnoreCase))
-    .Select(p => p.GetValue(null)?.ToString()!)];
-
-
+    ];
     internal enum DataBaseType// Enum para percorrer os caminhos das base de dados.
     {
         Student,
@@ -41,9 +35,7 @@ internal static class FileManager
         Course
     }
 
-    /// <summary>
-    /// Retorna o caminho do arquivo JSON correspondente ao tipo de base de dados fornecido.
-    /// </summary>
+    /// <summary> Retorna o caminho do arquivo JSON correspondente ao tipo de base de dados fornecido.</summary>
     /// <returns>
     /// Retorna uma variavel do tipo <see cref="string"/> com o caminho completo do arquivo JSON correspondente ao <paramref name="baseType"/>.
     /// </returns>

@@ -208,6 +208,10 @@ internal class Student : Person
         }
     }
 
+    internal static void Select()
+    {
+        // seleciona um estudante e professor, e manuseia os dados
+    }
 
     internal override void Introduce()
     { WriteLine($"🎓 New Student: {Name_s}, ID: {ID_i}, Age: {Age_by}, Genero: {Gender_c}, Data de nascimento: {BirthDate_dt.Date}, Nacionalidade: {Nationality}."); }
@@ -379,6 +383,10 @@ internal class Teacher : Person
         }
     }
 
+    internal static  void Select()
+    {
+        // seleciona um estudante e professor, e manuseia os dados
+    }
 
     internal override void Introduce() { WriteLine($"👨‍🏫 New Teacher: {Name_s}, ID: {ID_i}, Age: {Age_by}, Genero: {Gender_c}, Data de nascimento: {BirthDate_dt.Date}, Nacionalidade: {Nationality}."); }
 }
