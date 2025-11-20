@@ -53,8 +53,6 @@ interface IMustExist // não pode ter modificadores de acesso
 {
 }
 
-
-
 class MenuRelated_cl
 {
     internal const string UnknowonCommand_s = "❌ Comando desconhecido.\n";
@@ -111,8 +109,7 @@ class MenuRelated_cl
                 case "4": input_s = "Course"; break;
             }
 
-            if (!Enum.TryParse(input_s, true, out GlobalObjectCommands_e command))
-                command = GlobalObjectCommands_e.None;
+            if (!Enum.TryParse(input_s, true, out GlobalObjectCommands_e command)) { command = GlobalObjectCommands_e.None; }
 
             if (command == GlobalObjectCommands_e.Back)
             {
@@ -143,12 +140,9 @@ class MenuRelated_cl
         // Aqui usamos Action, que é um delegate que representa um método sem parâmetros e sem retorno
         var actions = new Dictionary<GlobalObjectCommands_e, Action>
     {
-        // Para "Student", chamamos Student.Create() e descartamos o objeto retornado com "_ ="
-        { GlobalObjectCommands_e.Student, () => _ = Student.Create() },
-        // Para "Teacher", chamamos Teacher.Create() e descartamos o objeto retornado
-        { GlobalObjectCommands_e.Teacher, () => _ = Teacher.Create() },
-        // Para "Course", chamamos Course.Create() e descartamos o objeto retornado
-        { GlobalObjectCommands_e.Course,  () => _ = Course.Create() }
+        { GlobalObjectCommands_e.Student, () => _ = Student.Create() },// Para "Student", chamamos Student.Create() e descartamos o objeto retornado com "_ ="
+        { GlobalObjectCommands_e.Teacher, () => _ = Teacher.Create() },// Para "Teacher", chamamos Teacher.Create() e descartamos o objeto retornado
+        { GlobalObjectCommands_e.Course,  () => _ = Course.Create() }// Para "Course", chamamos Course.Create() e descartamos o objeto retornado
     };
         // Chama a função genérica que executa o loop do menu, passando o texto do menu e o dicionário de ações
         RunMenu(MenuAddObject_s, actions);
