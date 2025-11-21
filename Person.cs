@@ -5,7 +5,18 @@ using System.Security.AccessControl;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
+abstract class SchoolMenbers
+{
+    [JsonInclude] internal protected string Name_s { get; private set; } = "";// string porque um nome é uma sequência dinâmica de caracteres
+    [JsonInclude] internal protected byte Age_by { get; private set; } = default;// byte (0-255) porque a idade nunca é negativa e não passa de 255.
+    [JsonInclude] internal protected char Gender_c { get; private set; } = default;// char 'M' ou 'F' (sempre um único caractere)
+    [JsonInclude] internal protected DateTime BirthDate_dt { get; private set; } = default;// Data de nascimento (struct DateTime) 
+    [JsonInclude] internal protected Nationality_e Nationality { get; private set; } = default;// Nacionalidade (enum)
 
+    private SchoolMenbers(){}
+    
+
+}
 
 internal class Person
 {
@@ -383,7 +394,7 @@ internal class Teacher : Person
         }
     }
 
-    internal static  void Select()
+    internal static void Select()
     {
         // seleciona um estudante e professor, e manuseia os dados
     }

@@ -139,11 +139,11 @@ class MenuRelated_cl
         // Cria um dicionário que associa cada comando do menu a uma ação
         // Aqui usamos Action, que é um delegate que representa um método sem parâmetros e sem retorno
         var actions = new Dictionary<GlobalObjectCommands_e, Action>
-    {
-        { GlobalObjectCommands_e.Student, () => _ = Student.Create() },// Para "Student", chamamos Student.Create() e descartamos o objeto retornado com "_ ="
-        { GlobalObjectCommands_e.Teacher, () => _ = Teacher.Create() },// Para "Teacher", chamamos Teacher.Create() e descartamos o objeto retornado
-        { GlobalObjectCommands_e.Course,  () => _ = Course.Create() }// Para "Course", chamamos Course.Create() e descartamos o objeto retornado
-    };
+        {
+            { GlobalObjectCommands_e.Student, () => _ = Student.Create() },// Para "Student", chamamos Student.Create() e descartamos o objeto retornado com "_ ="
+            { GlobalObjectCommands_e.Teacher, () => _ = Teacher.Create() },// Para "Teacher", chamamos Teacher.Create() e descartamos o objeto retornado
+            { GlobalObjectCommands_e.Course,  () => _ = Course.Create() }// Para "Course", chamamos Course.Create() e descartamos o objeto retornado
+        };
         // Chama a função genérica que executa o loop do menu, passando o texto do menu e o dicionário de ações
         RunMenu(MenuAddObject_s, actions);
     }
@@ -152,12 +152,12 @@ class MenuRelated_cl
     {
         // Dicionário de ações para o menu de remoção
         var actions = new Dictionary<GlobalObjectCommands_e, Action>
-    {
-        // Neste caso Remove() já é void, então não precisamos de "_ ="
-        { GlobalObjectCommands_e.Student, Student.Remove },
-        { GlobalObjectCommands_e.Teacher, Teacher.Remove },
-        { GlobalObjectCommands_e.Course,  Course.Remove }
-    };
+        {
+            // Neste caso Remove() já é void, então não precisamos de "_ ="
+            { GlobalObjectCommands_e.Student, Student.Remove },
+            { GlobalObjectCommands_e.Teacher, Teacher.Remove },
+            { GlobalObjectCommands_e.Course,  Course.Remove }
+        };
 
         // Executa o menu de remoção usando a função genérica
         RunMenu(MenuRemoveObject_s, actions);
@@ -167,17 +167,16 @@ class MenuRelated_cl
     {
         // Dicionário de ações para o menu de seleção
         var actions = new Dictionary<GlobalObjectCommands_e, Action>
-    {
-        // Para Select(), que retorna um objeto, usamos "_ =" para ignorar o retorno
-        { GlobalObjectCommands_e.Student, Student.Select },
-        { GlobalObjectCommands_e.Teacher,Teacher.Select },
-        { GlobalObjectCommands_e.Course, Course.Select }
-    };
+        {
+            // Para Select()
+            { GlobalObjectCommands_e.Student, Student.Select },
+            { GlobalObjectCommands_e.Teacher, Teacher.Select },
+            { GlobalObjectCommands_e.Course, Course.Select }
+        };
 
         // Executa o menu de seleção usando a função genérica
         RunMenu(MenuSelectObject_s, actions);
     }
-
 }
 
 class Program
@@ -260,72 +259,72 @@ object       -> var_o     (ex: var_oItem)
 
 
 */
-    /*
-    
-    internal static void MenuAddObject()
+/*
+
+internal static void MenuAddObject()
+{
+    Write(MenuAddObject_s);
+    while (true)
     {
-        Write(MenuAddObject_s);
-        while (true)
+        Write("\n(add menu)> ");
+        string? input_s = ReadLine()?.Trim().ToLower();// remove espaçamentos e converte a string para lowerCase,alem de poder ser nulo
+        switch (input_s)// converte números para texto do enum,para humman interface friendly
         {
-            Write("\n(add menu)> ");
-            string? input_s = ReadLine()?.Trim().ToLower();// remove espaçamentos e converte a string para lowerCase,alem de poder ser nulo
-            switch (input_s)// converte números para texto do enum,para humman interface friendly
-            {
-                case "0": input_s = "Back"; break;
-                case "1": input_s = "Help"; break;
-                case "2": input_s = "Student"; break;
-                case "3": input_s = "Teacher"; break;
-                case "4": input_s = "Course"; break;
+            case "0": input_s = "Back"; break;
+            case "1": input_s = "Help"; break;
+            case "2": input_s = "Student"; break;
+            case "3": input_s = "Teacher"; break;
+            case "4": input_s = "Course"; break;
 
-            }
-            if (!Enum.TryParse(input_s, true, out GlobalObjectCommands_e command)) { command = GlobalObjectCommands_e.None; }
-            switch (command)// Executa o comando
-            {
-                case GlobalObjectCommands_e.Back: Write(BackToMenu_s); break;
-                case GlobalObjectCommands_e.Help: Write(MenuAddObject_s); break;
-                case GlobalObjectCommands_e.Student: Student.Create(); break;
-                case GlobalObjectCommands_e.Teacher: Teacher.Create(); break;
-                case GlobalObjectCommands_e.Course: Course.Create(); break;
-                default: Write(UnknowonCommand_s); break;
-            }
-            if (command == GlobalObjectCommands_e.Back) { break; }
         }
-
-    }
-    internal static void MenuRemoveObject()
-    {
-        WriteLine(MenuRemoveObject_s);
-        while (true)
+        if (!Enum.TryParse(input_s, true, out GlobalObjectCommands_e command)) { command = GlobalObjectCommands_e.None; }
+        switch (command)// Executa o comando
         {
-            Write("\n(remove menu)> ");
-            string? input_s = ReadLine()?.Trim().ToLower();// remove espaçamentos e converte a string para lowerCase,alem de poder ser nulo
-            switch (input_s)// converte números para texto do enum,para humman interface friendly
-            {
-                case "0": input_s = "Back"; break;
-                case "1": input_s = "Help"; break;
-                case "2": input_s = "Student"; break;
-                case "3": input_s = "Teacher"; break;
-                case "4": input_s = "Course"; break;
-
-            }
-            // Agora tenta converter para enum
-            if (!Enum.TryParse(input_s, true, out GlobalObjectCommands_e command)) { command = GlobalObjectCommands_e.None; }
-
-
-            switch (command)// Executa o comando
-            {
-                case GlobalObjectCommands_e.Back: Write(BackToMenu_s); break;
-                case GlobalObjectCommands_e.Help: Write(MenuRemoveObject_s); break;
-                case GlobalObjectCommands_e.Student: Student.Remove(); break;
-                case GlobalObjectCommands_e.Teacher: Teacher.Remove(); break;
-                case GlobalObjectCommands_e.Course: Course.Remove(); break;
-                default: Write(UnknowonCommand_s); break;
-            }
-            if (command == GlobalObjectCommands_e.Back) { break; }
+            case GlobalObjectCommands_e.Back: Write(BackToMenu_s); break;
+            case GlobalObjectCommands_e.Help: Write(MenuAddObject_s); break;
+            case GlobalObjectCommands_e.Student: Student.Create(); break;
+            case GlobalObjectCommands_e.Teacher: Teacher.Create(); break;
+            case GlobalObjectCommands_e.Course: Course.Create(); break;
+            default: Write(UnknowonCommand_s); break;
         }
+        if (command == GlobalObjectCommands_e.Back) { break; }
     }
-    internal static void MenuSelectObject()
+
+}
+internal static void MenuRemoveObject()
+{
+    WriteLine(MenuRemoveObject_s);
+    while (true)
     {
-        
+        Write("\n(remove menu)> ");
+        string? input_s = ReadLine()?.Trim().ToLower();// remove espaçamentos e converte a string para lowerCase,alem de poder ser nulo
+        switch (input_s)// converte números para texto do enum,para humman interface friendly
+        {
+            case "0": input_s = "Back"; break;
+            case "1": input_s = "Help"; break;
+            case "2": input_s = "Student"; break;
+            case "3": input_s = "Teacher"; break;
+            case "4": input_s = "Course"; break;
+
+        }
+        // Agora tenta converter para enum
+        if (!Enum.TryParse(input_s, true, out GlobalObjectCommands_e command)) { command = GlobalObjectCommands_e.None; }
+
+
+        switch (command)// Executa o comando
+        {
+            case GlobalObjectCommands_e.Back: Write(BackToMenu_s); break;
+            case GlobalObjectCommands_e.Help: Write(MenuRemoveObject_s); break;
+            case GlobalObjectCommands_e.Student: Student.Remove(); break;
+            case GlobalObjectCommands_e.Teacher: Teacher.Remove(); break;
+            case GlobalObjectCommands_e.Course: Course.Remove(); break;
+            default: Write(UnknowonCommand_s); break;
+        }
+        if (command == GlobalObjectCommands_e.Back) { break; }
     }
-    */
+}
+internal static void MenuSelectObject()
+{
+
+}
+*/

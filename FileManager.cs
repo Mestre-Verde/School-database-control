@@ -12,16 +12,14 @@ using System.Linq.Expressions;
 internal static class FileManager
 {
     // 🗂️ Caminhos dos ficheiros principais do programa
-    internal static string ClassDirectory { get; } = "classes/";
-    internal static string CourseFilePath { get; } = "classes/Course.cs";                 // Código fonte de cursos
-    internal static string StudentFilePath { get; } = "classes/Person.cs";                // Código fonte de pessoas
+    internal static string CourseFilePath { get; } = "Course.cs";                 // Código fonte de cursos
+    internal static string StudentFilePath { get; } = "Person.cs";                // Código fonte de pessoas
     private static string DataBaseDirectory { get; } = "data/";               // Pasta onde ficam os ficheiros de dados
     private static string StudentsJSONPath { get; } = "data/students.json";      // Dados dos estudantes
     private static string TeachersJSONPath { get; } = "data/teachers.json";      // Dados dos professores
     private static string CoursesJSONPath { get; } = "data/courses.json";         // Dados dos cursos
     private static readonly string[] files =
     [
-         ClassDirectory,
          CourseFilePath,
          StudentFilePath,
          StudentsJSONPath,
