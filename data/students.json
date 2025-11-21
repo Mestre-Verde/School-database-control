@@ -78,5 +78,37 @@
     "Gender_c": "M",
     "BirthDate_dt": "1999-07-30T00:00:00",
     "Nationality": 3
+  },
+  "10": {
+    "ID_i": 10,
+    "Name_s": "Rita Maia",
+    "Age_by": 19,
+    "Gender_c": "F",
+    "BirthDate_dt": "2006-01-01T00:00:00",
+    "Nationality": 1
+  },
+  "11": {
+    "ID_i": 11,
+    "Name_s": "Rita Maia",
+    "Age_by": 19,
+    "Gender_c": "F",
+    "BirthDate_dt": "2006-06-03T00:00:00",
+    "Nationality": 7
+  },
+  "12": {
+    "ID_i": 12,
+    "Name_s": "",
+    "Age_by": 0,
+    "Gender_c": "\u0000",
+    "BirthDate_dt": "0001-01-01T00:00:00",
+    "Nationality": 0
+  },
+  "13": {
+    "ID_i": 13,
+    "Name_s": "Duarte Moreira",
+    "Age_by": 20,
+    "Gender_c": "M",
+    "BirthDate_dt": "2005-10-30T00:00:00",
+    "Nationality": 1
   }
 }
