@@ -5,7 +5,7 @@ using System.Security.AccessControl;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
-abstract class SchoolMenbers
+internal abstract class SchoolMembers
 {
     [JsonInclude] internal protected string Name_s { get; private set; } = "";// string porque um nome é uma sequência dinâmica de caracteres
     [JsonInclude] internal protected byte Age_by { get; private set; } = default;// byte (0-255) porque a idade nunca é negativa e não passa de 255.
@@ -13,11 +13,113 @@ abstract class SchoolMenbers
     [JsonInclude] internal protected DateTime BirthDate_dt { get; private set; } = default;// Data de nascimento (struct DateTime) 
     [JsonInclude] internal protected Nationality_e Nationality { get; private set; } = default;// Nacionalidade (enum)
 
-    private SchoolMenbers(){}
-    
+    protected SchoolMembers() { }
+    // Construtor principal da classe base
+    internal protected SchoolMembers(
+        string name = "",
+        byte age = default,
+        char gender = default,
+        DateTime? birthDate = default,
+        Nationality_e nationality = default)
+    {
+        Name_s = name;
+        Age_by = age;
+        Gender_c = gender;
+        BirthDate_dt = birthDate ?? DateTime.Now;
+        Nationality = nationality;
+    }
+
+    internal virtual void Introduce() { WriteLine($"👤 I'm a Person named {Name_s}, {Age_by} years old."); }
+
+    // Fabrica para criar objetos em subclasses
+    protected static O? CreateMember<O>(
+        string typeObject,
+        FileManager.DataBaseType dbType,
+        Func<string, byte, int, char, DateTime, Nationality_e, O> factory
+    ) where O : SchoolMembers
+    {
+        string? input_s;
+        string name = "";
+        byte age = default;
+        char gender = default;
+        DateTime date = default;
+        Nationality_e nationality = default;
+
+        // --- Nome ---
+        Write($"Escreva o nome do(a) {typeObject} (deixe vazio para default): ");
+        input_s = ReadLine()?.Trim();
+        if (!string.IsNullOrEmpty(input_s)) name = input_s;
+
+        // --- Idade ---
+        Write("Escreva a idade: ");
+        input_s = ReadLine();
+        if (!string.IsNullOrWhiteSpace(input_s) && !byte.TryParse(input_s, out age))
+            WriteLine($"DEBUG: Idade inválida, usando default 0.");
+
+        // --- Gênero ---
+        Write("Escreva o gênero (M/F): ");
+        input_s = ReadLine()?.Trim().ToUpper();
+        /* Truth table
+            M | F | S|
+            0   0 = 0| 
+            0   1 = 1| 
+            1   0 = 1| 
+            1   1 = inpossivel
+            */
+        if (input_s == "M" || input_s == "F") gender = input_s[0];
+
+        // --- Data de nascimento ---
+        Write("Escreva a data de nascimento (dd-MM-yyyy): ");
+        input_s = ReadLine()?.Trim();
+        if (!string.IsNullOrWhiteSpace(input_s) &&
+            !DateTime.TryParseExact(input_s, "dd-MM-yyyy", null, System.Globalization.DateTimeStyles.None, out date))
+            WriteLine($"DEBUG: Data inválida, usando default.");
+        date = date.Date;
+
+        // --- Nacionalidade ---
+        while (true)
+        {
+            Write("Escreva a nacionalidade ('Ajuda' para opções): ");
+            input_s = ReadLine()?.Trim();
+            if (string.Equals(input_s, "Ajuda", StringComparison.OrdinalIgnoreCase))
+            {
+                foreach (var country in Enum.GetValues<Nationality_e>())
+                    WriteLine($" - {country} ({(int)country})");
+                continue;
+            }
+            if (string.IsNullOrWhiteSpace(input_s)) break;
+            if (int.TryParse(input_s, out int numeric) && Enum.IsDefined(typeof(Nationality_e), numeric))
+            {
+                nationality = (Nationality_e)numeric;
+                break;
+            }
+            WriteLine("Entrada inválida. Tente novamente.");
+        }
+
+        // --- Confirmação final ---
+        WriteLine($"\nResumo do {typeObject}:");
+        WriteLine($" Nome: {(string.IsNullOrEmpty(name) ? "<default>" : name)}");
+        WriteLine($" Idade: {age}");
+        WriteLine($" Gênero: {(gender == default ? "<default>" : gender.ToString())}");
+        WriteLine($" Data de nascimento: {date}");
+        WriteLine($" Nacionalidade: {nationality}");
+        Write("Tem a certeza que quer criar? (S/N): ");
+        input_s = ReadLine()?.Trim().ToUpper();
+        if (input_s != "S") return null;
+
+        // --- Criação do ID ---
+        int newID = FileManager.GetTheNextAvailableID(dbType);
+        if (newID == -1) { WriteLine("❌ Erro: Não foi possível obter ID."); return null; }
+
+        var objeto = factory(name, age, newID, gender, date, nationality); // Cria o objeto usando factory
+
+        FileManager.WriteOnDataBase(dbType, objeto); // Escreve na DB
+        return objeto;
+    }
+
 
 }
-
+/*
 internal class Person
 {
     [JsonInclude] internal protected string Name_s { get; private set; }// string porque um nome é uma sequência dinâmica de caracteres
@@ -44,9 +146,9 @@ internal class Person
     // Método virtual — pode ser sobrescrito em subclasses
     internal virtual void Introduce() { WriteLine($"👤 I'm a Person named {Name_s}, {Age_by} years old."); }
 }
-
+*/
 // Classe derivada: Student
-internal class Student : Person
+internal class Student : SchoolMembers
 {
     [JsonInclude] internal int ID_i { get; private set; }
 
@@ -58,103 +160,108 @@ internal class Student : Person
         ID_i = id;
         Introduce();
     }
-
     // Fábrica de objetos Student.
-    internal static Student? Create() // Pode retornar null se o utilizador cancelar
+    internal static Student? Create()
     {
-        //WriteLine("DEBUG: Inside of Student.Create()");
-
-        string? input_s;
-        string name = "";                  // Valor default: vazio
-        byte age = default;                // Valor default: 0
-        char gender = default;             // Valor default: '\0'
-        DateTime date = default;           // Valor default: 01/01/0001
-        Nationality_e nationality = default; // Valor default: Other (0)
-
-        // --- Nome ---
-        Write("Escreva o nome do(a) estudante (deixe vazio para default): ");
-        input_s = ReadLine()?.Trim();
-        if (!string.IsNullOrEmpty(input_s)) name = input_s; // Se não estiver vazio, usa o input
-
-        // --- Idade ---
-        Write("Escreva a idade do(a) estudante: ");
-        input_s = ReadLine();// WriteLine($"DEBUG: Input de idade -> \"{input_s}\"");
-        if (!string.IsNullOrWhiteSpace(input_s) && !byte.TryParse(input_s, out age))
-        {
-            WriteLine($"DEBUG: Falha ao converter idade: \"{input_s}\" não é número válido. Usando default 0.");
-        }
-
-        // --- Gênero ---
-        Write("Escreva o seu genero (M/F): ");
-        input_s = ReadLine()?.Trim().ToUpper();
-        /* Truth table
-         M | F | S|
-         0   0 = 0| 
-         0   1 = 1| 
-         1   0 = 1| 
-         1   1 = inpossivel
-         */
-        if (input_s == "M" || input_s == "F") gender = input_s[0]; // Só aceita M ou F
-
-        // --- Data de nascimento ---
-        Write("Escreva a sua data de nascimento (dd-MM-yyyy): ");
-        input_s = ReadLine()?.Trim();
-        if (!string.IsNullOrWhiteSpace(input_s) &&
-            !DateTime.TryParseExact(input_s, "dd-MM-yyyy", null, System.Globalization.DateTimeStyles.None, out date))
-        {
-            WriteLine($"DEBUG: Falha ao converter birthdate: \"{input_s}\". Usando valor default.");
-        }
-        date = date.Date; // Remove a parte do tempo, mantendo só a data
-
-        // --- Nacionalidade ---
-        while (true)
-        {
-            Write("Escreva a sua nacionalidade ('Ajuda' para saber as opções): ");
-            input_s = ReadLine()?.Trim();
-
-            // Mostra a lista de nacionalidades disponíveis
-            if (string.Equals(input_s, "Ajuda", StringComparison.OrdinalIgnoreCase))
-            {
-                WriteLine("Opções possíveis:");
-                foreach (var country in Enum.GetValues<Nationality_e>())
-                    WriteLine($" - {country} ({(int)country})");
-                continue; // Volta ao início do loop para pedir novamente
-            }
-            if (string.IsNullOrWhiteSpace(input_s)) break; // usa default Other
-
-            // Se for número válido dentro do enum
-            if (int.TryParse(input_s, out int numeric) && Enum.IsDefined(typeof(Nationality_e), numeric))
-            {
-                nationality = (Nationality_e)numeric;
-                break; // Entrada válida
-            }
-
-            // Entrada inválida, pede novamente
-            WriteLine("Entrada inválida. Tente novamente.");
-        }
-
-        // --- Confirmação final ---
-        WriteLine($"\nResumo do estudante:");
-        WriteLine($" Nome: {(string.IsNullOrEmpty(name) ? "<default>" : name)}");
-        WriteLine($" Idade: {age}");
-        WriteLine($" Gênero: {(gender == default ? "<default>" : gender.ToString())}");
-        WriteLine($" Data de nascimento: {date}");
-        WriteLine($" Nacionalidade: {nationality}");
-        Write("Tem a certeza que quer criar este estudante? (S/N): ");
-        input_s = ReadLine()?.Trim().ToUpper();
-        if (input_s != "S") return null; // Cancela criação se não confirmar
-
-        // --- Criação do objeto ---
-        int newID = FileManager.GetTheNextAvailableID(FileManager.DataBaseType.Student);
-        if (newID == -1) { WriteLine("❌ Erro: Não foi possível obter um ID válido para o curso. Criação cancelada."); return null; }
-        Student student = new(name, age, newID, gender, date, nationality);
-
-        // --- Escrever no banco de dados ---
-        FileManager.WriteOnDataBase(FileManager.DataBaseType.Student, student);
-
-        return student; // Retorna o objeto criado
+        return CreateMember<Student>(
+            "estudante",
+            FileManager.DataBaseType.Student,
+            (n, a, id, g, d, nat) => new Student(n, a, id, g, d, nat)
+        );
     }
 
+    /*
+        // Fábrica de objetos Student.
+        internal static Student? Create() // Pode retornar null se o utilizador cancelar
+        {
+            //WriteLine("DEBUG: Inside of Student.Create()");
+
+            string? input_s;
+            string name = "";                  // Valor default: vazio
+            byte age = default;                // Valor default: 0
+            char gender = default;             // Valor default: '\0'
+            DateTime date = default;           // Valor default: 01/01/0001
+            Nationality_e nationality = default; // Valor default: Other (0)
+
+            // --- Nome ---
+            Write("Escreva o nome do(a) estudante (deixe vazio para default): ");
+            input_s = ReadLine()?.Trim();
+            if (!string.IsNullOrEmpty(input_s)) name = input_s; // Se não estiver vazio, usa o input
+
+            // --- Idade ---
+            Write("Escreva a idade do(a) estudante: ");
+            input_s = ReadLine();// WriteLine($"DEBUG: Input de idade -> \"{input_s}\"");
+            if (!string.IsNullOrWhiteSpace(input_s) && !byte.TryParse(input_s, out age))
+            {
+                WriteLine($"DEBUG: Falha ao converter idade: \"{input_s}\" não é número válido. Usando default 0.");
+            }
+
+            // --- Gênero ---
+            Write("Escreva o seu genero (M/F): ");
+            input_s = ReadLine()?.Trim().ToUpper();
+
+
+            if (input_s == "M" || input_s == "F") gender = input_s[0]; // Só aceita M ou F
+
+            // --- Data de nascimento ---
+            Write("Escreva a sua data de nascimento (dd-MM-yyyy): ");
+            input_s = ReadLine()?.Trim();
+            if (!string.IsNullOrWhiteSpace(input_s) &&
+                !DateTime.TryParseExact(input_s, "dd-MM-yyyy", null, System.Globalization.DateTimeStyles.None, out date))
+            {
+                WriteLine($"DEBUG: Falha ao converter birthdate: \"{input_s}\". Usando valor default.");
+            }
+            date = date.Date; // Remove a parte do tempo, mantendo só a data
+
+            // --- Nacionalidade ---
+            while (true)
+            {
+                Write("Escreva a sua nacionalidade ('Ajuda' para saber as opções): ");
+                input_s = ReadLine()?.Trim();
+
+                // Mostra a lista de nacionalidades disponíveis
+                if (string.Equals(input_s, "Ajuda", StringComparison.OrdinalIgnoreCase))
+                {
+                    WriteLine("Opções possíveis:");
+                    foreach (var country in Enum.GetValues<Nationality_e>())
+                        WriteLine($" - {country} ({(int)country})");
+                    continue; // Volta ao início do loop para pedir novamente
+                }
+                if (string.IsNullOrWhiteSpace(input_s)) break; // usa default Other
+
+                // Se for número válido dentro do enum
+                if (int.TryParse(input_s, out int numeric) && Enum.IsDefined(typeof(Nationality_e), numeric))
+                {
+                    nationality = (Nationality_e)numeric;
+                    break; // Entrada válida
+                }
+
+                // Entrada inválida, pede novamente
+                WriteLine("Entrada inválida. Tente novamente.");
+            }
+
+            // --- Confirmação final ---
+            WriteLine($"\nResumo do estudante:");
+            WriteLine($" Nome: {(string.IsNullOrEmpty(name) ? "<default>" : name)}");
+            WriteLine($" Idade: {age}");
+            WriteLine($" Gênero: {(gender == default ? "<default>" : gender.ToString())}");
+            WriteLine($" Data de nascimento: {date}");
+            WriteLine($" Nacionalidade: {nationality}");
+            Write("Tem a certeza que quer criar este estudante? (S/N): ");
+            input_s = ReadLine()?.Trim().ToUpper();
+            if (input_s != "S") return null; // Cancela criação se não confirmar
+
+            // --- Criação do objeto ---
+            int newID = FileManager.GetTheNextAvailableID(FileManager.DataBaseType.Student);
+            if (newID == -1) { WriteLine("❌ Erro: Não foi possível obter um ID válido para o curso. Criação cancelada."); return null; }
+            Student student = new(name, age, newID, gender, date, nationality);
+
+            // --- Escrever no banco de dados ---
+            FileManager.WriteOnDataBase(FileManager.DataBaseType.Student, student);
+
+            return student; // Retorna o objeto criado
+        }
+    */
     internal static void Remove()
     {
         Write("Digite o nome ou ID do aluno para remover: ");
@@ -230,7 +337,7 @@ internal class Student : Person
 
 
 // Classe derivada: Teacher
-internal class Teacher : Person
+internal class Teacher : SchoolMembers
 {
     [JsonInclude] internal int ID_i { get; private set; }
 

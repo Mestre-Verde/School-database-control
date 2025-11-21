@@ -91,16 +91,36 @@ class MenuRelated_cl
         [4] Course     -> Remove um curso existente
     ";
 
-    private static void RunMenu(string menuText, Dictionary<GlobalObjectCommands_e, Action> actions)
+    /// <summary>/// Executa um menu interativo com comandos pré-definidos.</summary>
+    /// <param name="mainMenuText">Texto identificador do menu (ex.: "add", "remove").</param>
+    /// <param name="menuString">Texto a mostrar no menu, para listar os comandos disponíveis.</param>
+    /// <param name="actions">
+    /// Dicionário que associa cada comando (GlobalObjectCommands_e) a uma ação (Action) a executar.
+    /// Cada Action é um delegate que representa um método sem parâmetros e sem retorno (void).
+    /// Se o comando for digitado pelo utilizador e existir no dicionário, a Action correspondente é executada.
+    /// Caso não exista, é mostrado "Comando desconhecido".
+    /// </param>
+    /// <remarks>
+    /// Funciona assim:
+    /// 1. O utilizador digita um comando (pode ser número ou texto).
+    /// 2. O comando é convertido para enum GlobalObjectCommands_e.
+    /// 3. Se o comando for "Back", sai do menu.
+    /// 4. Se for "Help", imprime novamente o menu.
+    /// 5. Para outros comandos, o dicionário actions é consultado com TryGetValue:
+    ///    - Se existir a chave, executa a Action associada.
+    ///    - Se não existir, mostra "Comando desconhecido".
+    /// </remarks>
+    private static void RunMenu(string mainMenuText, string menuString, Dictionary<GlobalObjectCommands_e, Action> actions)
     {
-        WriteLine(menuText);
+        WriteLine(menuString); // mostra o menu inicial
 
         while (true)
         {
-            Write("\n(menu)> ");
+            Write($"\n(menu {mainMenuText})> ");
             string? input_s = ReadLine()?.Trim().ToLower();
 
-            switch (input_s) // converte números para texto
+            // Permite usar números como atalhos no menu
+            switch (input_s)
             {
                 case "0": input_s = "Back"; break;
                 case "1": input_s = "Help"; break;
@@ -109,31 +129,47 @@ class MenuRelated_cl
                 case "4": input_s = "Course"; break;
             }
 
-            if (!Enum.TryParse(input_s, true, out GlobalObjectCommands_e command)) { command = GlobalObjectCommands_e.None; }
+            // Tenta converter o texto para um comando válido enum
+            if (!Enum.TryParse(input_s, true, out GlobalObjectCommands_e command))
+            {
+                command = GlobalObjectCommands_e.None;
+            }
 
+
+            // Voltar ao menu anterior
             if (command == GlobalObjectCommands_e.Back)
             {
                 WriteLine(BackToMenu_s);
                 break;
             }
 
+            // Mostrar novamente o menu
             if (command == GlobalObjectCommands_e.Help)
             {
-                WriteLine(menuText);
+                WriteLine(menuString);
                 continue;
             }
 
-            if (actions.TryGetValue(command, out Action? action))
-            {
-                action();
-            }
-            else
-            {
-                Write(UnknowonCommand_s);
-            }
+            // Executa a ação associada ao comando
+            if (actions.TryGetValue(command, out Action? action)) { action(); }
+            else { Write(UnknowonCommand_s); } // comando inválido
         }
     }
 
+
+    /// <summary> Menu para adicionar objetos na aplicação (estudantes, professores ou cursos). </summary>
+    /// <remarks>
+    /// Esta função cria um dicionário que associa cada comando do menu (enum <see cref="GlobalObjectCommands_e"/>)
+    /// a uma ação específica (<see cref="Action"/>).<para> Em seguida, passa esse dicionário e o texto do menu
+    /// para a função genérica <see cref="RunMenu"/> que trata do loop de entrada do utilizador e execução das ações.</para>
+    ///
+    /// Cada comando no dicionário corresponde a uma função de criação de objeto:
+    /// - <see cref="GlobalObjectCommands_e.Student"/> → cria um estudante usando <see cref="Student.Create"/>.
+    /// - <see cref="GlobalObjectCommands_e.Teacher"/> → cria um professor usando <see cref="Teacher.Create"/>.
+    /// - <see cref="GlobalObjectCommands_e.Course"/> → cria um curso usando <see cref="Course.Create"/>.
+    ///
+    /// O operador "_ =" é usado para descartar o objeto retornado, pois neste menu não é necessário armazená-lo.
+    /// </remarks>
     internal static void MenuAddObject()
     {
         // Cria um dicionário que associa cada comando do menu a uma ação
@@ -145,7 +181,7 @@ class MenuRelated_cl
             { GlobalObjectCommands_e.Course,  () => _ = Course.Create() }// Para "Course", chamamos Course.Create() e descartamos o objeto retornado
         };
         // Chama a função genérica que executa o loop do menu, passando o texto do menu e o dicionário de ações
-        RunMenu(MenuAddObject_s, actions);
+        RunMenu("Add", MenuAddObject_s, actions);
     }
 
     internal static void MenuRemoveObject()
@@ -160,7 +196,7 @@ class MenuRelated_cl
         };
 
         // Executa o menu de remoção usando a função genérica
-        RunMenu(MenuRemoveObject_s, actions);
+        RunMenu("Remove", MenuRemoveObject_s, actions);
     }
 
     internal static void MenuSelectObject()
@@ -175,7 +211,7 @@ class MenuRelated_cl
         };
 
         // Executa o menu de seleção usando a função genérica
-        RunMenu(MenuSelectObject_s, actions);
+        RunMenu("Select", MenuSelectObject_s, actions);
     }
 }
 
