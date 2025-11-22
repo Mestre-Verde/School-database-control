@@ -15,6 +15,18 @@ internal abstract class SchoolMembers
     [JsonInclude] internal protected DateTime BirthDate_dt { get; protected set; }// Data de nascimento (struct DateTime) 
     [JsonInclude] internal protected Nationality_e Nationality { get; protected set; }// Nacionalidade (enum)
 
+    protected static string BuildEditMenu(string typeName)// menu para parametros
+    {
+        return $@"
+    Editar {typeName}:
+        [0] Voltar
+        [1] Nome
+        [2] Idade
+        [3] Género
+        [4] Data de nascimento
+        [5] Nacionalidade
+    ";
+    }
     static readonly string InvalidEntrance = "Entrada inválida. Tente novamente.";
     static readonly string EmptyEntrance = "Entrada nula ou em branco, valor default utilizado.";
 
