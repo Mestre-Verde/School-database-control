@@ -1,7 +1,17 @@
 ﻿using static System.Console; // <-- isto importa Write e WriteLine
 //using Newtonsoft.Json;
 using System.Globalization;
-
+// enums de SchoolMembers
+internal enum EditParamSchoolMember_e
+{
+    None,
+    Back,
+    Name,
+    Age,
+    Gender,
+    BirthDate,
+    Nationality
+}
 internal enum Nationality_e
 {
     Other,      // 0
@@ -90,6 +100,8 @@ class MenuRelated_cl
         [3] Teacher    -> Remove um professor existente
         [4] Course     -> Remove um curso existente
     ";
+
+
 
     /// <summary>/// Executa um menu interativo com comandos pré-definidos.</summary>
     /// <param name="mainMenuText">Texto identificador do menu (ex.: "add", "remove").</param>

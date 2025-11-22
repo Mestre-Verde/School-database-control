@@ -7,24 +7,40 @@ using System.Text.RegularExpressions;
 
 internal abstract class SchoolMembers
 {
-    [JsonInclude] internal protected string Name_s { get; private set; } = "";// string porque um nome é uma sequência dinâmica de caracteres
-    [JsonInclude] internal protected byte Age_by { get; private set; } = default;// byte (0-255) porque a idade nunca é negativa e não passa de 255.
-    [JsonInclude] internal protected char Gender_c { get; private set; } = default;// char 'M' ou 'F' (sempre um único caractere)
-    [JsonInclude] internal protected DateTime BirthDate_dt { get; private set; } = default;// Data de nascimento (struct DateTime) 
-    [JsonInclude] internal protected Nationality_e Nationality { get; private set; } = default;// Nacionalidade (enum)
+    [JsonInclude] internal protected int ID_i { get; protected set; }
+    [JsonInclude] internal protected string Name_s { get; protected set; } = "";// string porque um nome é uma sequência dinâmica de caracteres
+    [JsonInclude] internal protected byte Age_by { get; protected set; } = default;// byte (0-255) porque a idade nunca é negativa e não passa de 255.
+    [JsonInclude] internal protected char Gender_c { get; protected set; } = default;// char 'M' ou 'F' (sempre um único caractere)
+    [JsonInclude] internal protected DateTime BirthDate_dt { get; protected set; } = default;// Data de nascimento (struct DateTime) 
+    [JsonInclude] internal protected Nationality_e Nationality { get; protected set; } = default;// Nacionalidade (enum)
 
+    protected static string BuildEditMenu(string typeName)// menu para parametros
+    {
+        return $@"
+    Editar {typeName}:
+        [0] Voltar
+        [1] Nome
+        [2] Idade
+        [3] Género
+        [4] Data de nascimento
+        [5] Nacionalidade
+    ";
+    }
     static readonly string InvalidEntrance = "Entrada inválida. Tente novamente.";
     static readonly string EmptyEntrance = "Entrada nula ou em branco, valor default utilizado.";
 
-    protected SchoolMembers() { }
+
+    protected SchoolMembers() { }// construtor para Desserialização
     // Construtor principal da classe base
     internal protected SchoolMembers(
+        int id,
         string name = "",
         byte age = default,
         char gender = default,
         DateTime? birthDate = default,
         Nationality_e nationality = default)
     {
+        ID_i = id;
         Name_s = name;
         Age_by = age;
         Gender_c = gender;
@@ -129,13 +145,199 @@ internal abstract class SchoolMembers
         return objeto;
     }
 
-    protected static void Remove(string typeObject, FileManager.DataBaseType dbType,object obj) 
+    protected static void RemoveMember<M>(
+        string typeName,
+        FileManager.DataBaseType dbType
+    ) where M : SchoolMembers
     {
-        Write("Digite o nome ou ID do aluno para remover: ");
+        Write($"Digite o nome ou ID do {typeName} para remover: ");
         string input = ReadLine() ?? "";
-        
 
+        bool isId = int.TryParse(input, out int idInput);
+
+        // Busca genérica
+        var matches = isId
+            ? FileManager.Search<M>(dbType, id: idInput)
+            : FileManager.Search<M>(dbType, name: input);
+
+        if (matches.Count == 0)
+        {
+            WriteLine($"Nenhum {typeName} encontrado.");
+            return;
+        }
+
+        // Mostra as opções
+        WriteLine($"Foram encontrados os seguintes {typeName}s:");
+        for (int i = 0; i < matches.Count; i++)
+        {
+            var m = matches[i];
+            WriteLine($"{i + 1}: ID={m.ID_i}, Nome='{m.Name_s}', Idade={m.Age_by}, " +
+                $"Gênero={m.Gender_c}, Nascimento={m.BirthDate_dt:yyyy-MM-dd}, Nacionalidade={m.Nationality}");
+        }
+
+        Write($"Escolha os números dos {typeName}s a remover (ex: 1,2,3 ou 1 2 3): ");
+        string choiceInput = ReadLine() ?? "";
+
+        // Processa a lista de índices
+        var indices = choiceInput
+            .Split([',', ' '], StringSplitOptions.RemoveEmptyEntries)
+            .Select(s => int.TryParse(s, out int x) ? x : -1)
+            .Where(x => x >= 1 && x <= matches.Count)
+            .Distinct()
+            .ToList();
+
+        if (indices.Count == 0)
+        {
+            WriteLine("Nenhuma seleção válida. Operação cancelada.");
+            return;
+        }
+
+        WriteLine($"Você selecionou os seguintes {typeName}s para remoção:");
+        foreach (var idx in indices)
+        {
+            var m = matches[idx - 1];
+            WriteLine($"- ID={m.ID_i}, Nome='{m.Name_s}', Idade={m.Age_by}, Gênero={m.Gender_c}");
+        }
+
+        Write($"Tem certeza que deseja remover todos esses {typeName}s? (S/N): ");
+        string confirm = ReadLine()?.Trim().ToUpper() ?? "N";
+
+        if (confirm != "S")
+        {
+            WriteLine("Operação cancelada.");
+            return;
+        }
+
+        // Remove
+        foreach (var idx in indices)
+        {
+            var m = matches[idx - 1];
+            bool removed = FileManager.RemoveById<M>(dbType, m.ID_i);
+
+            if (removed)
+                WriteLine($"✅ {typeName} removido: ID={m.ID_i}, Nome='{m.Name_s}'");
+            else
+                WriteLine($"❌ Erro ao remover: ID={m.ID_i}, Nome='{m.Name_s}'");
+        }
     }
+    /*
+        protected static void SelectMember<M>(
+        FileManager.DataBaseType dbType,
+        string typeName,
+        string menuText // não vai ser mais necessário visto que o texto de menu foi alterado para a class abstrata
+        ) where M : SchoolMembers
+        {
+            // 1) mostrar menuText aqui
+
+            // 2) procurar pessoa (igual ao RemoveMember)
+            // 3) escolher a pessoa (igual ao RemoveMember)
+            // 4)o user vai selecionar uma das opções que se encontram no enum EditParamSchoolMember_e
+            // 5) no final pergunta se quer emmso alterar
+
+        }
+        */
+
+    protected static void SelectMember<M>(
+      FileManager.DataBaseType dbType,
+      string typeName
+  ) where M : SchoolMembers
+    {
+        // --- procurar membro ---
+        Write($"Digite o nome ou ID do {typeName} que quer selecionar: ");
+        string input = ReadLine() ?? "";
+
+        bool isId_b = int.TryParse(input, out int idInput);
+
+        var matches = isId_b
+            ? FileManager.Search<M>(dbType, id: idInput) // caso seja ID
+            : FileManager.Search<M>(dbType, name: input); // caso seja nome
+
+        if (matches.Count == 0) { WriteLine($"Nenhum {typeName} encontrado."); return; }
+
+        // --- escolher item ---
+        WriteLine($"Resultados encontrados ({matches.Count}):");
+        for (int i = 0; i < matches.Count; i++)
+        {
+            var m = matches[i];
+            WriteLine($"{i + 1}: ID={m.ID_i}, Nome={m.Name_s}, Idade={m.Age_by}, Género={m.Gender_c}, Nasc={m.BirthDate_dt:dd-MM-yyyy}");
+        }
+
+        Write($"Escolha qual deseja editar (1 - {matches.Count}): ");
+        if (!int.TryParse(ReadLine(), out int choice) || choice < 1 || choice > matches.Count)
+        {
+            WriteLine("Escolha inválida.");
+            return;
+        }
+
+        M member = matches[choice - 1];
+
+        // --- loop do menu interno ---
+        while (true)
+        {
+            string menuText = BuildEditMenu(typeName);
+            WriteLine(menuText);
+
+
+            string? cmd = ReadLine()?.Trim();
+            if (!Enum.TryParse(cmd, out EditParamSchoolMember_e option))
+            {
+                WriteLine("Comando inválido.");
+                continue;
+            }
+
+            if (option == EditParamSchoolMember_e.Back)
+                break;
+
+            switch (option)
+            {
+                case EditParamSchoolMember_e.Name:
+                    Write("Novo nome: ");
+                    string? newName = ReadLine()?.Trim();
+                    if (!string.IsNullOrWhiteSpace(newName))
+                        member.Name_s = newName;
+                    break;
+
+                case EditParamSchoolMember_e.Age:
+                    Write("Nova idade: ");
+                    if (byte.TryParse(ReadLine(), out byte newAge))
+                        member.Age_by = newAge;
+                    break;
+
+                case EditParamSchoolMember_e.Gender:
+                    Write("Novo gênero (M/F): ");
+                    string g = (ReadLine() ?? "").Trim().ToUpper();
+                    if (g == "M" || g == "F")
+                        member.Gender_c = g[0];
+                    break;
+
+                case EditParamSchoolMember_e.BirthDate:
+                    Write("Nova data (dd-MM-yyyy): ");
+                    if (DateTime.TryParseExact(ReadLine(), "dd-MM-yyyy", null, System.Globalization.DateTimeStyles.None, out DateTime newDate))
+                        member.BirthDate_dt = newDate;
+                    break;
+
+                case EditParamSchoolMember_e.Nationality:
+                    Write("Nova nacionalidade (número): ");
+                    if (int.TryParse(ReadLine(), out int natId) && Enum.IsDefined(typeof(Nationality_e), natId))
+                        member.Nationality = (Nationality_e)natId;
+                    break;
+            }
+        }
+
+        // --- confirmar alterações ---
+        Write("\nDeseja salvar as alterações? (S/N): ");
+        if ((ReadLine()?.Trim().ToUpper()) == "S")
+        {
+            //FileManager.UpdateInDataBase(dbType, member); // depois implementa a atualização específica
+            WriteLine("✔️ AIndaa por implementar Alterações salvas.");
+        }
+        else
+        {
+            WriteLine("❌ Alterações descartadas.");
+        }
+    }
+
+
 
 }
 /*
@@ -169,14 +371,11 @@ internal class Person
 // Classe derivada: Student
 internal class Student : SchoolMembers
 {
-    [JsonInclude] internal int ID_i { get; private set; }
-
     // Construtor parameterless obrigatório para JSON
     public Student() : base() { }
 
-    private Student(string name, byte age, int id, char gender, DateTime birthDate, Nationality_e nat) : base(name, age, gender, birthDate, nationality: nat)
+    private Student(string name, byte age, int id, char gender, DateTime birthDate, Nationality_e nat) : base(id, name, age, gender, birthDate, nationality: nat)
     {
-        ID_i = id;
         Introduce();
     }
     // Fábrica de objetos Student.
@@ -189,254 +388,36 @@ internal class Student : SchoolMembers
         );
     }
 
-    internal static void Remove()
-    {
-        Write("Digite o nome ou ID do aluno para remover: ");
-        string input = ReadLine() ?? "";
+    internal static void Remove() { RemoveMember<Student>("aluno", FileManager.DataBaseType.Student); }
 
-        bool isId = int.TryParse(input, out int idInput);
-        var dbType = FileManager.DataBaseType.Student;
+    internal static void Select() { SelectMember<Student>(FileManager.DataBaseType.Student, "aluno"); }
 
-        // Busca usando enum
-        var matches = isId ? FileManager.Search<Student>(dbType, id: idInput) : FileManager.Search<Student>(dbType, name: input);
-
-        if (matches.Count == 0)
-        {
-            WriteLine("Nenhum aluno encontrado.");
-            return;
-        }
-
-        // Mostra todos os matches com detalhes
-        WriteLine("Foram encontrados os seguintes alunos:");
-        for (int i = 0; i < matches.Count; i++)
-        {
-            var s = matches[i];
-            WriteLine($"{i + 1}: ID={s.ID_i}, Nome='{s.Name_s}', Idade={s.Age_by}, Gênero={s.Gender_c}, Nascimento={s.BirthDate_dt:yyyy-MM-dd}, Nacionalidade={s.Nationality}");
-        }
-
-        Write("Escolha os números dos alunos a remover (ex: 1,2,3 ou 1 2 3): ");
-        string choiceInput = ReadLine() ?? "";
-
-        // Divide a string por vírgula ou espaço
-        var indices = choiceInput
-            .Split([',', ' '], StringSplitOptions.RemoveEmptyEntries)
-            .Select(s => int.TryParse(s, out int x) ? x : -1)
-            .Where(x => x >= 1 && x <= matches.Count)
-            .Distinct()
-            .ToList();
-
-        if (indices.Count == 0)
-        {
-            WriteLine("Nenhuma seleção válida. Operação cancelada.");
-            return;
-        }
-
-        // Confirmação global
-        WriteLine("Você selecionou os seguintes alunos para remoção:");
-        foreach (var idx in indices)
-        {
-            var s = matches[idx - 1];
-            WriteLine($"- ID={s.ID_i}, Nome='{s.Name_s}', Idade={s.Age_by}, Gênero={s.Gender_c}");
-        }
-        Write("Tem certeza que deseja remover todos esses alunos? (S/N): ");
-        string confirm = ReadLine()?.Trim().ToUpper() ?? "N"; // Se estiver vazio, passa a ser "N". 
-
-        if (confirm != "S") { WriteLine("Operação cancelada."); return; }
-
-        // Remove todos selecionados
-        foreach (var idx in indices)
-        {
-            var s = matches[idx - 1];
-            bool removed = FileManager.RemoveById<Student>(dbType, s.ID_i);
-            if (removed) WriteLine($"✅ Aluno removido: ID={s.ID_i}, Nome='{s.Name_s}'");
-            else WriteLine($"❌ Erro ao remover: ID={s.ID_i}, Nome='{s.Name_s}'");
-        }
-    }
-
-    internal static void Select()
-    {
-        // seleciona um estudante e professor, e manuseia os dados
-    }
-
-    internal override void Introduce()
-    { WriteLine($"🎓 New Student: {Name_s}, ID: {ID_i}, Age: {Age_by}, Genero: {Gender_c}, Data de nascimento: {BirthDate_dt.Date}, Nacionalidade: {Nationality}."); }
+    internal override void Introduce() { WriteLine($"🎓 New Student: {Name_s}, ID: {ID_i}, Age: {Age_by}, Genero: {Gender_c}, Data de nascimento: {BirthDate_dt.Date}, Nacionalidade: {Nationality}."); }
 }
 
 
 // Classe derivada: Teacher
 internal class Teacher : SchoolMembers
 {
-    [JsonInclude] internal int ID_i { get; private set; }
-
     public Teacher() : base() { }
-    private Teacher(string name, byte age, int id, char gender, DateTime birthDate, Nationality_e nat) : base(name, age, gender, birthDate, nationality: nat)
+    private Teacher(string name, byte age, int id, char gender, DateTime birthDate, Nationality_e nat) : base(id, name, age, gender, birthDate, nationality: nat)
     {
-        ID_i = id;
         Introduce();
     }
 
-    // Fábrica de objetos Teacher.
-    internal static Teacher? Create() // Pode retornar null se o utilizador cancelar
-    {
-        return CreateMember<Teacher>("professor", FileManager.DataBaseType.Teacher, (n, a, id, g, d, nat) => new Teacher(n, a, id, g, d, nat));
-    }
-    /*
+    // Fábrica de objetos Teacher. Pode retornar null se o utilizador cancelar
     internal static Teacher? Create()
     {
-        //WriteLine("DEBUG: Inside of Teacher.Create()");
-
-        string? input_s;
-        string name = "";                  // Valor default: vazio
-        byte age = default;                // Valor default: 0
-        char gender = default;             // Valor default: '\0'
-        DateTime date = default;           // Valor default: 01/01/0001
-        Nationality_e nationality = default; // Valor default: Other (0)
-
-        // --- Nome ---
-        Write("Escreva o nome do professor(a) (deixe vazio para default): ");
-        input_s = ReadLine()?.Trim();
-        if (!string.IsNullOrEmpty(input_s)) name = input_s;
-
-        // --- Idade ---
-        Write("Escreva a idade do professor(a): ");
-        input_s = ReadLine();
-        if (!string.IsNullOrWhiteSpace(input_s) && !byte.TryParse(input_s, out age))
-        {
-            WriteLine($"DEBUG: Falha ao converter idade: \"{input_s}\" não é número válido. Usando default 0.");
-        }
-
-        // --- Gênero ---
-        Write("Escreva o seu género (M/F): ");
-        input_s = ReadLine()?.Trim().ToUpper();
-        if (input_s == "M" || input_s == "F") gender = input_s[0];
-
-        // --- Data de nascimento ---
-        Write("Escreva a data de nascimento (dd-MM-yyyy): ");
-        input_s = ReadLine()?.Trim();
-        if (!string.IsNullOrWhiteSpace(input_s) &&
-            !DateTime.TryParseExact(input_s, "dd-MM-yyyy", null, System.Globalization.DateTimeStyles.None, out date))
-        {
-            WriteLine($"DEBUG: Falha ao converter birthdate: \"{input_s}\". Usando valor default.");
-        }
-        date = date.Date; // remove a parte do tempo, mantendo só a data
-
-        // --- Nacionalidade ---
-        while (true)
-        {
-            Write("Escreva a sua nacionalidade ('Ajuda' para opções): ");
-            input_s = ReadLine()?.Trim();
-
-            if (string.Equals(input_s, "Ajuda", StringComparison.OrdinalIgnoreCase))
-            {
-                WriteLine("Opções possíveis:");
-                foreach (var country in Enum.GetValues<Nationality_e>())
-                    WriteLine($" - {country} ({(int)country})");
-                continue;
-            }
-
-            if (string.IsNullOrWhiteSpace(input_s)) break; // usa default Other
-
-            if (int.TryParse(input_s, out int numeric) && Enum.IsDefined(typeof(Nationality_e), numeric))
-            {
-                nationality = (Nationality_e)numeric;
-                break;
-            }
-
-            WriteLine("Entrada inválida. Tente novamente.");
-        }
-
-        // --- Confirmação final ---
-        WriteLine($"\nResumo do professor:");
-        WriteLine($" Nome: {(string.IsNullOrEmpty(name) ? "<default>" : name)}");
-        WriteLine($" Idade: {age}");
-        WriteLine($" Gênero: {(gender == default ? "<default>" : gender.ToString())}");
-        WriteLine($" Data de nascimento: {date}");
-        WriteLine($" Nacionalidade: {nationality}");
-        Write("Tem a certeza que quer criar este professor? (S/N): ");
-        input_s = ReadLine()?.Trim().ToUpper();
-        if (input_s != "S") return null; // Cancela criação
-
-        // --- Criação do objeto ---
-        if (!FileManager.StartupCheckFilesWithProgress(false)) { return null; } // Verifica se os ficheiros essenciais existem
-
-        int newID = FileManager.GetTheNextAvailableID(FileManager.DataBaseType.Teacher);
-        if (newID == -1) { WriteLine("❌ Erro: Não foi possível obter um ID válido para o curso. Criação cancelada."); return null; }
-        Teacher teacher = new(name, age, newID, gender, date, nationality);
-
-        // --- Escrever no banco de dados ---
-        FileManager.WriteOnDataBase(FileManager.DataBaseType.Teacher, teacher);
-
-        return teacher; // Retorna o objeto criado
-    }
-*/
-    internal static void Remove()
-    {
-        Write("Digite o nome ou ID do professor para remover: ");
-        string input = ReadLine() ?? "";
-
-        bool isId = int.TryParse(input, out int idInput);
-        var dbType = FileManager.DataBaseType.Teacher;
-
-        // Busca usando enum
-        var matches = isId ? FileManager.Search<Teacher>(dbType, id: idInput) : FileManager.Search<Teacher>(dbType, name: input);
-
-        if (matches.Count == 0)
-        {
-            WriteLine("Nenhum professor encontrado.");
-            return;
-        }
-
-        // Mostra todos os matches com detalhes
-        WriteLine("Foram encontrados os seguintes professores:");
-        for (int i = 0; i < matches.Count; i++)
-        {
-            var t = matches[i];
-            WriteLine($"{i + 1}: ID={t.ID_i}, Nome='{t.Name_s}', Idade={t.Age_by}, Gênero={t.Gender_c}, Nascimento={t.BirthDate_dt:yyyy-MM-dd}, Nacionalidade={t.Nationality}");
-        }
-
-        Write("Escolha os números dos professores a remover (ex: 1,2,3 ou 1 2 3): ");
-        string choiceInput = ReadLine() ?? "";
-
-        // Divide a string por vírgula ou espaço
-        var indices = choiceInput
-            .Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries)
-            .Select(s => int.TryParse(s, out int x) ? x : -1)
-            .Where(x => x >= 1 && x <= matches.Count)
-            .Distinct()
-            .ToList();
-
-        if (indices.Count == 0)
-        {
-            WriteLine("Nenhuma seleção válida. Operação cancelada.");
-            return;
-        }
-
-        // Confirmação global
-        WriteLine("Você selecionou os seguintes professores para remoção:");
-        foreach (var idx in indices)
-        {
-            var t = matches[idx - 1];
-            WriteLine($"- ID={t.ID_i}, Nome='{t.Name_s}', Idade={t.Age_by}, Gênero={t.Gender_c}");
-        }
-        Write("Tem certeza que deseja remover todos esses professores? (S/N): ");
-        string confirm = ReadLine()?.Trim().ToUpper() ?? "N"; // Se estiver vazio, passa a ser "N".
-
-        if (confirm != "S") { WriteLine("Operação cancelada."); return; }
-
-        // Remove todos selecionados
-        foreach (var idx in indices)
-        {
-            var t = matches[idx - 1];
-            bool removed = FileManager.RemoveById<Teacher>(dbType, t.ID_i);
-            if (removed) WriteLine($"✅ Professor removido: ID={t.ID_i}, Nome='{t.Name_s}'");
-            else WriteLine($"❌ Erro ao remover: ID={t.ID_i}, Nome='{t.Name_s}'");
-        }
+        return CreateMember<Teacher>(
+            "professor",
+            FileManager.DataBaseType.Teacher,
+            (n, a, id, g, d, nat) => new Teacher(n, a, id, g, d, nat));
     }
 
-    internal static void Select()
-    {
-        // seleciona um estudante e professor, e manuseia os dados
-    }
+    internal static void Remove() { RemoveMember<Teacher>("professor", FileManager.DataBaseType.Teacher); }
+
+    internal static void Select() { SelectMember<Teacher>(FileManager.DataBaseType.Teacher, "professor"); }
 
     internal override void Introduce() { WriteLine($"👨‍🏫 New Teacher: {Name_s}, ID: {ID_i}, Age: {Age_by}, Genero: {Gender_c}, Data de nascimento: {BirthDate_dt.Date}, Nacionalidade: {Nationality}."); }
 }
+
