@@ -95,14 +95,6 @@
     "BirthDate_dt": "2006-06-03T00:00:00",
     "Nationality": 7
   },
-  "12": {
-    "ID_i": 12,
-    "Name_s": "",
-    "Age_by": 0,
-    "Gender_c": "\u0000",
-    "BirthDate_dt": "0001-01-01T00:00:00",
-    "Nationality": 0
-  },
   "13": {
     "ID_i": 13,
     "Name_s": "Duarte Moreira",
@@ -110,5 +102,45 @@
     "Gender_c": "M",
     "BirthDate_dt": "2005-10-30T00:00:00",
     "Nationality": 1
+  },
+  "19": {
+    "ID_i": 19,
+    "Name_s": "T",
+    "Age_by": 100,
+    "Gender_c": "\u0000",
+    "BirthDate_dt": "1925-12-06T00:00:00",
+    "Nationality": 6
+  },
+  "21": {
+    "ID_i": 21,
+    "Name_s": "U",
+    "Age_by": 26,
+    "Gender_c": "\u0000",
+    "BirthDate_dt": "1999-07-03T00:00:00",
+    "Nationality": 11
+  },
+  "12": {
+    "ID_i": 12,
+    "Name_s": "Carlos",
+    "Age_by": 20,
+    "Gender_c": "M",
+    "BirthDate_dt": "2005-03-16T00:00:00",
+    "Nationality": 1
+  },
+  "14": {
+    "ID_i": 14,
+    "Name_s": "Carlos Gomes",
+    "Age_by": 25,
+    "Gender_c": "M",
+    "BirthDate_dt": "2000-02-02T00:00:00",
+    "Nationality": 9
+  },
+  "15": {
+    "ID_i": 15,
+    "Name_s": "Joana",
+    "Age_by": 10,
+    "Gender_c": "F",
+    "BirthDate_dt": "2015-02-19T00:00:00",
+    "Nationality": 5
   }
 }

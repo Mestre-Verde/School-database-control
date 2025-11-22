@@ -1,6 +1,17 @@
 ﻿using static System.Console; // <-- isto importa Write e WriteLine
 //using Newtonsoft.Json;
 using System.Globalization;
+// enums de SchoolMembers
+internal enum EditParamSchoolMember_e
+{
+    Back = 0,
+    Help = 1,
+    Name = 2,
+    Age = 3,
+    Gender = 4,
+    BirthDate = 5,
+    Nationality = 6
+}
 
 internal enum Nationality_e
 {
@@ -90,6 +101,8 @@ class MenuRelated_cl
         [3] Teacher    -> Remove um professor existente
         [4] Course     -> Remove um curso existente
     ";
+
+
 
     /// <summary>/// Executa um menu interativo com comandos pré-definidos.</summary>
     /// <param name="mainMenuText">Texto identificador do menu (ex.: "add", "remove").</param>
@@ -292,6 +305,27 @@ Record / struct          -> var_sct   (ex: var_sctPerson)
 class        -> var_cl     (ex: var_cStudent)
 interface    -> var_i     (ex: var_iRepository)
 object       -> var_o     (ex: var_oItem)
+
+
+| Tipo                        | Valor Default                               | Observações                                 |
+| --------------------------- | ------------------------------------------- | ------------------------------------------- |
+| `int`                       | `0`                                         | Tipo inteiro padrão                         |
+| `long`                      | `0L`                                        |                                             |
+| `short`                     | `0`                                         |                                             |
+| `byte`                      | `0`                                         |                                             |
+| `float`                     | `0.0f`                                      |                                             |
+| `double`                    | `0.0`                                       |                                             |
+| `decimal`                   | `0.0m`                                      |                                             |
+| `bool`                      | `false`                                     |                                             |
+| `char`                      | `'\0'`                                      | Caractere nulo                              |
+| `string`                    | `null`                                      | Tipo de referência                          |
+| `object`                    | `null`                                      | Tipo de referência                          |
+| `int[]` / qualquer array    | `null`                                      | Arrays são tipos de referência              |
+| `List<T>` / qualquer classe | `null`                                      | Tipos de referência                         |
+| `DateTime`                  | `01/01/0001 00:00:00` (`DateTime.MinValue`) | Tipo struct de valor                        |
+| `Guid`                      | `00000000-0000-0000-0000-000000000000`      | Tipo struct                                 |
+| `enum`                      | `0`                                         | Equivale ao primeiro valor definido no enum |
+| `T?` (nullable)             | `null`                                      | Pode ser `int?`, `bool?`, `DateTime?`, etc. |
 
 
 */
