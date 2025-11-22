@@ -1,6 +1,8 @@
 ﻿using static System.Console; // <-- isto importa Write e WriteLine
 //using Newtonsoft.Json;
 using System.Globalization;
+using System.Runtime.InteropServices;
+
 // enums de SchoolMembers
 internal enum EditParamSchoolMember_e
 {
@@ -60,14 +62,12 @@ internal enum GlobalObjectCommands_e
     None       // Caso não reconheça o comando
 }
 
-interface IMustExist // não pode ter modificadores de acesso
-{
-}
+
 
 class MenuRelated_cl
 {
     internal const string UnknowonCommand_s = "❌ Comando desconhecido.\n";
-    internal const string BackToMenu_s = "🔙 A voltar ao menu principal...\n";
+    internal const string BackToMenu_s = "🔙 A voltar ao menu anterior...\n";
     internal const string MainMenuCommands_s = @"
     Comandos disponíveis:
         [0] Exit      -> Sair do programa
@@ -77,32 +77,28 @@ class MenuRelated_cl
         [4] Select    -> Selecionar item
         [5] Search        -> Mostrar todos os dados
     ";
-    private const string MenuAddObject_s = @"
-    Comandos para Adicionar:
+    private static string BuildObjectMenu(string typeFunction)
+    {
+        return $@"    Comandos para {typeFunction}r:
         [0] Back       -> Voltar ao menu principal
         [1] Help       -> Mostrar este texto
-        [2] Student    -> Adicionar um novo aluno
-        [3] Teacher    -> Adicionar um novo professor
-        [4] Course     -> Adicionar um novo curso
+        [2] Student    -> {typeFunction} um novo aluno
+        [3] Teacher    -> {typeFunction} um novo professor
+        [4] Course     -> {typeFunction} um novo curso";
+    }
+    internal static string BuildEditMenu(string typeName)
+    {
+        return $@"
+        Editar {typeName}:
+            [0] Voltar
+            [1] Help
+            [2] Nome
+            [3] Idade
+            [4] Género
+            [5] Data de nascimento
+            [6] Nacionalidade
     ";
-    private const string MenuRemoveObject_s = @"
-    Comandos para Remover:
-        [0] Back       -> Voltar ao menu principal
-        [1] Help       -> Mostrar este texto
-        [2] Student    -> Remove um aluno existente.
-        [3] Teacher    -> Remove um professor existente
-        [4] Course     -> Remove um curso existente
-    ";
-    private const string MenuSelectObject_s = @"
-    Comandos para Selecionar:
-        [0] Back       -> Voltar ao menu principal
-        [1] Help       -> Mostrar este texto
-        [2] Student    -> Remove um aluno existente.
-        [3] Teacher    -> Remove um professor existente
-        [4] Course     -> Remove um curso existente
-    ";
-
-
+    }
 
     /// <summary>/// Executa um menu interativo com comandos pré-definidos.</summary>
     /// <param name="mainMenuText">Texto identificador do menu (ex.: "add", "remove").</param>
@@ -169,7 +165,6 @@ class MenuRelated_cl
         }
     }
 
-
     /// <summary> Menu para adicionar objetos na aplicação (estudantes, professores ou cursos). </summary>
     /// <remarks>
     /// Esta função cria um dicionário que associa cada comando do menu (enum <see cref="GlobalObjectCommands_e"/>)
@@ -194,7 +189,7 @@ class MenuRelated_cl
             { GlobalObjectCommands_e.Course,  () => _ = Course.Create() }// Para "Course", chamamos Course.Create() e descartamos o objeto retornado
         };
         // Chama a função genérica que executa o loop do menu, passando o texto do menu e o dicionário de ações
-        RunMenu("Add", MenuAddObject_s, actions);
+        RunMenu("Add", BuildObjectMenu("Adiciona"), actions);
     }
 
     internal static void MenuRemoveObject()
@@ -209,7 +204,7 @@ class MenuRelated_cl
         };
 
         // Executa o menu de remoção usando a função genérica
-        RunMenu("Remove", MenuRemoveObject_s, actions);
+        RunMenu("Remove", BuildObjectMenu("Remove"), actions);
     }
 
     internal static void MenuSelectObject()
@@ -224,10 +219,40 @@ class MenuRelated_cl
         };
 
         // Executa o menu de seleção usando a função genérica
-        RunMenu("Select", MenuSelectObject_s, actions);
+        RunMenu("Select", BuildObjectMenu("Seleciona"), actions);
+    }
+
+    internal static EditParamSchoolMember_e MenuSchoolMembersParameters(string typeName)
+    {
+        EditParamSchoolMember_e option;
+        while (true)
+        {
+
+            Write("(edit menu)> ");
+            string? input_s = ReadLine()?.Trim().ToLower();
+            if (string.IsNullOrWhiteSpace(input_s)) continue;
+
+            // Converter números → nomes do enum
+            switch (input_s)
+            {
+                case "0": input_s = "Back"; Write(BackToMenu_s); break;
+                case "1": input_s = "Help";WriteLine(BuildEditMenu(typeName)); break;
+                case "2": input_s = "Name"; break;
+                case "3": input_s = "Age"; break;
+                case "4": input_s = "Gender"; break;
+                case "5": input_s = "BirthDate"; break;
+                case "6": input_s = "Nationality"; break;
+            }
+            if (!Enum.TryParse(input_s, true, out option))
+            {
+                WriteLine(UnknowonCommand_s);
+                continue;
+            }
+            break;
+        }
+        return option;
     }
 }
-
 class Program
 {
     static void Setup()
@@ -277,6 +302,7 @@ class Program
     }
 }
 
+interface IMustExist{} // não pode ter modificadores de acesso
 /*
 string      -> var_s     (ex: var_sName)
 char        -> var_c     (ex: var_cGender)

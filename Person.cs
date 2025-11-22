@@ -4,6 +4,7 @@ using System.Runtime.Serialization;
 using System.Security.AccessControl;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using Microsoft.VisualBasic;
 
 internal abstract class SchoolMembers
 {
@@ -14,18 +15,6 @@ internal abstract class SchoolMembers
     [JsonInclude] internal protected DateTime BirthDate_dt { get; protected set; }// Data de nascimento (struct DateTime) 
     [JsonInclude] internal protected Nationality_e Nationality { get; protected set; }// Nacionalidade (enum)
 
-    protected static string BuildEditMenu(string typeName)
-    {
-        return $@"Editar {typeName}:
-        [0] Voltar
-        [1] Help
-        [2] Nome
-        [3] Idade
-        [4] Género
-        [5] Data de nascimento
-        [6] Nacionalidade
-    ";
-    }
     static readonly string InvalidEntrance = "Entrada inválida. Tente novamente.";
     static readonly string EmptyEntrance = "Entrada nula ou em branco, valor default utilizado.";
 
@@ -83,7 +72,7 @@ internal abstract class SchoolMembers
     /// <param name="isToEdit">Indica se é edição (true) ou criação (false).</param>
     /// <param name="minValue">Valor mínimo permitido.</param>
     /// <returns>A idade fornecida ou o valor atual caso não seja alterada.</returns>
-    protected static byte InputAge(string prompt, byte? currentValue = null, bool isToEdit = false, byte minValue = MinAge, DateTime? currentBirthDate = null)
+    protected static byte InputAge(string prompt, ref DateTime? currentBirthDate, byte? currentValue = null, bool isToEdit = false, byte minValue = MinAge)
     {
         while (true)
         {
@@ -321,8 +310,7 @@ internal abstract class SchoolMembers
 
 
     // Factory para criar objetos em subclasses
-    protected static M? CreateMember<M>(string typeObject,
-        FileManager.DataBaseType dbType,
+    protected static M? CreateMember<M>(string typeObject, FileManager.DataBaseType dbType,
         Func<string, byte, int, char, DateTime, Nationality_e, M> factory) where M : SchoolMembers
 
     {
@@ -335,7 +323,8 @@ internal abstract class SchoolMembers
 
         // --- Idade ---
         prompt = $"Escreva a idade do {typeObject}";
-        byte age = InputAge(prompt);
+        DateTime? trash = null;
+        byte age = InputAge(prompt, ref trash);
 
         // --- Gênero ---
         prompt = $"Escreva o gênero do {typeObject}";
@@ -364,17 +353,14 @@ internal abstract class SchoolMembers
         // --- Criação do ID ---
         int newID = FileManager.GetTheNextAvailableID(dbType);
         if (newID == -1) { WriteLine("❌ Erro: Não foi possível obter ID."); return null; }
-
-        var objeto = factory(name, age, newID, gender, date, nationality); // Cria o objeto usando factory
-
-        FileManager.WriteOnDataBase(dbType, objeto); // Escreve na DB
+        // cria o objeto pelo metudo fabrica.
+        var objeto = factory(name, age, newID, gender, date, nationality);
+        // Escreve na Base de dados
+        FileManager.WriteOnDataBase(dbType, objeto);
         return objeto;
     }
 
-    protected static void RemoveMember<M>(
-        string typeName,
-        FileManager.DataBaseType dbType
-    ) where M : SchoolMembers
+    protected static void RemoveMember<M>(string typeName, FileManager.DataBaseType dbType) where M : SchoolMembers
     {
         Write($"Digite o nome ou ID do {typeName} para remover: ");
         string input = ReadLine() ?? "";
@@ -446,27 +432,8 @@ internal abstract class SchoolMembers
                 WriteLine($"❌ Erro ao remover: ID={m.ID_i}, Nome='{m.Name_s}'");
         }
     }
-    /*
-        protected static void SelectMember<M>(
-        FileManager.DataBaseType dbType,
-        string typeName,
-        string menuText // não vai ser mais necessário visto que o texto de menu foi alterado para a class abstrata
-        ) where M : SchoolMembers
-        {
-            // 1) mostrar menuText aqui
 
-            // 2) procurar pessoa (igual ao RemoveMember)
-            // 3) escolher a pessoa (igual ao RemoveMember)
-            // 4)o user vai selecionar uma das opções que se encontram no enum EditParamSchoolMember_e
-            // 5) no final pergunta se quer emmso alterar
-
-        }
-        */
-
-    protected static void SelectMember<M>(
-        FileManager.DataBaseType dbType,
-        string typeName
-    ) where M : SchoolMembers
+    protected static void SelectMember<M>(string typeName, FileManager.DataBaseType dbType) where M : SchoolMembers
     {
         // --- Procurar membro ---
         Write($"Digite o nome ou ID do {typeName} que quer selecionar: ");
@@ -513,103 +480,60 @@ internal abstract class SchoolMembers
         bool hasChanged = false;
 
         // --- Loop do menu interno ---
-        WriteLine(BuildEditMenu(typeName));
+        WriteLine(MenuRelated_cl.BuildEditMenu(typeName));
         while (true)
         {
-
-            Write("(edit menu)> ");
-            input_s = ReadLine()?.Trim().ToLower();
-            if (string.IsNullOrWhiteSpace(input_s)) continue;
-
-            // Converter números → nomes do enum
-            switch (input_s)
-            {
-                case "0": input_s = "Back"; break;
-                case "1": input_s = "Help"; break;
-                case "2": input_s = "Name"; break;
-                case "3": input_s = "Age"; break;
-                case "4": input_s = "Gender"; break;
-                case "5": input_s = "BirthDate"; break;
-                case "6": input_s = "Nationality"; break;
-            }
-
-            if (!Enum.TryParse(input_s, true, out EditParamSchoolMember_e option))
-            {
-                WriteLine("Comando inválido.");
-                continue;
-            }
+            EditParamSchoolMember_e option = MenuRelated_cl.MenuSchoolMembersParameters(typeName);
 
             if (option == EditParamSchoolMember_e.Back) break;
 
-            // ===== Manipulação de opções =====
             switch (option)
             {
                 case EditParamSchoolMember_e.Name:
-                    Write("Novo nome: ");
-                    string? newName = ReadLine()?.Trim();
-                    if (!string.IsNullOrWhiteSpace(newName))
-                    {
-                        member.Name_s = newName;
-                        hasChanged = true;
-                    }
+                    member.Name_s = InputName($"Escreva o nome do(a) {typeName}", member.Name_s, true);
+                    hasChanged = true;
                     break;
 
                 case EditParamSchoolMember_e.Age:
-                    Write("Nova idade: ");
-                    if (byte.TryParse(ReadLine(), out byte newAge))
-                    {
-                        member.Age_by = newAge;
-                        hasChanged = true;
-                    }
+                    DateTime? temporary = member.BirthDate_dt;
+                    member.Age_by = InputAge($"Escreva a idade do {typeName}", ref temporary, member.Age_by, true, MinAge);
+                    if (temporary.HasValue) member.BirthDate_dt = temporary.Value;
+                    hasChanged = true;
                     break;
 
                 case EditParamSchoolMember_e.Gender:
-                    Write("Novo gênero (M/F): ");
-                    string g = (ReadLine() ?? "").Trim().ToUpper();
-                    if (g == "M" || g == "F")
-                    {
-                        member.Gender_c = g[0];
-                        hasChanged = true;
-                    }
+                    member.Gender_c = InputGender($"Escreva o gênero do(a) {typeName}", member.Gender_c, true);
+                    hasChanged = true;
                     break;
 
                 case EditParamSchoolMember_e.BirthDate:
-                    Write("Nova data (dd-MM-yyyy): ");
-                    if (DateTime.TryParseExact(ReadLine(), "dd-MM-yyyy", null, System.Globalization.DateTimeStyles.None, out DateTime newDate))
-                    {
-                        member.BirthDate_dt = newDate;
-                        hasChanged = true;
-                    }
+                    member.BirthDate_dt = InputBirthDate($"Escreva a data de nascimento do(a) {typeName}", member.Age_by, member.BirthDate_dt, true);
+                    hasChanged = true;
                     break;
 
                 case EditParamSchoolMember_e.Nationality:
-                    Write("Nova nacionalidade (número): ");
-                    if (int.TryParse(ReadLine(), out int natId) && Enum.IsDefined(typeof(Nationality_e), natId))
-                    {
-                        member.Nationality = (Nationality_e)natId;
-                        hasChanged = true;
-                    }
+                    member.Nationality = InputNationality($"Escreva a nacionalidade do(a) {typeName}", member.Nationality, true);
+                    hasChanged = true;
                     break;
 
                 case EditParamSchoolMember_e.Help:
-                    WriteLine(BuildEditMenu(typeName));
-                    WriteLine("\n--- Dados originais ---");
+                    WriteLine("\n--- Dados atuais ---");
                     WriteLine($"ID: {member.ID_i}");
-                    WriteLine($"Nome: {originalParameters.Name_s}");
-                    WriteLine($"Idade: {originalParameters.Age_by}");
-                    WriteLine($"Género: {originalParameters.Gender_c}");
-                    WriteLine($"Nascimento: {originalParameters.BirthDate_dt:dd-MM-yyyy}");
-                    WriteLine($"Nacionalidade: {originalParameters.Nationality}");
+                    WriteLine($"Nome: {member.Name_s}");
+                    WriteLine($"Idade: {member.Age_by}");
+                    WriteLine($"Género: {member.Gender_c}");
+                    WriteLine($"Nascimento: {member.BirthDate_dt:dd-MM-yyyy}");
+                    WriteLine($"Nacionalidade: {member.Nationality}");
                     break;
             }
         }
-
         // --- Confirmar alterações apenas se houve modificações ---
         if (!hasChanged) return;
 
         Write("\nDeseja salvar as alterações? (S/N): ");
         if ((ReadLine()?.Trim().ToUpper()) == "S")
         {
+            // usa o id do objeto para atualizar os valores.pois o nome pode ser alterado
             //FileManager.UpdateInDataBase(dbType, member);
             WriteLine("✔️ Alterações salvas (por implementar).");
         }
@@ -667,16 +591,12 @@ internal class Student : SchoolMembers
     // Fábrica de objetos Student.
     internal static Student? Create() // Pode retornar null se o utilizador cancelar
     {
-        return CreateMember<Student>(
-            "estudante",
-            FileManager.DataBaseType.Student,
-            (n, a, id, g, d, nat) => new Student(n, a, id, g, d, nat)
-        );
+        return CreateMember<Student>("estudante", FileManager.DataBaseType.Student, (n, a, id, g, d, nat) => new Student(n, a, id, g, d, nat));
     }
 
     internal static void Remove() { RemoveMember<Student>("aluno", FileManager.DataBaseType.Student); }
 
-    internal static void Select() { SelectMember<Student>(FileManager.DataBaseType.Student, "aluno"); }
+    internal static void Select() { SelectMember<Student>("aluno", FileManager.DataBaseType.Student); }
 
     internal override void Introduce() { WriteLine($"🎓 New Student: {Name_s}, ID: {ID_i}, Age: {Age_by}, Genero: {Gender_c}, Data de nascimento: {BirthDate_dt.Date}, Nacionalidade: {Nationality}."); }
 }
@@ -694,15 +614,12 @@ internal class Teacher : SchoolMembers
     // Fábrica de objetos Teacher. Pode retornar null se o utilizador cancelar
     internal static Teacher? Create()
     {
-        return CreateMember<Teacher>(
-            "professor",
-            FileManager.DataBaseType.Teacher,
-            (n, a, id, g, d, nat) => new Teacher(n, a, id, g, d, nat));
+        return CreateMember<Teacher>("professor", FileManager.DataBaseType.Teacher, (n, a, id, g, d, nat) => new Teacher(n, a, id, g, d, nat));
     }
 
     internal static void Remove() { RemoveMember<Teacher>("professor", FileManager.DataBaseType.Teacher); }
 
-    internal static void Select() { SelectMember<Teacher>(FileManager.DataBaseType.Teacher, "professor"); }
+    internal static void Select() { SelectMember<Teacher>("professor", FileManager.DataBaseType.Teacher); }
 
     internal override void Introduce() { WriteLine($"👨‍🏫 New Teacher: {Name_s}, ID: {ID_i}, Age: {Age_by}, Genero: {Gender_c}, Data de nascimento: {BirthDate_dt.Date}, Nacionalidade: {Nationality}."); }
 }
