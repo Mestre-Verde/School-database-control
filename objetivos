@@ -6,3 +6,7 @@ exibe os dados diretamente ao usuário, nunca modifica nada.
 
 ------------------____-___--_________-----------___
 
+deixar as classes o mais independentes possiveis e mudelar o maximo possivel para evitar 
+repetir código.
+
+-------------___-----------____-----------__-------------__--

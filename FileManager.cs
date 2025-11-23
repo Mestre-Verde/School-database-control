@@ -11,20 +11,25 @@ using System.Linq.Expressions;
 // Classe estática — não precisa ser instanciada
 internal static class FileManager
 {
-    // 🗂️ Caminhos dos ficheiros principais do programa
-    private static string SchoolMemberDirectory { get; } = "schoolMember/";
+    // 🗂️ Caminhos dos ficheiros principais do Programa
+    private static string MainAbstractClassDirectory { get; } = "Class_1st_degree";
+    private static string SecundAbstractClassDirectory { get; } = "Class_2nd_degree";
+    private static string SchoolMembersDirectory { get; } = "schoolMembers";
     private static string DataBaseDirectory { get; } = "data/";               // Pasta onde ficam os ficheiros de dados
     private static string CourseDirectory { get; } = "courseProgram/";
     private static readonly string[] directorys = [
+        MainAbstractClassDirectory,
+        SecundAbstractClassDirectory,
         CourseDirectory,
         DataBaseDirectory,
-        SchoolMemberDirectory
+        SchoolMembersDirectory,
     ];
     //------------------
-    private static string SchoolMemberFilePath { get; } = "schoolMember/SchoolMember.cs";// Código fonte para memebros da escola
-    private static string StudentFilePath { get; } = "schoolMember/Student.cs";
-    private static string TeacherFilePath { get; } = "schoolMember/Teacher.cs";
+    private static string SchoolMemberFilePath { get; } = "Class_2nd_degree/SchoolMember.cs";// Código fonte para memebros da escola
+    private static string StudentFilePath { get; } = "schoolMembers/Student.cs";
+    private static string TeacherFilePath { get; } = "schoolMembers/Teacher.cs";
     private static string CourseFilePath { get; } = "courseProgram/Course.cs";                 // Código fonte de cursos
+    private static string DisciplineFilePath { get; } = "courseProgram/Discipline.cs";
     //------------------
     private static string StudentsJSONPath { get; } = "data/students.json";      // Dados dos estudantes
     private static string TeachersJSONPath { get; } = "data/teachers.json";      // Dados dos professores
@@ -43,6 +48,7 @@ internal static class FileManager
             TeacherFilePath,
             CourseFilePath,
             SchoolMemberFilePath,
+            DisciplineFilePath,
 
             StudentsJSONPath,
             TeachersJSONPath,
