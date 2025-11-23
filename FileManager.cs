@@ -169,44 +169,39 @@ internal static class FileManager
     internal static string ReadFile(string path) { return File.Exists(path) ? File.ReadAllText(path) : "{}"; }
 
     // Esta função assume que o objeto já contém um ID válido.
-    // Serve apenas para adicionar, atualizar ou remover do ficheiro JSON.
-    internal static void WriteOnDataBase<T>(DataBaseType baseType, T obj, bool isToAdd = true)
+    // Serve apenas para adicionar ou atualizar no ficheiro JSON.
+    internal static void WriteOnDataBase<T>(DataBaseType baseType, T obj)
     {
-        //  Determina o caminho certo do ficheiro JSON com base no tipo de base de dados
         string path = GetFilePath(baseType);
-        string json = ReadFile(path);//  Lê o conteúdo atual do ficheiro
+        string json = ReadFile(path);
 
-        //  Desserializa em um dicionário [ID → objeto], Caso o ficheiro esteja vazio ou nulo, cria um dicionário vazio
-        var dict = string.IsNullOrWhiteSpace(json) ? [] : JsonSerializer.Deserialize<Dictionary<int, T>>(json) ?? [];
+        // Desserializa ou cria dicionário vazio
+        var dict = string.IsNullOrWhiteSpace(json)
+            ? new Dictionary<int, T>()
+            : JsonSerializer.Deserialize<Dictionary<int, T>>(json) ?? new Dictionary<int, T>();
 
-        //  Usa reflection com BindingFlags para obter a propriedade ID_i, mesmo se internal ou private setter
-        var idProperty = typeof(T).GetProperty("ID_i", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic) ?? throw new InvalidOperationException($"A classe {typeof(T).Name} não contém uma propriedade 'ID_i'.");
-        //  Obtém o valor do ID_i do objeto
-        int id = (int)(idProperty.GetValue(obj) ?? -1); WriteLine($"DEBUG(FileManager.WriteOnDataBase): ID do objeto = {id}"); // Linha de debug
+        // Obtém ID via reflection
+        var idProperty = typeof(T).GetProperty("ID_i",
+            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+            ?? throw new InvalidOperationException($"A classe {typeof(T).Name} não contém a propriedade 'ID_i'.");
 
-        //  Valida o ID — deve ser >= 0
-        if (id < 0) throw new InvalidOperationException("O ID do objeto é inválido.");
+        int id = (int)(idProperty.GetValue(obj) ?? -1);
+        WriteLine($"DEBUG(FileManager.WriteOnDataBase): ID do objeto = {id}");
 
-        //  Adiciona ou atualiza o objeto no dicionário
-        if (isToAdd)
-        {
-            dict[id] = obj;
-            WriteLine($"DEBUG(FileManager.WriteOnDataBase): Objeto com ID {id} adicionado/atualizado.");
-        }
+        if (id < 0)
+            throw new InvalidOperationException("O ID do objeto é inválido.");
 
-        //  Remove o objeto caso solicitado
-        if (!isToAdd && dict.ContainsKey(id)) { dict.Remove(id); }
+        // Adiciona / atualiza
+        dict[id] = obj;
+        WriteLine($"DEBUG: Objeto ID {id} adicionado/atualizado.");
 
-        //  Serializa novamente o dicionário atualizado para JSON
+        // Serializa para JSON
         var options = new JsonSerializerOptions { WriteIndented = true };
         string updatedJson = JsonSerializer.Serialize(dict, options);
 
-        //  Escreve o JSON atualizado de volta no ficheiro
         File.WriteAllText(path, updatedJson);
 
-
-        //  Mensagem de sucesso
-        WriteLine($"DEBUG(FileManager.WriteOnDataBase): Base de dados '{baseType}' atualizada com sucesso.");
+        WriteLine($"DEBUG: Base de dados '{baseType}' atualizada com sucesso.");
     }
 
     //-----------------------

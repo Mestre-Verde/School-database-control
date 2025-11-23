@@ -15,18 +15,6 @@ internal abstract class SchoolMembers
     [JsonInclude] internal protected DateTime BirthDate_dt { get; protected set; }// Data de nascimento (struct DateTime) 
     [JsonInclude] internal protected Nationality_e Nationality { get; protected set; }// Nacionalidade (enum)
 
-    protected static string BuildEditMenu(string typeName)// menu para parametros
-    {
-        return $@"
-    Editar {typeName}:
-        [0] Voltar
-        [1] Nome
-        [2] Idade
-        [3] Género
-        [4] Data de nascimento
-        [5] Nacionalidade
-    ";
-    }
     static readonly string InvalidEntrance = "Entrada inválida. Tente novamente.";
     static readonly string EmptyEntrance = "Entrada nula ou em branco, valor default utilizado.";
 
@@ -452,17 +440,11 @@ internal abstract class SchoolMembers
         string? input_s = ReadLine();
 
         bool isId_b = int.TryParse(input_s, out int idInput);
-
         var matches = isId_b
             ? FileManager.Search<M>(dbType, id: idInput)
             : FileManager.Search<M>(dbType, name: input_s);
 
-        if (matches.Count == 0)
-        {
-            WriteLine($"Nenhum {typeName} encontrado.");
-            return;
-        }
-
+        if (matches.Count == 0) { WriteLine($"Nenhum {typeName} encontrado."); return; }
         // --- Escolher item ---
         WriteLine($"Resultados encontrados ({matches.Count}):");
         for (int i = 0; i < matches.Count; i++)
@@ -545,9 +527,8 @@ internal abstract class SchoolMembers
         Write("\nDeseja salvar as alterações? (S/N): ");
         if ((ReadLine()?.Trim().ToUpper()) == "S")
         {
-            // usa o id do objeto para atualizar os valores.pois o nome pode ser alterado
-            //FileManager.UpdateInDataBase(dbType, member);
-            WriteLine("✔️ Alterações salvas (por implementar).");
+            FileManager.WriteOnDataBase(dbType, member);  // <-- SALVA
+            WriteLine("✔️ Alterações salvas.");
         }
         else
         {
@@ -562,34 +543,7 @@ internal abstract class SchoolMembers
     }
 
 }
-/*
-internal class Person
-{
-    [JsonInclude] internal protected string Name_s { get; private set; }// string porque um nome é uma sequência dinâmica de caracteres
-    [JsonInclude] internal protected byte Age_by { get; private set; }// byte (0-255) porque a idade nunca é negativa e não passa de 255.
-    [JsonInclude] internal protected char Gender_c { get; private set; }// char 'M' ou 'F' (sempre um único caractere)
-    [JsonInclude] internal protected DateTime BirthDate_dt { get; private set; }// Data de nascimento (struct DateTime) 
-    [JsonInclude] internal protected Nationality_e Nationality { get; private set; }// Nacionalidade (enum)
 
-    // Construtor principal da classe base
-    internal protected Person(
-        string name = "",
-        byte age = default,
-        char gender = default,
-        DateTime? birthDate = default,
-        Nationality_e nationality = default)
-    {
-        Name_s = name;
-        Age_by = age;
-        Gender_c = gender;
-        BirthDate_dt = birthDate ?? DateTime.Now;
-        Nationality = nationality;
-    }
-
-    // Método virtual — pode ser sobrescrito em subclasses
-    internal virtual void Introduce() { WriteLine($"👤 I'm a Person named {Name_s}, {Age_by} years old."); }
-}
-*/
 // Classe derivada: Student
 internal class Student : SchoolMembers
 {
@@ -635,7 +589,34 @@ internal class Teacher : SchoolMembers
 
     internal override void Introduce() { WriteLine($"👨‍🏫 New Teacher: {Name_s}, ID: {ID_i}, Age: {Age_by}, Genero: {Gender_c}, Data de nascimento: {BirthDate_dt.Date}, Nacionalidade: {Nationality}."); }
 }
+/*
+internal class Person
+{
+    [JsonInclude] internal protected string Name_s { get; private set; }// string porque um nome é uma sequência dinâmica de caracteres
+    [JsonInclude] internal protected byte Age_by { get; private set; }// byte (0-255) porque a idade nunca é negativa e não passa de 255.
+    [JsonInclude] internal protected char Gender_c { get; private set; }// char 'M' ou 'F' (sempre um único caractere)
+    [JsonInclude] internal protected DateTime BirthDate_dt { get; private set; }// Data de nascimento (struct DateTime) 
+    [JsonInclude] internal protected Nationality_e Nationality { get; private set; }// Nacionalidade (enum)
 
+    // Construtor principal da classe base
+    internal protected Person(
+        string name = "",
+        byte age = default,
+        char gender = default,
+        DateTime? birthDate = default,
+        Nationality_e nationality = default)
+    {
+        Name_s = name;
+        Age_by = age;
+        Gender_c = gender;
+        BirthDate_dt = birthDate ?? DateTime.Now;
+        Nationality = nationality;
+    }
+
+    // Método virtual — pode ser sobrescrito em subclasses
+    internal virtual void Introduce() { WriteLine($"👤 I'm a Person named {Name_s}, {Age_by} years old."); }
+}
+*/
 /* perfect but not modular
         while (true)
         {

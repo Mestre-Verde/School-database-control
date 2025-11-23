@@ -98,7 +98,7 @@ internal class Course
         // --- Criação do objeto ---
         Course curso = new(name, newID, type, duration);
 
-        FileManager.WriteOnDataBase(FileManager.DataBaseType.Course, curso, true);
+        FileManager.WriteOnDataBase(FileManager.DataBaseType.Course, curso);
 
         return curso;
 
