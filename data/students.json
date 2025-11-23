@@ -143,14 +143,6 @@
     "ID_i": 15,
     "Name_s": "Joana"
   },
-  "16": {
-    "Age_by": 0,
-    "Gender_c": "\u0000",
-    "BirthDate_dt": "2000-08-02T00:00:00",
-    "Nationality": 12,
-    "ID_i": 16,
-    "Name_s": ""
-  },
   "17": {
     "Age_by": 0,
     "Gender_c": "M",

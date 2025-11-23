@@ -78,6 +78,7 @@ internal enum GlobalObjectCommands_e
     Student,    // Adicionar aluno
     Teacher,    // Adicionar professor
     Course,     // Adicionar curso
+    Discipline,
     None       // Caso não reconheça o comando
 }
 
@@ -96,14 +97,25 @@ class MenuRelated_cl
         [4] Select    -> Selecionar item
         [5] Search    -> Mostrar todos os dados
     ";
+    private static string CourseMenuCommands_s = @"
+        Editar Curso:
+            [0] Back
+            [1] Help
+            [2] Name
+            [3] Type
+            [4] Duration
+            [5] ManageSubjects
+    ";
     private static string BuildObjectMenu(string typeFunction)
     {
         return $@"    Comandos para {typeFunction}r:
-        [0] Back       -> Voltar ao menu principal
-        [1] Help       -> Mostrar este texto
-        [2] Student    -> {typeFunction} um novo aluno
-        [3] Teacher    -> {typeFunction} um novo professor
-        [4] Course     -> {typeFunction} um novo curso";
+        [0] Back        -> Voltar ao menu principal
+        [1] Help        -> Mostrar este texto
+        [2] Student     -> {typeFunction} um novo aluno
+        [3] Teacher     -> {typeFunction} um novo professor
+        [4] Course      -> {typeFunction} um novo curso
+        [5] Disciplines -> {typeFunction} uma nova disciplina
+    ";
     }
     internal static string BuildEditMenu(string typeName)
     {
@@ -118,15 +130,6 @@ class MenuRelated_cl
             [6] Nacionalidade
     ";
     }
-    private static string CourseMenuCommands_s = @"
-        Editar Curso:
-            [0] Back
-            [1] Help
-            [2] Name
-            [3] Type
-            [4] Duration
-            [5] ManageSubjects
-    ";
     private static string BuildEditDisciplineMenu(string disciplineName)
     {
         return $@"
@@ -177,6 +180,7 @@ class MenuRelated_cl
                 case "2": input_s = "Student"; break;
                 case "3": input_s = "Teacher"; break;
                 case "4": input_s = "Course"; break;
+                case "5": input_s = "Discipline"; break;
             }
 
             // Tenta converter o texto para um comando válido enum
@@ -227,7 +231,8 @@ class MenuRelated_cl
         {
             { GlobalObjectCommands_e.Student, () => _ = Student.Create() },// Para "Student", chamamos Student.Create() e descartamos o objeto retornado com "_ ="
             { GlobalObjectCommands_e.Teacher, () => _ = Teacher.Create() },// Para "Teacher", chamamos Teacher.Create() e descartamos o objeto retornado
-            { GlobalObjectCommands_e.Course,  () => _ = Course.Create() }// Para "Course", chamamos Course.Create() e descartamos o objeto retornado
+            { GlobalObjectCommands_e.Course,  () => _ = Course.Create() },// Para "Course", chamamos Course.Create() e descartamos o objeto retornado
+            { GlobalObjectCommands_e.Discipline,() => _ = Discipline.Create() }
         };
         // Chama a função genérica que executa o loop do menu, passando o texto do menu e o dicionário de ações
         RunMenu("Add", BuildObjectMenu("Adiciona"), actions);
@@ -241,7 +246,8 @@ class MenuRelated_cl
             // Neste caso Remove() já é void, então não precisamos de "_ ="
             { GlobalObjectCommands_e.Student, Student.Remove },
             { GlobalObjectCommands_e.Teacher, Teacher.Remove },
-            { GlobalObjectCommands_e.Course,  Course.Remove }
+            { GlobalObjectCommands_e.Course,  Course.Remove },
+            { GlobalObjectCommands_e.Discipline, Discipline.Remove}
         };
 
         // Executa o menu de remoção usando a função genérica
@@ -256,7 +262,8 @@ class MenuRelated_cl
             // Para Select()
             { GlobalObjectCommands_e.Student, Student.Select },
             { GlobalObjectCommands_e.Teacher, Teacher.Select },
-            { GlobalObjectCommands_e.Course, Course.Select }
+            { GlobalObjectCommands_e.Course, Course.Select },
+            {GlobalObjectCommands_e.Discipline,Discipline.Select}
         };
 
         // Executa o menu de seleção usando a função genérica
@@ -357,8 +364,8 @@ class MenuRelated_cl
     }
 
 
-
 }
+//falta o Search, praticamente só será necessário usar o FileManager
 class Program
 {
     static void Setup()
@@ -434,9 +441,6 @@ Tuple<T1, T2>            -> var_t     (ex: var_tPair)
 KeyValuePair<TKey, TValue>-> var_kv   (ex: var_kvEntry)
 Record / struct          -> var_sct   (ex: var_sctPerson)
 
-class        -> var_cl     (ex: var_cStudent)
-interface    -> var_i     (ex: var_iRepository)
-object       -> var_o     (ex: var_oItem)
 
 
 | Tipo                        | Valor Default                               | Observações                                 |

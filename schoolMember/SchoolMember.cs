@@ -14,9 +14,9 @@ internal abstract class SchoolMembers : BaseEntity
     [JsonInclude] internal protected Nationality_e Nationality { get; protected set; }// Nacionalidade (enum)
 
     private const byte MinAge = 6;
-
-    protected SchoolMembers() : base(0, "") { } // construtor para desserialização
-                                                // Construtor principal da classe base
+    // construtor para desserialização
+    protected SchoolMembers() : base(0, "") { }
+    // Construtor principal da classe base
     internal protected SchoolMembers(int id, string name = "", byte age = default, char gender = default, DateTime? birthDate = default, Nationality_e nationality = default) : base(id, name)
     {
         Age_by = age;
@@ -277,7 +277,6 @@ internal abstract class SchoolMembers : BaseEntity
         Func<string, byte, int, char, DateTime, Nationality_e, M> factory) where M : SchoolMembers
 
     {
-        string? input_s;
         string prompt;
 
         // --- Nome ---
@@ -310,7 +309,7 @@ internal abstract class SchoolMembers : BaseEntity
         WriteLine($" Data de nascimento: {date.Date}");
         WriteLine($" Nacionalidade: {nationality}");
         Write("Tem a certeza que quer criar? (S/N): ");
-        input_s = ReadLine()?.Trim().ToUpper();
+        string? input_s = ReadLine()?.Trim().ToUpper();
         if (input_s != "S") return null;
 
         // --- Criação do ID ---
@@ -346,8 +345,8 @@ internal abstract class SchoolMembers : BaseEntity
         for (int i = 0; i < matches.Count; i++)
         {
             var m = matches[i];
-            WriteLine($"{i + 1}: ID={m.ID_i}, Nome='{m.Name_s}', Idade={m.Age_by}, " +
-                $"Gênero={m.Gender_c}, Nascimento={m.BirthDate_dt:yyyy-MM-dd}, Nacionalidade={m.Nationality}");
+            WriteLine($"- ID={m.ID_i}, Nome='{m.Name_s}', Idade={m.Age_by}, Gênero={m.Gender_c}, " +
+                $"Nascimento={m.BirthDate_dt:yyyy-MM-dd}, Nacionalidade={m.Nationality}");
         }
 
         Write($"Escolha os números dos {typeName}s a remover (ex: 1,2,3 ou 1 2 3): ");
@@ -371,7 +370,8 @@ internal abstract class SchoolMembers : BaseEntity
         foreach (var idx in indices)
         {
             var m = matches[idx - 1];
-            WriteLine($"- ID={m.ID_i}, Nome='{m.Name_s}', Idade={m.Age_by}, Gênero={m.Gender_c}");
+            WriteLine($"- ID={m.ID_i}, Nome='{m.Name_s}', Idade={m.Age_by}, Gênero={m.Gender_c}, " +
+                $"Nascimento={m.BirthDate_dt:yyyy-MM-dd}, Nacionalidade={m.Nationality}");
         }
 
         Write($"Tem certeza que deseja remover todos esses {typeName}s? (S/N): ");
@@ -389,10 +389,8 @@ internal abstract class SchoolMembers : BaseEntity
             var m = matches[idx - 1];
             bool removed = FileManager.RemoveById<M>(dbType, m.ID_i);
 
-            if (removed)
-                WriteLine($"✅ {typeName} removido: ID={m.ID_i}, Nome='{m.Name_s}'");
-            else
-                WriteLine($"❌ Erro ao remover: ID={m.ID_i}, Nome='{m.Name_s}'");
+            if (removed) WriteLine($"✅ {typeName} removido: ID={m.ID_i}, Nome='{m.Name_s}'");
+            else WriteLine($"❌ Erro ao remover: ID={m.ID_i}, Nome='{m.Name_s}'");
         }
     }
 
@@ -508,102 +506,3 @@ internal abstract class SchoolMembers : BaseEntity
     }
 
 }
-
-/*
-internal class Person
-{
-    [JsonInclude] internal protected string Name_s { get; private set; }// string porque um nome é uma sequência dinâmica de caracteres
-    [JsonInclude] internal protected byte Age_by { get; private set; }// byte (0-255) porque a idade nunca é negativa e não passa de 255.
-    [JsonInclude] internal protected char Gender_c { get; private set; }// char 'M' ou 'F' (sempre um único caractere)
-    [JsonInclude] internal protected DateTime BirthDate_dt { get; private set; }// Data de nascimento (struct DateTime) 
-    [JsonInclude] internal protected Nationality_e Nationality { get; private set; }// Nacionalidade (enum)
-
-    // Construtor principal da classe base
-    internal protected Person(
-        string name = "",
-        byte age = default,
-        char gender = default,
-        DateTime? birthDate = default,
-        Nationality_e nationality = default)
-    {
-        Name_s = name;
-        Age_by = age;
-        Gender_c = gender;
-        BirthDate_dt = birthDate ?? DateTime.Now;
-        Nationality = nationality;
-    }
-
-    // Método virtual — pode ser sobrescrito em subclasses
-    internal virtual void Introduce() { WriteLine($"👤 I'm a Person named {Name_s}, {Age_by} years old."); }
-}
-*/
-/* perfect but not modular
-        while (true)
-        {
-            int anoEstimado = (age > 0) ? anoAtual - age : 0;
-
-            if (age == default) // idade não foi fornecida
-            {
-                Write("Escreva a data de nascimento (ex: 5 11 1980, 1980-11-05, ou Enter para default): ");
-                input_s = ReadLine()?.Trim();
-
-                if (string.IsNullOrWhiteSpace(input_s)) break; // vazio → usa default
-
-                // Remove múltiplos espaços e vírgulas
-                input_s = input_s.Replace(',', ' ');
-                input_s = Regex.Replace(input_s, @"\s+", " ");
-
-                if (!DateTime.TryParse(input_s, out DateTime parsedDate))
-                {
-                    WriteLine(InvalidEntrance);
-                    continue; // força a digitar novamente
-                }
-
-                date = parsedDate.Date;
-            }
-            else // idade fornecida → pede mês e dia
-            {
-                WriteLine($"Ano de nascimento de acordo com idade: {anoEstimado}");
-
-                while (true)
-                {
-                    Write("Escreva o mês e o dia (ex: 12 31 ou 11,30) ou Enter para manter default: ");
-                    input_s = ReadLine()?.Trim();
-                    // Usuário não forneceu mês/dia → cria data temporária com 1º de janeiro
-                    if (string.IsNullOrWhiteSpace(input_s)) { date = new DateTime(anoEstimado, 1, 1); break; }
-                    input_s = input_s.Replace(',', ' ');
-                    input_s = Regex.Replace(input_s, @"\s+", " ");
-                    string[] parts = input_s.Split(' ');
-
-                    if (parts.Length < 2) { WriteLine("Você precisa fornecer mês e dia."); continue; }
-
-                    if (!int.TryParse(parts[0], out int mesTmp) || mesTmp < 1 || mesTmp > 12) { WriteLine("Mês inválido."); continue; }
-                    if (!int.TryParse(parts[1], out int diaTmp) || diaTmp < 1 || diaTmp > DateTime.DaysInMonth(anoEstimado, mesTmp)) { WriteLine("Dia inválido."); continue; }
-
-                    mes = mesTmp;
-                    dia = diaTmp;
-                    date = new DateTime(anoEstimado, mes, dia);
-                    break;
-                }
-            }
-
-            // Calcula idade se não fornecida
-            if (age == default)
-            {
-                int idadeCalculada = anoAtual - date.Year;
-                if (idadeCalculada < MinAge) { WriteLine($"Erro: idade calculada ({idadeCalculada}) menor que {MinAge} anos."); continue; }
-                age = (byte)idadeCalculada;
-            }
-            else
-            {
-                // valida consistência idade × data
-                int idadeCalculada = anoAtual - date.Year;
-                if (idadeCalculada != age)
-                {
-                    WriteLine($"Erro: idade ({age}) e data de nascimento ({date.ToShortDateString()}) não coincidem. Tente novamente.");
-                    continue;
-                }
-            }
-            break; // data válida obtida
-        }
-*/

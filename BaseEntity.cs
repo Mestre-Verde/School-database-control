@@ -49,6 +49,4 @@ internal abstract class BaseEntity
         }
     }
 
-    // Método abstrato que cada classe concreta deve implementar
-    
 }

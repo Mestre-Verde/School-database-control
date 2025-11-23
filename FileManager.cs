@@ -13,30 +13,42 @@ internal static class FileManager
 {
     // 🗂️ Caminhos dos ficheiros principais do programa
     private static string SchoolMemberDirectory { get; } = "schoolMember/";
+    private static string DataBaseDirectory { get; } = "data/";               // Pasta onde ficam os ficheiros de dados
+    private static string CourseDirectory { get; } = "courseProgram/";
+    private static readonly string[] directorys = [
+        CourseDirectory,
+        DataBaseDirectory,
+        SchoolMemberDirectory
+    ];
+    //------------------
     private static string SchoolMemberFilePath { get; } = "schoolMember/SchoolMember.cs";// Código fonte para memebros da escola
     private static string StudentFilePath { get; } = "schoolMember/Student.cs";
     private static string TeacherFilePath { get; } = "schoolMember/Teacher.cs";
-    private static string CourseFilePath { get; } = "Course.cs";                 // Código fonte de cursos
-    private static string DataBaseDirectory { get; } = "data/";               // Pasta onde ficam os ficheiros de dados
+    private static string CourseFilePath { get; } = "courseProgram/Course.cs";                 // Código fonte de cursos
+    //------------------
     private static string StudentsJSONPath { get; } = "data/students.json";      // Dados dos estudantes
     private static string TeachersJSONPath { get; } = "data/teachers.json";      // Dados dos professores
     private static string CoursesJSONPath { get; } = "data/courses.json";         // Dados dos cursos
+    private static string DisciplinesJSONPath { get; } = "data/disciplines.json";
+    internal enum DataBaseType// Enum para percorrer os caminhos das base de dados.
+    {
+        Student,
+        Teacher,
+        Course,
+        Discipline
+    }
     private static readonly string[] files =
         [
             StudentFilePath,
             TeacherFilePath,
             CourseFilePath,
             SchoolMemberFilePath,
+
             StudentsJSONPath,
             TeachersJSONPath,
-            CoursesJSONPath
+            CoursesJSONPath,
+            DisciplinesJSONPath
         ];
-    internal enum DataBaseType// Enum para percorrer os caminhos das base de dados.
-    {
-        Student,
-        Teacher,
-        Course
-    }
 
     /// <summary> Retorna o caminho do arquivo JSON correspondente ao tipo de base de dados fornecido.</summary>
     /// <returns>
@@ -59,14 +71,14 @@ internal static class FileManager
     // 🎨 Desenha uma barra de progresso simples no terminal
     private static void DrawProgressBar(int value, int max)
     {
-        int totalBlocks = 30; // Tamanho da barra (número de blocos)
+        int totalBlocks = 50; // Tamanho da barra (número de blocos)
         int filledBlocks = (int)Math.Round((double)value / max * totalBlocks); // Percentagem preenchida
 
         // Cria visual da barra com '#' e '-'
         string bar = "[" +
             new string('#', filledBlocks) +
             new string('-', totalBlocks - filledBlocks) +
-            $"] {value * 100 / max}%";
+            $"] {value * 100 / max}% ";
 
         CursorLeft = 0; // Reposiciona o cursor para sobrescrever a linha anterior
         Write(bar);     // Escreve a barra atualizada
@@ -79,16 +91,13 @@ internal static class FileManager
     {
         try
         {
-            string content = File.ReadAllText(path).Trim();
+            string content = ReadFile(path).Trim();
             if (string.IsNullOrWhiteSpace(content)) return false;
 
             JsonDocument.Parse(content);
             return true;
         }
-        catch
-        {
-            return false;
-        }
+        catch { return false; }
     }
 
     // Verifica se todos os ficheiros necessários existem e cria os que faltam
@@ -103,16 +112,14 @@ internal static class FileManager
 
         if (setup) WriteLine("A verificar os ficheiros...");
 
-        // Garantir diretoria
-        if (!Directory.Exists(DataBaseDirectory))
+        // verifica se as pastas existem e, se não existirem, cria as pastas que faltarem.
+        foreach (var directory in directorys)
         {
-            Directory.CreateDirectory(DataBaseDirectory);
-            missingFiles.Add(DataBaseDirectory);
-        }
-        if (!Directory.Exists(SchoolMemberDirectory))
-        {
-            Directory.CreateDirectory(SchoolMemberDirectory);
-            missingFiles.Add(SchoolMemberDirectory);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+                missingFiles.Add(directory);
+            }
         }
 
         foreach (var file in files)
@@ -129,7 +136,7 @@ internal static class FileManager
                 // Validar JSON
                 if (ext == ".json")
                 {
-                    string content = File.ReadAllText(file).Trim();
+                    string content = ReadFile(file).Trim();
 
                     // 📌 Se estiver vazio → cria {}
                     if (string.IsNullOrWhiteSpace(content))
@@ -267,34 +274,40 @@ internal static class FileManager
         var dict = JsonSerializer.Deserialize<Dictionary<string, T>>(json);
         if (dict == null)
         {
-            WriteLine("[DEBUG] Dicionário nulo após desserialização!");
+            WriteLine("[DEBUG] Dicionário nulo!");
             return false;
         }
 
         var keyToRemove = dict.FirstOrDefault(kvp =>
         {
-            if (kvp.Value == null) return false;  // evita CS8602
-
-            var prop = kvp.Value.GetType().GetProperty("ID_i", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            var prop = kvp.Value?.GetType().GetProperty(
+                "ID_i", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+            );
             if (prop == null) return false;
 
             var valObj = prop.GetValue(kvp.Value);
-            if (valObj == null) return false;
+            return valObj != null && Convert.ToInt32(valObj) == id;
 
-            int value = (int)valObj;
-            return value == id;
         }).Key;
-
-
         if (keyToRemove != null)
         {
+            // --- Backup sem indentação ---
+            string backupPath = Path.Combine("backup", $"{baseType}.txt");
+            Directory.CreateDirectory("backup"); // garante pasta
+
+            string backupEntry = JsonSerializer.Serialize(dict[keyToRemove]); // sem WriteIndented
+            File.AppendAllText(backupPath, backupEntry + Environment.NewLine);
+
+            // --- Remove do arquivo principal (mantendo indentação) ---
             dict.Remove(keyToRemove);
             File.WriteAllText(path, JsonSerializer.Serialize(dict, new JsonSerializerOptions { WriteIndented = true }));
-            WriteLine($"[DEBUG] ID={id} removido com sucesso.");
+
+            //WriteLine($"[DEBUG] ID={id} removido com sucesso. Backup gravado em '{backupPath}'");
             return true;
         }
 
-        WriteLine("[DEBUG] Nenhum objeto correspondente encontrado para remover.");
+
+        WriteLine("[DEBUG] Nenhum objeto correspondente encontrado.");
         return false;
     }
 
@@ -317,7 +330,7 @@ internal static class FileManager
             return new List<T>();
         }
 
-        string json = File.ReadAllText(path);
+        string json = ReadFile(path);
         var dict = JsonSerializer.Deserialize<Dictionary<string, T>>(json);
         if (dict == null)
         {
