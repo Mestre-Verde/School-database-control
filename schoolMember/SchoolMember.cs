@@ -318,16 +318,16 @@ internal abstract class SchoolMembers
         string prompt;
 
         // --- Nome ---
-        prompt = $"Escreva o nome do(a) {typeObject}";
+        prompt = $"Escreva o nome do(a) {typeObject}(a)";
         string name = InputName(prompt);
 
         // --- Idade ---
-        prompt = $"Escreva a idade do {typeObject}";
+        prompt = $"Escreva a idade do(a) {typeObject}(a)";
         DateTime? trash = null;
         byte age = InputAge(prompt, ref trash);
 
         // --- Gênero ---
-        prompt = $"Escreva o gênero do {typeObject}";
+        prompt = $"Escreva o gênero do(a) {typeObject}(a)";
         char gender = InputGender(prompt);
 
         // --- Data de nascimento ---
@@ -544,51 +544,6 @@ internal abstract class SchoolMembers
 
 }
 
-// Classe derivada: Student
-internal class Student : SchoolMembers
-{
-    // Construtor parameterless obrigatório para JSON
-    public Student() : base() { }
-
-    private Student(string name, byte age, int id, char gender, DateTime birthDate, Nationality_e nat) : base(id, name, age, gender, birthDate, nationality: nat)
-    {
-        Introduce();
-    }
-    // Fábrica de objetos Student.
-    internal static Student? Create() // Pode retornar null se o utilizador cancelar
-    {
-        return CreateMember<Student>("estudante", FileManager.DataBaseType.Student, (n, a, id, g, d, nat) => new Student(n, a, id, g, d, nat));
-    }
-
-    internal static void Remove() { RemoveMember<Student>("aluno", FileManager.DataBaseType.Student); }
-
-    internal static void Select() { SelectMember<Student>("aluno", FileManager.DataBaseType.Student); }
-
-    internal override void Introduce() { WriteLine($"🎓 New Student: {Name_s}, ID: {ID_i}, Age: {Age_by}, Genero: {Gender_c}, Data de nascimento: {BirthDate_dt.Date}, Nacionalidade: {Nationality}."); }
-}
-
-
-// Classe derivada: Teacher
-internal class Teacher : SchoolMembers
-{
-    public Teacher() : base() { }
-    private Teacher(string name, byte age, int id, char gender, DateTime birthDate, Nationality_e nat) : base(id, name, age, gender, birthDate, nationality: nat)
-    {
-        Introduce();
-    }
-
-    // Fábrica de objetos Teacher. Pode retornar null se o utilizador cancelar
-    internal static Teacher? Create()
-    {
-        return CreateMember<Teacher>("professor", FileManager.DataBaseType.Teacher, (n, a, id, g, d, nat) => new Teacher(n, a, id, g, d, nat));
-    }
-
-    internal static void Remove() { RemoveMember<Teacher>("professor", FileManager.DataBaseType.Teacher); }
-
-    internal static void Select() { SelectMember<Teacher>("professor", FileManager.DataBaseType.Teacher); }
-
-    internal override void Introduce() { WriteLine($"👨‍🏫 New Teacher: {Name_s}, ID: {ID_i}, Age: {Age_by}, Genero: {Gender_c}, Data de nascimento: {BirthDate_dt.Date}, Nacionalidade: {Nationality}."); }
-}
 /*
 internal class Person
 {

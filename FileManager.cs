@@ -12,20 +12,25 @@ using System.Linq.Expressions;
 internal static class FileManager
 {
     // 🗂️ Caminhos dos ficheiros principais do programa
-    internal static string CourseFilePath { get; } = "Course.cs";                 // Código fonte de cursos
-    internal static string StudentFilePath { get; } = "Person.cs";                // Código fonte de pessoas
+    private static string SchoolMemberDirectory { get; } = "schoolMember/";
+    private static string SchoolMemberFilePath { get; } = "schoolMember/SchoolMember.cs";// Código fonte para memebros da escola
+    private static string StudentFilePath { get; } = "schoolMember/Student.cs";
+    private static string TeacherFilePath { get; } = "schoolMember/Teacher.cs";
+    private static string CourseFilePath { get; } = "Course.cs";                 // Código fonte de cursos
     private static string DataBaseDirectory { get; } = "data/";               // Pasta onde ficam os ficheiros de dados
     private static string StudentsJSONPath { get; } = "data/students.json";      // Dados dos estudantes
     private static string TeachersJSONPath { get; } = "data/teachers.json";      // Dados dos professores
     private static string CoursesJSONPath { get; } = "data/courses.json";         // Dados dos cursos
     private static readonly string[] files =
-    [
-         CourseFilePath,
-         StudentFilePath,
-         StudentsJSONPath,
-         TeachersJSONPath,
-         CoursesJSONPath
-    ];
+        [
+            StudentFilePath,
+            TeacherFilePath,
+            CourseFilePath,
+            SchoolMemberFilePath,
+            StudentsJSONPath,
+            TeachersJSONPath,
+            CoursesJSONPath
+        ];
     internal enum DataBaseType// Enum para percorrer os caminhos das base de dados.
     {
         Student,
@@ -104,6 +109,11 @@ internal static class FileManager
             Directory.CreateDirectory(DataBaseDirectory);
             missingFiles.Add(DataBaseDirectory);
         }
+        if (!Directory.Exists(SchoolMemberDirectory))
+        {
+            Directory.CreateDirectory(SchoolMemberDirectory);
+            missingFiles.Add(SchoolMemberDirectory);
+        }
 
         foreach (var file in files)
         {
@@ -152,14 +162,10 @@ internal static class FileManager
 
         if (missingFiles.Count > 0 && setup)
         {
-            Console.WriteLine("\n📄 Ficheiros criados:");
-            foreach (var f in missingFiles)
-                Console.WriteLine(" - " + f);
+            WriteLine("\n📄 Ficheiros criados:");
+            foreach (var f in missingFiles) WriteLine(" - " + f);
         }
-        else if (setup)
-        {
-            Console.WriteLine("\n✅ Nenhum ficheiro em falta.");
-        }
+        else if (setup) { WriteLine("\n✅ Nenhum ficheiro em falta."); }
 
         // Se algum ficheiro inválido foi encontrado → devolve false
         return !errorDetected;
