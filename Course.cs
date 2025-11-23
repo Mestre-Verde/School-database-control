@@ -3,24 +3,20 @@ using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Data.Common;
 
-
-internal class Course
+internal class Course : BaseEntity
 {
-    [JsonInclude] internal string Name_s { get; private set; } = "";
-    [JsonInclude] internal int ID_i { get; private set; }
     [JsonInclude] internal CourseType_e Type_e { get; private set; }
     [JsonInclude] internal float Duration_f { get; set; } // duração em anos pode ser 0,5
     [JsonInclude] internal List<Discipline> Subjects_l { get; private set; } = []; // o curso tem disciplinas
 
-    public Course() { } // construtor vazio para desserialização
-    private Course(string name = "", int id = default, CourseType_e type = default, float duracao = default)
+    public Course() : base(0, "") { } // construtor para desserialização
+    private Course(string name = "", int id = default, CourseType_e type = default, float duracao = default) : base(id, name)
     {
-        Name_s = name;
-        ID_i = id;
         Type_e = type;
         Duration_f = duracao;
 
     }
+
 
     internal static Course? Create()
     {
@@ -162,11 +158,23 @@ internal class Course
             else WriteLine($"❌ Erro ao remover: ID={s.ID_i}, Nome='{s.Name_s}'");
         }
     }
-    
+
     internal static protected void Select()
     {
-        // seleciona um estudante e professor, e manuseia os dados
+        // aqui vai ser diferente, equanto nos alunos 
     }
+
+    internal void AddSubject(Discipline d)
+    {
+        Subjects_l.Add(d);
+    }
+
+    internal void RemoveSubject(string name)
+    {
+        Subjects_l.RemoveAll(x => x.Name_s == name);
+    }
+
+
 }
 
 
@@ -174,17 +182,88 @@ internal class Discipline
 {
     internal string Name_s { get; private set; }
     internal int ECTS_i { get; private set; }
-    internal string Professor_s { get; private set; }
-    private Dictionary<int, Student> alunosInscritos = [];
+    internal List<Teacher> Professor_l { get; private set; }
+    internal List<Student> students_l { get; private set; }
 
-    private Discipline(string name, int ects, string professor)
+    private Discipline(string name, int ects)
     {
-        Name_s = name;
-        ECTS_i = ects;
-        Professor_s = professor;
-    }
 
-    public override string ToString() => $"{Name_s} ({ECTS_i} ECTS) - Prof. {Professor_s}";
+    }
+/*
+    internal bool EnrollStudent(Student s)
+    {
+
+    }
+    internal bool UnenrollStudent(int studentId)
+    {
+
+    }
+    internal void SetGrade(int studentId, float grade)
+    {
+
+    }
+    internal static void ManageSubjectsSubmenu(Course course)
+    {
+        while (true)
+        {
+            // Lista todas as disciplinas do curso
+            WriteLine("\nDisciplinas do curso:");
+            for (int i = 0; i < course.Subjects_l.Count; i++)
+            {
+                var d = course.Subjects_l[i];
+                WriteLine($"{i + 1}: {d.Name_s} ({d.ECTS_i} ECTS)");
+            }
+
+            Write("Escolha a disciplina para editar (0 para voltar): ");
+            if (!int.TryParse(ReadLine(), out int choice) || choice < 0 || choice > course.Subjects_l.Count)
+            {
+                WriteLine("Escolha inválida.");
+                continue;
+            }
+
+            if (choice == 0) break; // Voltar para menu do curso
+
+            var discipline = course.Subjects_l[choice - 1];
+
+            // --- Loop de edição da disciplina ---
+            while (true)
+            {
+                EditParamDiscipline_e option = MenuDisciplineParameters(discipline.Name_s);
+
+                if (option == EditParamDiscipline_e.Back) break;
+
+                switch (option)
+                {
+                    case EditParamDiscipline_e.Name:
+                        Write("Novo nome da disciplina: ");
+                        string? newName = ReadLine()?.Trim();
+                        if (!string.IsNullOrEmpty(newName))
+                            discipline.Name_s = newName;
+                        break;
+
+                    case EditParamDiscipline_e.ECTS:
+                        Write("Novo ECTS: ");
+                        if (int.TryParse(ReadLine(), out int newEcts))
+                            discipline.ECTS_i = newEcts;
+                        break;
+
+                    case EditParamDiscipline_e.ManageTeachers:
+                        WriteLine("Função de gestão de professores a implementar...");
+                        break;
+
+                    case EditParamDiscipline_e.ManageStudents:
+                        WriteLine("Função de gestão de estudantes a implementar...");
+                        break;
+
+                    case EditParamDiscipline_e.Help:
+                        WriteLine(BuildEditDisciplineMenu(discipline.Name_s));
+                        break;
+                }
+            }
+        }
+    }
+*/
+
 }
 
 

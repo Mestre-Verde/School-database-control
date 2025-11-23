@@ -6,26 +6,19 @@ using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using Microsoft.VisualBasic;
 
-internal abstract class SchoolMembers
+internal abstract class SchoolMembers : BaseEntity
 {
-    [JsonInclude] internal protected int ID_i { get; protected set; }
-    [JsonInclude] internal protected string Name_s { get; protected set; } = "";// string porque um nome é uma sequência dinâmica de caracteres
     [JsonInclude] internal protected byte Age_by { get; protected set; }// byte (0-255) porque a idade nunca é negativa e não passa de 255.
     [JsonInclude] internal protected char Gender_c { get; protected set; }// char 'M' ou 'F' (sempre um único caractere)
     [JsonInclude] internal protected DateTime BirthDate_dt { get; protected set; }// Data de nascimento (struct DateTime) 
     [JsonInclude] internal protected Nationality_e Nationality { get; protected set; }// Nacionalidade (enum)
 
-    static readonly string InvalidEntrance = "Entrada inválida. Tente novamente.";
-    static readonly string EmptyEntrance = "Entrada nula ou em branco, valor default utilizado.";
-
     private const byte MinAge = 6;
 
-    protected SchoolMembers() { }// construtor para Desserialização
-    // Construtor principal da classe base
-    internal protected SchoolMembers(int id, string name = "", byte age = default, char gender = default, DateTime? birthDate = default, Nationality_e nationality = default)
+    protected SchoolMembers() : base(0, "") { } // construtor para desserialização
+                                                // Construtor principal da classe base
+    internal protected SchoolMembers(int id, string name = "", byte age = default, char gender = default, DateTime? birthDate = default, Nationality_e nationality = default) : base(id, name)
     {
-        ID_i = id;
-        Name_s = name;
         Age_by = age;
         Gender_c = gender;
         BirthDate_dt = birthDate ?? DateTime.Now;
@@ -33,36 +26,6 @@ internal abstract class SchoolMembers
     }
 
     internal virtual void Introduce() { WriteLine($"👤 I'm a Person named {Name_s}, {Age_by} years old."); }
-
-    /// <summary>
-    /// Pede ao usuário para inserir ou alterar um nome.
-    /// </summary>
-    /// <param name="prompt">Mensagem a exibir para o usuário.</param>
-    /// <param name="isToEdit">Indica se é edição (true) ou criação (false).</param>
-    /// <param name="currentValue">Valor atual, caso seja edição (null se criação).</param>
-    /// <returns>O nome fornecido ou o valor atual/default caso não seja alterado.</returns>
-    protected static string InputName(string prompt, string? currentValue = null, bool isToEdit = false)
-    {
-        while (true)
-        {
-            if (isToEdit && !string.IsNullOrEmpty(currentValue))
-                Write($"{prompt} (Enter para manter '{currentValue}'): ");
-            else
-                Write($"{prompt} (Enter para default): ");
-
-            string? input = ReadLine()?.Trim();
-
-            if (string.IsNullOrWhiteSpace(input))
-            {
-                WriteLine(EmptyEntrance); // mostra aviso de valor default
-                                          // Se vazio, mantém valor atual em edição, ou default na criação
-                return isToEdit && !string.IsNullOrEmpty(currentValue) ? currentValue : "";
-            }
-
-            // Aqui você pode adicionar validações extras (ex: tamanho mínimo, caracteres permitidos)
-            return input;
-        }
-    }
 
     /// <summary>
     /// Pede ao usuário para inserir ou alterar a idade.
@@ -169,7 +132,7 @@ internal abstract class SchoolMembers
     ///     - Valida se a data é válida, repetindo até obter uma entrada correta.
     /// - A função ajusta a idade se não fornecida, calculando a partir do ano informado.
     /// </remarks>
-    protected static DateTime InputBirthDate(string prompt, byte age = default, DateTime? currentValue = null, bool isToEdit = false)
+    protected static DateTime InputBirthDate(string prompt, ref byte age, DateTime? currentValue = null, bool isToEdit = false)
     {
         DateTime date = currentValue ?? default;
         int anoAtual = DateTime.Now.Year;
@@ -195,7 +158,7 @@ internal abstract class SchoolMembers
 
                 if (!DateTime.TryParse(input_s, out DateTime parsedDate))
                 {
-                    WriteLine(InvalidEntrance);
+                    WriteLine(BaseEntity.InvalidEntrance);
                     continue;
                 }
 
@@ -211,7 +174,6 @@ internal abstract class SchoolMembers
 
                     if (string.IsNullOrWhiteSpace(input_s))
                     {
-                        // mantém valor atual em edição, ou usa 1º de janeiro
                         date = (isToEdit && currentValue.HasValue) ? currentValue.Value : new DateTime(anoEstimado, 1, 1);
                         break;
                     }
@@ -220,17 +182,18 @@ internal abstract class SchoolMembers
                     input_s = Regex.Replace(input_s, @"\s+", " ");
                     string[] parts = input_s.Split(' ');
 
-                    if (parts.Length < 2) { WriteLine("Você precisa fornecer mês e dia."); continue; }
+                    if (parts.Length < 2) { WriteLine(BaseEntity.InvalidEntrance); continue; }
 
-                    if (!int.TryParse(parts[0], out int mesTmp) || mesTmp < 1 || mesTmp > 12) { WriteLine("Mês inválido."); continue; }
-                    if (!int.TryParse(parts[1], out int diaTmp) || diaTmp < 1 || diaTmp > DateTime.DaysInMonth(anoEstimado, mesTmp)) { WriteLine("Dia inválido."); continue; }
+                    if (!int.TryParse(parts[0], out int mesTmp) || mesTmp < 1 || mesTmp > 12) { WriteLine(BaseEntity.InvalidEntrance); continue; }
+                    if (!int.TryParse(parts[1], out int diaTmp) || diaTmp < 1 || diaTmp > DateTime.DaysInMonth(anoEstimado, mesTmp)) { WriteLine(BaseEntity.InvalidEntrance); continue; }
 
                     date = new DateTime(anoEstimado, mesTmp, diaTmp);
                     break;
                 }
             }
+
             // Ajusta idade se necessário
-            if (age == 0 && date != default) { age = (byte)(anoAtual - date.Year); }
+            if (age == 0 && date != default) age = (byte)(anoAtual - date.Year);
             break; // data válida obtida
         }
 
@@ -332,7 +295,7 @@ internal abstract class SchoolMembers
 
         // --- Data de nascimento ---
         prompt = "";
-        DateTime date = InputBirthDate(prompt, age);
+        DateTime date = InputBirthDate(prompt, ref age);
 
         // --- Nacionalidade ---
         prompt = $"Escreva a nacionalidade {typeObject}";
@@ -501,9 +464,11 @@ internal abstract class SchoolMembers
                     break;
 
                 case EditParamSchoolMember_e.BirthDate:
-                    member.BirthDate_dt = InputBirthDate($"Escreva a data de nascimento do(a) {typeName}", member.Age_by, member.BirthDate_dt, true);
+                    byte tempAge = member.Age_by; // variável local
+                    member.BirthDate_dt = InputBirthDate($"Escreva a data de nascimento do(a) {typeName}", ref tempAge, member.BirthDate_dt, true); member.Age_by = tempAge; // atualiza a propriedade
                     hasChanged = true;
                     break;
+
 
                 case EditParamSchoolMember_e.Nationality:
                     member.Nationality = InputNationality($"Escreva a nacionalidade do(a) {typeName}", member.Nationality, true);

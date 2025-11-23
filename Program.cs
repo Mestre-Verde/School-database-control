@@ -14,7 +14,6 @@ internal enum EditParamSchoolMember_e
     BirthDate = 5,
     Nationality = 6
 }
-
 internal enum Nationality_e
 {
     Other,      // 0
@@ -32,6 +31,26 @@ internal enum Nationality_e
     CA,         // Canadá
     AU,         // Austrália
     RU          // Rússia
+}
+
+// enums de Course
+internal enum EditParamCourse_e
+{
+    Back,
+    Help,
+    Name,
+    Type,
+    Duration,
+    ManageSubjects,
+}
+internal enum EditParamDiscipline_e
+{
+    Back,
+    Help,
+    Name,
+    ECTS,
+    ManageStudents,
+    ManageTeachers
 }
 internal enum CourseType_e
 {
@@ -75,7 +94,7 @@ class MenuRelated_cl
         [2] Add       -> Adicionar aluno, professor, etc.
         [3] Remove    -> Remover item
         [4] Select    -> Selecionar item
-        [5] Search        -> Mostrar todos os dados
+        [5] Search    -> Mostrar todos os dados
     ";
     private static string BuildObjectMenu(string typeFunction)
     {
@@ -98,6 +117,28 @@ class MenuRelated_cl
             [5] Data de nascimento
             [6] Nacionalidade
     ";
+    }
+    private static string CourseMenuCommands_s = @"
+        Editar Curso:
+            [0] Back
+            [1] Help
+            [2] Name
+            [3] Type
+            [4] Duration
+            [5] ManageSubjects
+    ";
+    private static string BuildEditDisciplineMenu(string disciplineName)
+    {
+        return $@"
+        Editar disciplina '{disciplineName}':
+            [0] Voltar
+            [1] Help
+            [2] Nome
+            [3] ECTS
+            [4] ManageStudents
+            [5] ManageTeachers
+            
+        ";
     }
 
     /// <summary>/// Executa um menu interativo com comandos pré-definidos.</summary>
@@ -236,7 +277,7 @@ class MenuRelated_cl
             switch (input_s)
             {
                 case "0": input_s = "Back"; Write(BackToMenu_s); break;
-                case "1": input_s = "Help";WriteLine(BuildEditMenu(typeName)); break;
+                case "1": input_s = "Help"; WriteLine(BuildEditMenu(typeName)); break;
                 case "2": input_s = "Name"; break;
                 case "3": input_s = "Age"; break;
                 case "4": input_s = "Gender"; break;
@@ -252,6 +293,71 @@ class MenuRelated_cl
         }
         return option;
     }
+
+    internal static EditParamCourse_e MenuCourseParameters(string typeName)
+    {
+        EditParamCourse_e option;
+        while (true)
+        {
+            Write("(edit menu)> ");
+            string? input_s = ReadLine()?.Trim().ToLower();
+            if (string.IsNullOrWhiteSpace(input_s)) continue;
+
+            // Converter números → nomes do enum
+            switch (input_s)
+            {
+                case "0": input_s = "Back"; WriteLine("Voltando ao menu anterior..."); break;
+                case "1": input_s = "Help"; WriteLine(); break;
+                case "2": input_s = "Name"; break;
+                case "3": input_s = "Type"; break;
+                case "4": input_s = "Duration"; break;
+                case "5": input_s = "ManageSubjects"; break;
+            }
+
+            if (!Enum.TryParse(input_s, true, out option))
+            {
+                WriteLine("Comando desconhecido. Tente novamente.");
+                continue;
+            }
+
+            break;
+        }
+        return option;
+    }
+    internal static EditParamDiscipline_e MenuDisciplineParameters(string disciplineName)
+    {
+        EditParamDiscipline_e option;
+        while (true)
+        {
+            Write("(discipline menu)> ");
+            string? input_s = ReadLine()?.Trim().ToLower();
+            if (string.IsNullOrWhiteSpace(input_s)) continue;
+
+            // Converter números para nomes do enum
+            switch (input_s)
+            {
+                case "0": input_s = "Back"; break;
+                case "1": input_s = "Help"; WriteLine(BuildEditDisciplineMenu(disciplineName)); continue;
+                case "2": input_s = "Name"; break;
+                case "3": input_s = "ECTS"; break;
+                case "4": input_s = "ManageTeachers"; break;
+                case "5": input_s = "ManageStudents"; break;
+            }
+
+            if (!Enum.TryParse(input_s, true, out option))
+            {
+                WriteLine("Comando desconhecido!");
+                continue;
+            }
+
+            break;
+        }
+
+        return option;
+    }
+
+
+
 }
 class Program
 {
@@ -302,7 +408,7 @@ class Program
     }
 }
 
-interface IMustExist{} // não pode ter modificadores de acesso
+interface IMustExist { } // não pode ter modificadores de acesso
 /*
 string      -> var_s     (ex: var_sName)
 char        -> var_c     (ex: var_cGender)
