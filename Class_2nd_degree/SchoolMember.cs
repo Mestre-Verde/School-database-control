@@ -278,7 +278,6 @@ internal abstract class SchoolMembers : BaseEntity
 
     {
         string prompt;
-
         // --- Nome ---
         prompt = $"Escreva o nome do(a) {typeObject}(a)";
         string name = InputName(prompt);
@@ -314,7 +313,7 @@ internal abstract class SchoolMembers : BaseEntity
 
         // --- Criação do ID ---
         int newID = FileManager.GetTheNextAvailableID(dbType);
-        if (newID == -1) { WriteLine("❌ Erro: Não foi possível obter ID."); return null; }
+        if (newID == -1) { WriteLine(ProblemGetTheId); return null; }
         // cria o objeto pelo metudo fabrica.
         var objeto = factory(name, age, newID, gender, date, nationality);
         // Escreve na Base de dados
@@ -411,7 +410,7 @@ internal abstract class SchoolMembers : BaseEntity
         for (int i = 0; i < matches.Count; i++)
         {
             var m = matches[i];
-            WriteLine($"{i + 1}: ID={m.ID_i}, Nome={m.Name_s}, Idade={m.Age_by}, Género={m.Gender_c}, Nasc={m.BirthDate_dt:dd-MM-yyyy}");
+            WriteLine($"{i + 1}: ID={m.ID_i}, Nome={m.Name_s}, Idade={m.Age_by}, Género={m.Gender_c}, Nasc={m.BirthDate_dt:dd-MM-yyyy}, Nacio={m.Nationality}");
         }
 
         Write($"Escolha qual deseja editar (1 - {matches.Count}): ");

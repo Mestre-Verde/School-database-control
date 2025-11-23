@@ -82,8 +82,6 @@ internal enum GlobalObjectCommands_e
     None       // Caso não reconheça o comando
 }
 
-
-
 class MenuRelated_cl
 {
     internal const string UnknowonCommand_s = "❌ Comando desconhecido.\n";
@@ -400,7 +398,7 @@ class Program
                 case MainMenuCommands_e.Add: MenuRelated_cl.MenuAddObject(); break;
                 case MainMenuCommands_e.Remove: MenuRelated_cl.MenuRemoveObject(); break;
                 case MainMenuCommands_e.Select: MenuRelated_cl.MenuSelectObject(); break;
-                case MainMenuCommands_e.Search:
+                case MainMenuCommands_e.Search: //FileManager.SuperSearch;
                     WriteLine("📋  [ls] Mostrando todos os dados..."); break;
                 default: Write(MenuRelated_cl.UnknowonCommand_s); break;
             }

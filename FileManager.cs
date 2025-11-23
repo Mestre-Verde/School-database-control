@@ -34,15 +34,8 @@ internal static class FileManager
     private static string StudentsJSONPath { get; } = "data/students.json";      // Dados dos estudantes
     private static string TeachersJSONPath { get; } = "data/teachers.json";      // Dados dos professores
     private static string CoursesJSONPath { get; } = "data/courses.json";         // Dados dos cursos
-    private static string DisciplinesJSONPath { get; } = "data/disciplines.json";
-    internal enum DataBaseType// Enum para percorrer os caminhos das base de dados.
-    {
-        Student,
-        Teacher,
-        Course,
-        Discipline
-    }
-    private static readonly string[] files =
+    private static string SubjectsJSONPath { get; } = "data/subjects.json";
+    private static readonly string[] files_s =
         [
             StudentFilePath,
             TeacherFilePath,
@@ -53,9 +46,16 @@ internal static class FileManager
             StudentsJSONPath,
             TeachersJSONPath,
             CoursesJSONPath,
-            DisciplinesJSONPath
+            SubjectsJSONPath
         ];
 
+    internal enum DataBaseType// Enum para percorrer os caminhos das base de dados.
+    {
+        Student,
+        Teacher,
+        Course,
+        Discipline
+    }
     /// <summary> Retorna o caminho do arquivo JSON correspondente ao tipo de base de dados fornecido.</summary>
     /// <returns>
     /// Retorna uma variavel do tipo <see cref="string"/> com o caminho completo do arquivo JSON correspondente ao <paramref name="baseType"/>.
@@ -63,14 +63,39 @@ internal static class FileManager
     /// <exception cref="ArgumentOutOfRangeException">
     /// Lançada quando o <paramref name="baseType"/> não corresponde a nenhum valor definido no enum <see cref="DataBaseType"/>.
     /// </exception>
-    private static string GetFilePath(DataBaseType baseType)
+    /*private static string GetFilePath(DataBaseType baseType)
     {
         return baseType switch
         {
             DataBaseType.Student => StudentsJSONPath,
             DataBaseType.Teacher => TeachersJSONPath,
             DataBaseType.Course => CoursesJSONPath,
-            _ => throw new ArgumentOutOfRangeException(nameof(baseType))
+            DataBaseType.Discipline => SubjectsJSONPath,
+
+            _ => throw new ArgumentOutOfRangeException(
+                nameof(baseType),
+                $"Na função FileManager.GetFilePath não foi encontrada uma base de dados correspondente ao valor recebido: {baseType}. " +
+                "Se adicionou um novo DataBaseType, lembre-se de incluir o caminho correspondente aqui."
+            )
+        };
+    }*/
+    private static string GetFilePath(DataBaseType baseType)
+    {
+        return GetDataBaseInfo(baseType).path;
+    }
+
+    private static (string path, Type type) GetDataBaseInfo(DataBaseType baseType)
+    {
+        return baseType switch
+        {
+            DataBaseType.Student => (StudentsJSONPath, typeof(Student)),
+            DataBaseType.Teacher => (TeachersJSONPath, typeof(Teacher)),
+            DataBaseType.Course => (CoursesJSONPath, typeof(Course)),
+            DataBaseType.Discipline => (SubjectsJSONPath, typeof(Discipline)),
+
+            _ => throw new ArgumentOutOfRangeException(nameof(baseType),
+                $"Base de dados não encontrada para o valor recebido: {baseType}. " +
+                "Se adicionou um novo DataBaseType, lembre-se de incluir aqui.Seu distraido!")
         };
     }
 
@@ -109,7 +134,7 @@ internal static class FileManager
     // Verifica se todos os ficheiros necessários existem e cria os que faltam
     internal static bool StartupCheckFilesWithProgress(bool setup = true)
     {
-        int total = files.Length;
+        int total = files_s.Length;
         int count = 0;
         List<string> missingFiles = [];
 
@@ -128,7 +153,7 @@ internal static class FileManager
             }
         }
 
-        foreach (var file in files)
+        foreach (var file in files_s)
         {
             if (!File.Exists(file) && setup)
             {
@@ -226,13 +251,13 @@ internal static class FileManager
     //-----------------------
     // Método auxiliar genérico que calcula o próximo ID disponível num ficheiro JSON
     // <T> permite reutilizar o mesmo código para Student, Teacher, Course, etc.
-    private static int GetNextAvailableIDFromFile<X>(string filePath)
+    private static int GetNextAvailableIDFromFile<T>(string filePath)
     {
         string json = ReadFile(filePath);// Lê o conteúdo do ficheiro JSON indicado
         if (string.IsNullOrWhiteSpace(json)) { return 0; }// Caso o ficheiro esteja vazio, nulo ou só com espaços, não há dados — começa do ID 0
 
         // Desserializa o JSON num dicionário de pares [ID → objeto T]
-        var dict = JsonSerializer.Deserialize<Dictionary<int, X>>(json);// O tipo genérico <T> torna este método reutilizável para qualquer classe de dados. Exemplo: se T for Student, ficamos com Dictionary<int, Student>
+        var dict = JsonSerializer.Deserialize<Dictionary<int, T>>(json);// O tipo genérico <T> torna este método reutilizável para qualquer classe de dados. Exemplo: se T for Student, ficamos com Dictionary<int, Student>
         if (dict == null || dict.Count == 0) { return 0; }// Se o ficheiro estiver vazio ou o JSON não tiver entradas válidas, retorna 0 como o primeiro ID disponível.
 
         // Enquanto o ID atual existir no dicionário, incrementa para procurar o próximo livre. Esta lógica garante que se houver "buracos" (ex: IDs 0,1,3,4), o método retorna 2.
@@ -241,29 +266,20 @@ internal static class FileManager
         return nextID;//  Retorna o menor ID que ainda não foi usado.
     }
 
-    // Método principal que decide qual base de dados usar (Student, Teacher, Course)
-    // e chama a função auxiliar genérica com o tipo e ficheiro corretos.
     internal static int GetTheNextAvailableID(DataBaseType baseType)
     {
-        if (!StartupCheckFilesWithProgress(false)) { return -1; } // Verifica se os ficheiros essenciais existem
+        if (!StartupCheckFilesWithProgress(false)) return -1;
 
-        // Usa expressão 'switch' moderna do C# para selecionar o caminho e tipo correto. Cada caso chama a função genérica com o tipo correspondente.
-        return baseType switch
-        {
-            // 📘 Base de dados de estudantes → lê students.json e trata como Dictionary<int, Student>
-            DataBaseType.Student => GetNextAvailableIDFromFile<Student>(StudentsJSONPath),
+        var info = GetDataBaseInfo(baseType);
 
-            // 📗 Base de dados de professores → lê teachers.json e trata como Dictionary<int, Teacher>
-            DataBaseType.Teacher => GetNextAvailableIDFromFile<Teacher>(TeachersJSONPath),
+        var method = typeof(FileManager)
+            .GetMethod(nameof(GetNextAvailableIDFromFile), BindingFlags.NonPublic | BindingFlags.Static)!
+            .MakeGenericMethod(info.type);
 
-            // 📙 Base de dados de cursos → lê courses.json e trata como Dictionary<int, Course>
-            DataBaseType.Course => GetNextAvailableIDFromFile<Course>(CoursesJSONPath),
-
-            _ => throw new ArgumentOutOfRangeException(nameof(baseType))// Caso o tipo de base de dados não seja reconhecido, lança exceção descritiva.
-        };
-    }
-
-    //-----------------------
+        return (int)method.Invoke(null, new object[] { info.path })!;
+    }    //-----------------------
+    //--------------
+    
     // Remove pelo enum e ID
     internal static bool RemoveById<T>(DataBaseType baseType, int id)
     {
@@ -317,6 +333,55 @@ internal static class FileManager
         return false;
     }
 
+    //--------------------
+    private static Dictionary<string, T> SafeReadDatabase<T>(string path)
+    {
+        if (!File.Exists(path))
+        {
+            WriteLine($"[DEBUG] Arquivo não existe: {path}");
+            return new Dictionary<string, T>();
+        }
+
+        string json = File.ReadAllText(path);
+
+        // Tenta desserializar normalmente
+        try
+        {
+            var dict = JsonSerializer.Deserialize<Dictionary<string, T>>(json);
+            if (dict != null) return dict;
+            WriteLine($"[DEBUG] Dicionário vazio após desserialização: {path}");
+            return new Dictionary<string, T>();
+        }
+        catch (JsonException ex)
+        {
+            WriteLine($"[WARNING] JSON inválido detectado em {path}: {ex.Message}");
+        }
+
+        // Tentativa de reparo simples: remove vírgulas iniciais ou finais, linhas em branco
+        string cleaned = string.Join("\n",
+            json.Split('\n')
+                .Select(line => line.Trim())
+                .Where(line => !string.IsNullOrWhiteSpace(line))
+                .Select(line => line.TrimStart(',').TrimEnd(','))
+        );
+
+        try
+        {
+            var dict = JsonSerializer.Deserialize<Dictionary<string, T>>(cleaned);
+            if (dict != null)
+            {
+                WriteLine($"[INFO] JSON reparado com sucesso: {path}");
+                return dict;
+            }
+        }
+        catch
+        {
+            WriteLine($"[ERROR] Falha ao reparar JSON em {path}. Base vazia retornada.");
+        }
+
+        return new Dictionary<string, T>();
+    }
+
     /// <summary> Restricted Search Engine
     /// Pesquisa objetos em uma base de dados pelo nome ou ID.
     /// </summary>
@@ -328,7 +393,6 @@ internal static class FileManager
     internal static List<T> Search<T>(DataBaseType baseType, string? name = null, int? id = null)
     {
         string path = GetFilePath(baseType);
-        WriteLine($"[DEBUG] Procurando em {path} | name='{name}' | id='{id}'");
 
         if (!File.Exists(path))
         {
@@ -337,20 +401,24 @@ internal static class FileManager
         }
 
         string json = ReadFile(path);
-        var dict = JsonSerializer.Deserialize<Dictionary<string, T>>(json);
+        var dict = SafeReadDatabase<T>(path);
+        try { dict = JsonSerializer.Deserialize<Dictionary<string, T>>(json); }
+        catch (JsonException ex)
+        {
+            WriteLine($"[ERROR] Falha ao ler o JSON em {path}: {ex.Message}");
+            return new List<T>();
+        }
         if (dict == null)
         {
             WriteLine("[DEBUG] Dicionário nulo após desserialização!");
             return new List<T>();
         }
-
         IEnumerable<T> list = dict.Values;
 
         // --- Filtro por nome ---
-        if (name != null) // user realmente quis procurar por nome
+        if (!string.IsNullOrWhiteSpace(name))
         {
             string trimmed = name.Trim();
-
             list = list.Where(item =>
             {
                 if (item == null) return false;
@@ -363,19 +431,13 @@ internal static class FileManager
                 var valObj = prop.GetValue(item);
                 string? value = valObj?.ToString();
 
-                // 📌 Caso 1 — user enviou string vazia → procurar apenas campos vazios OU null
-                if (trimmed == "")
-                {
-                    return string.IsNullOrEmpty(value);
-                }
+                if (trimmed == "") return string.IsNullOrEmpty(value);
 
-                // 📌 Caso 2 — user enviou texto → comparar normalmente
-                if (value == null) return false;
-                return value.Contains(trimmed, StringComparison.OrdinalIgnoreCase);
+                return value != null && value.Contains(trimmed, StringComparison.OrdinalIgnoreCase);
             });
         }
 
-
+        // --- Filtro por ID ---
         if (id.HasValue)
         {
             list = list.Where(item =>
@@ -397,15 +459,11 @@ internal static class FileManager
                 }
 
                 int value = (int)valObj;
-                WriteLine($"[DEBUG] Comparando ID {value} com {id.Value}");
                 return value == id.Value;
             });
         }
 
-        var results = list.ToList();
-        WriteLine($"[DEBUG] Encontrados {results.Count} resultados");
-        return results;
+        return list.ToList();
     }
-    //--------------------
 
 }

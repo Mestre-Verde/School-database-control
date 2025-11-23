@@ -19,5 +19,5 @@ internal class Teacher : SchoolMembers
 
     internal static void Select() { SelectMember<Teacher>("professor", FileManager.DataBaseType.Teacher); }
 
-    internal override void Introduce() { WriteLine($"👨‍🏫 New Teacher: {Name_s}, ID: {ID_i}, Age: {Age_by}, Genero: {Gender_c}, Data de nascimento: {BirthDate_dt.Date}, Nacionalidade: {Nationality}."); }
+    internal override void Introduce() { WriteLine($"\n👨‍🏫 New Teacher: {Name_s}, ID: {ID_i}, Age: {Age_by}, Genero: {Gender_c}, Data de nascimento: {BirthDate_dt.Date}, Nacionalidade: {Nationality}."); }
 }

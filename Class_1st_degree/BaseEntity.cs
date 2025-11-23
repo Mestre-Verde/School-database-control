@@ -2,19 +2,14 @@ using static System.Console; // Permite usar Write e WriteLine diretamente
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
-internal abstract class BaseEntity
+internal abstract class BaseEntity(int id, string name)
 {
-    [JsonInclude] internal int ID_i { get; private set; }
-    [JsonInclude] internal protected string Name_s { get; set; } = "";
+    [JsonInclude] internal int ID_i { get; private set; } = id;
+    [JsonInclude] internal protected string Name_s { get; set; } = name;
 
     internal static readonly string InvalidEntrance = "Entrada inválida. Tente novamente.";
     internal static readonly string EmptyEntrance = "Entrada nula ou em branco, valor default utilizado.";
-    // Construtor protegido para ser usado pelas classes derivadas
-    protected BaseEntity(int id, string name)
-    {
-        ID_i = id;
-        Name_s = name;
-    }
+    protected const string ProblemGetTheId = "❌ Erro: Não foi possível obter um ID válido para o curso. Criação cancelada.";
 
     /// <summary>
     /// Pede ao usuário para inserir ou alterar um nome.

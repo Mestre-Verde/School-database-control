@@ -20,6 +20,6 @@ internal class Student : SchoolMembers
 
     internal static void Select() { SelectMember<Student>("aluno", FileManager.DataBaseType.Student); }
 
-    internal override void Introduce() { WriteLine($"🎓 New Student: {Name_s}, ID: {ID_i}, Age: {Age_by}, Genero: {Gender_c}, Data de nascimento: {BirthDate_dt.Date}, Nacionalidade: {Nationality}."); }
+    internal override void Introduce() { WriteLine($"\n🎓 New Student: {Name_s}, ID: {ID_i}, Age: {Age_by}, Genero: {Gender_c}, Data de nascimento: {BirthDate_dt.Date}, Nacionalidade: {Nationality}."); }
 }
 

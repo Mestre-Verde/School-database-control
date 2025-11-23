@@ -117,15 +117,15 @@ internal class Course : BaseEntity
         string prompt;
 
         // --- Nome ---
-        prompt = "Escreva o nome do curso: ";
+        prompt = "Escreva o nome do curso";
         string name = InputName(prompt);
 
         // --- type ---
-        prompt = "Escreva o tipo de curso ";
+        prompt = "Escreva o tipo de curso";
         CourseType_e type = InputCourseType(prompt);
 
         // --- Duração ---
-        prompt = "Escreva a duração do curso em anos ";
+        prompt = "Escreva a duração do curso em anos";
         float duration = InputCourseDuration(prompt);
 
         // --- Confirmação final ---
@@ -139,7 +139,7 @@ internal class Course : BaseEntity
 
 
         int newID = FileManager.GetTheNextAvailableID(FileManager.DataBaseType.Course);
-        if (newID == -1) { WriteLine("❌ Erro: Não foi possível obter um ID válido para o curso. Criação cancelada."); return null; }
+        if (newID == -1) { WriteLine(ProblemGetTheId); return null; }
         // --- Criação do objeto ---
         Course curso = new(name, newID, type, duration);
 
@@ -217,16 +217,16 @@ internal class Course : BaseEntity
 
 internal class Discipline : BaseEntity
 {
-    internal short ECTS_i { get; private set; }
-    internal List<Teacher> Professor_l { get; private set; } = [];
-    internal List<Student> Students_l { get; private set; } = [];
+    [JsonInclude] internal short ECTS_i { get; private set; }
+    [JsonInclude] internal List<Teacher> Professor_l { get; private set; } = [];
+    [JsonInclude] internal List<Student> Students_l { get; private set; } = [];
 
-    internal protected const short MinEtc = 3;
+    internal protected const short MinEct = 3;
     internal protected const short MaxSemesterEtc = 30;
 
-
+    // construtor para desserialização
     public Discipline() : base(0, "") { }
-
+    // construtor principal
     internal Discipline(int id, short ects, string name = "") : base(id, name)
     {
         ECTS_i = ects;
@@ -247,30 +247,24 @@ internal class Discipline : BaseEntity
         while (true)
         {
             // Prompt correto dependendo se está a editar
-            if (isToEdit && currentValue.HasValue)
-                Write($"{prompt} (Enter para manter '{currentValue}'): ");
-            else
-                Write($"{prompt} ({Discipline.MinEtc}–{Discipline.MaxSemesterEtc} ECTS, Enter para default): ");
+            if (isToEdit && currentValue.HasValue) Write($"{prompt} (Enter para manter '{currentValue}'): ");
+            else Write($"{prompt} ({MinEct}-{MaxSemesterEtc} ECTS, Enter para default): ");
 
             string? input = ReadLine()?.Trim();
 
             // Entrada vazia
             if (string.IsNullOrWhiteSpace(input))
             {
-                if (isToEdit && currentValue.HasValue)
-                    return currentValue.Value; // mantém valor atual
-
+                if (isToEdit && currentValue.HasValue) return currentValue.Value; // mantém valor atual
                 WriteLine(EmptyEntrance);
-                return Discipline.MinEtc; // default: mínimo permitido
+                return MinEct; // default: mínimo permitido
             }
-
             // Tenta converter
             if (short.TryParse(input, out short ects))
             {
-                if (ects >= Discipline.MinEtc && ects <= Discipline.MaxSemesterEtc)
+                if (ects >= MinEct && ects <= MaxSemesterEtc)
                     return ects;
-
-                WriteLine($"Valor inválido. Insira entre {Discipline.MinEtc} e {Discipline.MaxSemesterEtc} ECTS.");
+                WriteLine($"Valor inválido. Insira entre {MinEct} e {MaxSemesterEtc} ECTS.");
             }
             else
             {
@@ -279,20 +273,18 @@ internal class Discipline : BaseEntity
         }
     }
 
-
     internal static Discipline? Create()
     {
         string? input_s;
         string prompt;
 
         // --- Nome da disciplina ---
-        prompt = "Escreva o nome da disciplina: ";
+        prompt = "Escreva o nome da disciplina";
         string name = InputName(prompt);
 
         // --- ECTS ---
         prompt = "Escreva o número de ECTS da disciplina";
         short ects = InputDisciplineECTS(prompt);
-
 
         // --- Resumo ---
         WriteLine("\nResumo da Disciplina:");
@@ -305,11 +297,7 @@ internal class Discipline : BaseEntity
 
         // --- Criar ID ---
         int newID = FileManager.GetTheNextAvailableID(FileManager.DataBaseType.Discipline);
-        if (newID == -1)
-        {
-            WriteLine("❌ Erro: Não foi possível obter um ID válido. Criação cancelada.");
-            return null;
-        }
+        if (newID == -1) { WriteLine(ProblemGetTheId); return null; }
 
         // --- Criar objeto ---
         Discipline disc = new(newID, ects, name);
@@ -322,8 +310,75 @@ internal class Discipline : BaseEntity
 
     internal static void Remove()
     {
+        Write("Digite o nome ou ID da disciplina para remover: ");
+        string input = ReadLine() ?? "";
 
+        bool isId = int.TryParse(input, out int idInput);
+        var dbType = FileManager.DataBaseType.Discipline;
+
+        // Buscar disciplinas
+        var matches = isId
+            ? FileManager.Search<Discipline>(dbType, id: idInput)
+            : FileManager.Search<Discipline>(dbType, name: input);
+
+        if (matches.Count == 0)
+        {
+            WriteLine("Nenhuma disciplina encontrada.");
+            return;
+        }
+
+        WriteLine("Foram encontradas as seguintes disciplinas:");
+        for (int i = 0; i < matches.Count; i++)
+        {
+            var d = matches[i];
+            WriteLine($"{i + 1}: ID={d.ID_i}, Nome='{d.Name_s}', ECTS={d.ECTS_i}");
+        }
+
+        Write("Escolha o(s) número(s) da(s) disciplina(s) a remover: ");
+        string choiceInput = ReadLine() ?? "";
+
+        var indices = choiceInput
+            .Split([',', ' '], StringSplitOptions.RemoveEmptyEntries)
+            .Select(s => int.TryParse(s, out int x) ? x : -1)
+            .Where(x => x >= 1 && x <= matches.Count)
+            .Distinct()
+            .ToList();
+
+        if (indices.Count == 0)
+        {
+            WriteLine("Nenhuma seleção válida. Operação cancelada.");
+            return;
+        }
+
+        WriteLine("Você selecionou as seguintes disciplinas para remoção:");
+        foreach (var idx in indices)
+        {
+            var d = matches[idx - 1];
+            WriteLine($"- ID={d.ID_i}, Nome='{d.Name_s}', ECTS={d.ECTS_i}");
+        }
+
+        Write("Tem certeza que deseja remover todas essas disciplinas? (S/N): ");
+        string confirm = ReadLine()?.Trim().ToUpper() ?? "N";
+        if (confirm != "S")
+        {
+            WriteLine("Operação cancelada.");
+            return;
+        }
+
+        // Remover cada disciplina
+        foreach (var idx in indices)
+        {
+            var d = matches[idx - 1];
+            bool removed = FileManager.RemoveById<Discipline>(dbType, d.ID_i);
+
+            if (removed)
+                WriteLine($"✅ Disciplina removida: ID={d.ID_i}, Nome='{d.Name_s}'");
+            else
+                WriteLine($"❌ Erro ao remover: ID={d.ID_i}, Nome='{d.Name_s}'");
+        }
     }
+
+
     internal static void Select()
     {
 

@@ -54,5 +54,12 @@
     "Subjects_l": [],
     "ID_i": 7,
     "Name_s": ""
+  },
+  "8": {
+    "Type_e": 5,
+    "Duration_f": 2,
+    "Subjects_l": [],
+    "ID_i": 8,
+    "Name_s": "Curso Carlhanbe\u00E7o"
   }
 }
