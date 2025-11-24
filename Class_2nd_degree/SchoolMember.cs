@@ -11,9 +11,14 @@ internal abstract class SchoolMembers : BaseEntity
     [JsonInclude] internal protected byte Age_by { get; protected set; }// byte (0-255) porque a idade nunca é negativa e não passa de 255.
     [JsonInclude] internal protected char Gender_c { get; protected set; }// char 'M' ou 'F' (sempre um único caractere)
     [JsonInclude] internal protected DateTime BirthDate_dt { get; protected set; }// Data de nascimento (struct DateTime) 
-    [JsonInclude] internal protected Nationality_e Nationality { get; protected set; }// Nacionalidade (enum)
+    [JsonInclude] internal protected Nationality_e Nationality { get; protected set; }// Nacionalidade (enum) incorpurado para todos os tipos
+    [JsonInclude] internal protected string email_s { get; private set; } = "";
+    [JsonIgnore] private const byte MinAge = 6;
+    internal override string Describe()
+    {
+        return $"ID={ID_i}, Nome='{Name_s}', Idade={Age_by}, Gênero={Gender_c},Nascimento={BirthDate_dt:yyyy-MM-dd}, Nacionalidade={Nationality}, Email={email_s}";
+    }
 
-    private const byte MinAge = 6;
     // construtor para desserialização
     protected SchoolMembers() : base(0, "") { }
     // Construtor principal da classe base
@@ -25,7 +30,9 @@ internal abstract class SchoolMembers : BaseEntity
         Nationality = nationality;
     }
 
-    internal virtual void Introduce() { WriteLine($"👤 I'm a Person named {Name_s}, {Age_by} years old."); }
+    //----------------------------------
+    // funções para mudança de Atributos
+    //----------------------------------
 
     /// <summary>
     /// Pede ao usuário para inserir ou alterar a idade.
@@ -48,6 +55,7 @@ internal abstract class SchoolMembers : BaseEntity
 
             if (string.IsNullOrWhiteSpace(input))
             {
+                WriteLine(EmptyEntrance);
                 if (isToEdit && currentValue.HasValue)
                     return currentValue.Value; // mantém valor atual
                 else
@@ -90,11 +98,11 @@ internal abstract class SchoolMembers : BaseEntity
             if (string.IsNullOrWhiteSpace(input))
             {
                 WriteLine(EmptyEntrance); // mostra aviso de valor default
-                                          // Se vazio, mantém valor atual em edição, ou default na criação
+                // Se vazio, mantém valor atual em edição, ou default na criação
                 return isToEdit && currentValue.HasValue ? currentValue.Value : default;
             }
 
-            /* Truth table
+            /* Truth table(Or)
                 M | F | S|
                 0   0 = 0| 
                 0   1 = 1| 
@@ -136,7 +144,6 @@ internal abstract class SchoolMembers : BaseEntity
     {
         DateTime date = currentValue ?? default;
         int anoAtual = DateTime.Now.Year;
-
         while (true)
         {
             int anoEstimado = (age > 0) ? anoAtual - age : 0;
@@ -148,8 +155,8 @@ internal abstract class SchoolMembers : BaseEntity
 
                 if (string.IsNullOrWhiteSpace(input_s))
                 {
-                    // mantém valor atual
-                    if (isToEdit && currentValue.HasValue) return currentValue.Value;
+                    WriteLine(EmptyEntrance);
+                    if (isToEdit && currentValue.HasValue) return currentValue.Value;// mantém valor atual
                     return default; // default ao criar
                 }
 
@@ -158,7 +165,7 @@ internal abstract class SchoolMembers : BaseEntity
 
                 if (!DateTime.TryParse(input_s, out DateTime parsedDate))
                 {
-                    WriteLine(BaseEntity.InvalidEntrance);
+                    WriteLine(InvalidEntrance);
                     continue;
                 }
 
@@ -252,6 +259,7 @@ internal abstract class SchoolMembers : BaseEntity
 
             if (string.IsNullOrWhiteSpace(input))
             {
+                Write(EmptyEntrance);
                 if (isToEdit && currentValue.HasValue)
                     return currentValue.Value; // mantém valor atual
                 else
@@ -271,126 +279,90 @@ internal abstract class SchoolMembers : BaseEntity
         }
     }
 
-
-    // Factory para criar objetos em subclasses
-    protected static M? CreateMember<M>(string typeObject, FileManager.DataBaseType dbType,
-        Func<string, byte, int, char, DateTime, Nationality_e, M> factory) where M : SchoolMembers
-
+    /// <summary>
+    /// Solicita ao usuário para inserir ou alterar o email.
+    /// </summary>
+    /// <param name="prompt">Mensagem a exibir para o usuário.</param>
+    /// <param name="currentValue">Valor atual do email (usado apenas em edição).</param>
+    /// <param name="isToEdit">Indica se é edição (true) ou criação (false).</param>
+    /// <returns>Email válido como string.</returns>
+    protected static string InputEmail(string prompt, string? currentValue = null, bool isToEdit = false)
     {
-        string prompt;
-        // --- Nome ---
-        prompt = $"Escreva o nome do(a) {typeObject}(a)";
-        string name = InputName(prompt);
+        while (true)
+        {
+            if (isToEdit && !string.IsNullOrEmpty(currentValue))
+                Write($"{prompt} (Enter para manter '{currentValue}'): ");
+            else
+                Write($"{prompt} (Enter para default vazio): ");
 
-        // --- Idade ---
-        prompt = $"Escreva a idade do(a) {typeObject}(a)";
-        DateTime? trash = null;
-        byte age = InputAge(prompt, ref trash);
+            string? input = ReadLine()?.Trim();
 
-        // --- Gênero ---
-        prompt = $"Escreva o gênero do(a) {typeObject}(a)";
-        char gender = InputGender(prompt);
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                WriteLine(EmptyEntrance);
+                if (isToEdit && !string.IsNullOrEmpty(currentValue))
+                    return currentValue; // mantém valor atual
+                return ""; // valor default vazio
+            }
 
-        // --- Data de nascimento ---
-        prompt = "";
-        DateTime date = InputBirthDate(prompt, ref age);
+            // Validação simples de email
+            if (!Regex.IsMatch(input, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+            {
+                WriteLine("❌ Email inválido. Certifique-se de usar o formato correto (ex: nome@dominio.com).");
+                continue;
+            }
 
-        // --- Nacionalidade ---
-        prompt = $"Escreva a nacionalidade {typeObject}";
-        Nationality_e nationality = InputNationality(prompt);
-
-
-        // --- Confirmação final ---
-        WriteLine($"\nResumo do {typeObject}:");
-        WriteLine($" Nome: {(string.IsNullOrEmpty(name) ? "<default>" : name)}");
-        WriteLine($" Idade: {age}");
-        WriteLine($" Gênero: {(gender == default ? "<default>" : gender.ToString())}");
-        WriteLine($" Data de nascimento: {date.Date}");
-        WriteLine($" Nacionalidade: {nationality}");
-        Write("Tem a certeza que quer criar? (S/N): ");
-        string? input_s = ReadLine()?.Trim().ToUpper();
-        if (input_s != "S") return null;
-
-        // --- Criação do ID ---
-        int newID = FileManager.GetTheNextAvailableID(dbType);
-        if (newID == -1) { WriteLine(ProblemGetTheId); return null; }
-        // cria o objeto pelo metudo fabrica.
-        var objeto = factory(name, age, newID, gender, date, nationality);
-        // Escreve na Base de dados
-        FileManager.WriteOnDataBase(dbType, objeto);
-        return objeto;
+            return input;
+        }
     }
 
-    protected static void RemoveMember<M>(string typeName, FileManager.DataBaseType dbType) where M : SchoolMembers
+    //----------------------------------
+    // funções Globais
+    //----------------------------------
+
+    // Factory para criar objetos em subclasses
+    protected static M? CreateMember<M>(string typeObject, FileManager.DataBaseType dbType, Action<Dictionary<string, object>> collectSpecificFields, Func<Dictionary<string, object>, M> factory) where M : BaseEntity
     {
-        Write($"Digite o nome ou ID do {typeName} para remover: ");
-        string input = ReadLine() ?? "";
-
-        bool isId = int.TryParse(input, out int idInput);
-
-        // Busca genérica
-        var matches = isId
-            ? FileManager.Search<M>(dbType, id: idInput)
-            : FileManager.Search<M>(dbType, name: input);
-
-        if (matches.Count == 0)
+        var parameters = new Dictionary<string, object>
         {
-            WriteLine($"Nenhum {typeName} encontrado.");
-            return;
-        }
+            // ---------- CAMPOS COMUNS ----------
+            ["Name"] = InputName($"Escreva o nome do(a) {typeObject}")
+        };
 
-        // Mostra as opções
-        WriteLine($"Foram encontrados os seguintes {typeName}s:");
-        for (int i = 0; i < matches.Count; i++)
-        {
-            var m = matches[i];
-            WriteLine($"- ID={m.ID_i}, Nome='{m.Name_s}', Idade={m.Age_by}, Gênero={m.Gender_c}, " +
-                $"Nascimento={m.BirthDate_dt:yyyy-MM-dd}, Nacionalidade={m.Nationality}");
-        }
+        DateTime? trash = null;
+        parameters["Age"] = InputAge($"Escreva a idade do(a) {typeObject}", ref trash);
+        byte age = (byte)parameters["Age"];
 
-        Write($"Escolha os números dos {typeName}s a remover (ex: 1,2,3 ou 1 2 3): ");
-        string choiceInput = ReadLine() ?? "";
+        parameters["Gender"] = InputGender($"Escreva o gênero do(a) {typeObject}");
 
-        // Processa a lista de índices
-        var indices = choiceInput
-            .Split([',', ' '], StringSplitOptions.RemoveEmptyEntries)
-            .Select(s => int.TryParse(s, out int x) ? x : -1)
-            .Where(x => x >= 1 && x <= matches.Count)
-            .Distinct()
-            .ToList();
+        parameters["BirthDate"] = InputBirthDate("", ref age);
 
-        if (indices.Count == 0)
-        {
-            WriteLine("Nenhuma seleção válida. Operação cancelada.");
-            return;
-        }
+        parameters["Nationality"] = InputNationality($"Escreva a nacionalidade {typeObject}");
 
-        WriteLine($"Você selecionou os seguintes {typeName}s para remoção:");
-        foreach (var idx in indices)
-        {
-            var m = matches[idx - 1];
-            WriteLine($"- ID={m.ID_i}, Nome='{m.Name_s}', Idade={m.Age_by}, Gênero={m.Gender_c}, " +
-                $"Nascimento={m.BirthDate_dt:yyyy-MM-dd}, Nacionalidade={m.Nationality}");
-        }
+        parameters["Email"] = InputEmail($"Escreva o email do(a) {typeObject}");
 
-        Write($"Tem certeza que deseja remover todos esses {typeName}s? (S/N): ");
-        string confirm = ReadLine()?.Trim().ToUpper() ?? "N";
+        // ---------- CAMPOS ESPECÍFICOS ----------
+        collectSpecificFields(parameters);
 
-        if (confirm != "S")
-        {
-            WriteLine("Operação cancelada.");
-            return;
-        }
+        // ---------- RESUMO FINAL ----------
+        WriteLine($"\nResumo do {typeObject}:");
+        foreach (var kv in parameters)
+            WriteLine($" {kv.Key}: {kv.Value}");
 
-        // Remove
-        foreach (var idx in indices)
-        {
-            var m = matches[idx - 1];
-            bool removed = FileManager.RemoveById<M>(dbType, m.ID_i);
+        Write("Tem a certeza que quer criar? (S/N): ");
+        if ((ReadLine()?.Trim().ToUpper()) != "S") return null;
 
-            if (removed) WriteLine($"✅ {typeName} removido: ID={m.ID_i}, Nome='{m.Name_s}'");
-            else WriteLine($"❌ Erro ao remover: ID={m.ID_i}, Nome='{m.Name_s}'");
-        }
+        // ---------- CRIA ID ----------
+        int newID = FileManager.GetTheNextAvailableID(dbType);
+        if (newID == -1) { WriteLine(ProblemGetTheId); return null; }
+
+        parameters["ID"] = newID;
+
+        // ---------- CRIA OBJETO ----------
+        var objeto = factory(parameters);
+
+        FileManager.WriteOnDataBase(dbType, objeto);
+        return objeto;
     }
 
     protected static void SelectMember<M>(string typeName, FileManager.DataBaseType dbType) where M : SchoolMembers
@@ -503,5 +475,137 @@ internal abstract class SchoolMembers : BaseEntity
             member.Nationality = originalParameters.Nationality;
         }
     }
+}
 
+internal class Student : SchoolMembers
+{
+    [JsonInclude] internal int TutorId_i { get; private set; } = -1;
+    [JsonInclude] internal List<double> Grades_i { get; private set; } = [];// Lista de notas
+    [JsonIgnore] internal decimal GPA_d = default;//GPA = média das notas. vai ser calculado em ls não precisa de ser guardado
+    internal override string Describe()
+    {
+        return $"ID={ID_i}, Nome='{Name_s}', Idade={Age_by}, Gênero={Gender_c},Nascimento={BirthDate_dt:yyyy-MM-dd}, Nacionalidade={Nationality}, Email={email_s}, Tutor:{TutorId_i}.";
+    }
+    // Construtor parameterless obrigatório para JSON
+    public Student() : base() { }
+
+    protected Student(string name, byte age, int id, char gender, DateTime birthDate, Nationality_e nat, int tutorId_i) : base(id, name, age, gender, birthDate, nat)
+    {
+        TutorId_i = tutorId_i;
+        Introduce();
+    }
+
+    //----------------------------------
+    // funções para mudança de Atributos
+    //----------------------------------
+
+    /// <summary>
+    /// Solicita ao usuário que informe ou edite o ID do tutor.
+    /// </summary>
+    /// <param name="prompt">Mensagem a exibir ao usuário.</param>
+    /// <param name="currentValue">Valor atual do TutorId_i, usado em edição.</param>
+    /// <param name="isToEdit">Indica se é edição (true) ou criação (false).</param>
+    /// <returns>O ID do tutor fornecido pelo usuário ou o valor atual/default se Enter for pressionado.</returns>
+    protected static int InputTutorId(string prompt, int? currentValue = null, bool isToEdit = false)
+    // depois de deixares a função select super modular (colocar na class de 1º grau) colocar aqui para uma melhor seleção dos professores.
+    {
+        while (true)
+        {
+            if (isToEdit && currentValue.HasValue && currentValue.Value != -1) Write($"{prompt} (Enter para manter '{currentValue.Value}'): ");
+            else Write($"{prompt} (Enter para default '-1'): ");
+
+            string? input = ReadLine()?.Trim();
+
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                // Mantém valor atual em edição ou default na criação
+                return isToEdit && currentValue.HasValue ? currentValue.Value : -1;
+            }
+
+            if (int.TryParse(input, out int id) && id >= 0)
+                return id;
+
+            WriteLine(InvalidEntrance);
+        }
+    }
+
+    // Fábrica de objetos Student. Pode retornar null se o utilizador cancelar
+    internal override BaseEntity? CreateInstance() => Create();
+
+    internal static Student? Create()
+    {
+        return CreateMember("estudante", FileManager.DataBaseType.Student,
+            dict =>
+            {
+                dict["TutorId_i"] = InputTutorId("ID do tutor");
+            },
+            dict => new Student(
+                (string)dict["Name"],
+                (byte)dict["Age"],
+                (int)dict["ID"],
+                (char)dict["Gender"],
+                (DateTime)dict["BirthDate"],
+                (Nationality_e)dict["Nationality"],
+                (int)dict["TutorId_i"]
+            )
+        );
+    }
+
+    internal static void Remove() { RemoveEntity<Student>("aluno", FileManager.DataBaseType.Student); }
+
+    internal static void Select() { SelectMember<Student>("aluno", FileManager.DataBaseType.Student); }
+
+    internal override void Introduce() { WriteLine($"\n🎓 New Student: {Name_s}, ID: {ID_i}, Age: {Age_by}, Genero: {Gender_c}, Data de nascimento: {BirthDate_dt.Date}, Nacionalidade: {Nationality}."); }
+}
+
+internal class Teacher : SchoolMembers
+{
+    [JsonInclude] internal string Department_s { get; private set; } = "";
+
+    internal override string Describe()
+    {
+        return $"ID={ID_i}, Nome='{Name_s}', Idade={Age_by}, Gênero={Gender_c},Nascimento={BirthDate_dt:yyyy-MM-dd}, Nacionalidade={Nationality}, Email={email_s}, Departamento:{Department_s}.";
+    }
+
+    public Teacher() : base() { }
+    private Teacher(string name, byte age, int id, char gender, DateTime birthDate, Nationality_e nat, string department) : base(id, name, age, gender, birthDate, nationality: nat)
+    {
+        Department_s = department;
+        Introduce();
+    }
+
+    // Fábrica de objetos Teacher. Pode retornar null se o utilizador cancelar
+    internal override BaseEntity? CreateInstance() => Create();
+
+    internal static Teacher? Create()
+    {
+        return CreateMember(
+            "professor",
+            FileManager.DataBaseType.Teacher,
+
+            // Primeiro os campos específicos
+            dict =>
+            {
+                dict["Department"] = InputName("Departamento do professor");
+            },
+
+            // Depois o factory para criar o objeto
+            dict => new Teacher(
+                (string)dict["Name"],
+                (byte)dict["Age"],
+                (int)dict["ID"],
+                (char)dict["Gender"],
+                (DateTime)dict["BirthDate"],
+                (Nationality_e)dict["Nationality"],
+                (string)dict["Department"]
+            )
+        );
+    }
+
+
+    internal static void Remove() { RemoveEntity<Teacher>("professor", FileManager.DataBaseType.Teacher); }
+
+    internal static void Select() { SelectMember<Teacher>("professor", FileManager.DataBaseType.Teacher); }
+
+    internal override void Introduce() { WriteLine($"\n👨‍🏫 New Teacher: {Name_s}, ID: {ID_i}, Age: {Age_by}, Genero: {Gender_c}, Data de nascimento: {BirthDate_dt.Date}, Nacionalidade: {Nationality}."); }
 }

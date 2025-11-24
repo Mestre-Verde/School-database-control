@@ -1,0 +1,3 @@
+{"TutorId_i":-1,"Grades_i":[],"Age_by":0,"Gender_c":"\u0000","BirthDate_dt":"0001-01-01T00:00:00","Nationality":12,"email_s":"","ID_i":22,"Name_s":"Teste"}
+{"TutorId_i":-1,"Grades_i":[],"Age_by":26,"Gender_c":"F","BirthDate_dt":"1999-05-01T00:00:00","Nationality":1,"email_s":"","ID_i":0,"Name_s":"alice"}
+{"TutorId_i":1,"Grades_i":[],"Age_by":20,"Gender_c":"M","BirthDate_dt":"2005-02-19T00:00:00","Nationality":1,"email_s":"","ID_i":24,"Name_s":"Pedro Silva"}

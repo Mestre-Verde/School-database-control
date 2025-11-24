@@ -2,14 +2,13 @@ using static System.Console;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Data.Common;
-using System.Globalization;
 
 
 internal class Course : BaseEntity
 {
     [JsonInclude] internal CourseType_e Type_e { get; private set; }
     [JsonInclude] internal float Duration_f { get; set; } // duração em anos pode ser 0,5
-    [JsonInclude] internal List<Discipline> Subjects_l { get; private set; } = []; // o curso tem disciplinas
+    [JsonInclude] internal List<Subjects> Subjects_l { get; private set; } = []; // o curso tem disciplinas
 
     internal protected const short MinCourseEct = 60;  // mínimo razoável para um curso
     internal protected const short MaxCourseEct = 360; // máximo típico de licenciatura prolongada
@@ -40,13 +39,13 @@ internal class Course : BaseEntity
     private static CourseType_e InputCourseType(string prompt, CourseType_e? currentValue = null, bool isToEdit = false)
     {
         var courseMap = new Dictionary<string, CourseType_e>(StringComparer.OrdinalIgnoreCase)
-    {
-        { "0", CourseType_e.NONE }, { "none", CourseType_e.NONE },
-        { "5", CourseType_e.CTESP }, { "ctesp", CourseType_e.CTESP },
-        { "6", CourseType_e.Licenciatura }, { "licenciatura", CourseType_e.Licenciatura },
-        { "7", CourseType_e.Mestrado }, { "mestrado", CourseType_e.Mestrado },
-        { "8", CourseType_e.Doutoramento }, { "doutoramento", CourseType_e.Doutoramento }
-    };
+        {
+            { "0", CourseType_e.NONE }, { "none", CourseType_e.NONE },
+            { "5", CourseType_e.CTESP }, { "ctesp", CourseType_e.CTESP },
+            { "6", CourseType_e.Licenciatura }, { "licenciatura", CourseType_e.Licenciatura },
+            { "7", CourseType_e.Mestrado }, { "mestrado", CourseType_e.Mestrado },
+            { "8", CourseType_e.Doutoramento }, { "doutoramento", CourseType_e.Doutoramento }
+        };
 
         while (true)
         {
@@ -89,8 +88,10 @@ internal class Course : BaseEntity
     {
         while (true)
         {
-            if (isToEdit && currentValue.HasValue) Write($"{prompt} (Enter para manter '{currentValue}'): ");
-            else Write($"{prompt} (ex: 0,5 para 1 semestre, Enter para default): ");
+            if (isToEdit && currentValue.HasValue)
+                Write($"{prompt} (Enter para manter '{currentValue}'): ");
+            else
+                Write($"{prompt} (ex: 0,5 para 1 semestre, Enter para default): ");
 
             string? input = ReadLine()?.Trim();
 
@@ -98,20 +99,23 @@ internal class Course : BaseEntity
             {
                 WriteLine(EmptyEntrance);
                 if (isToEdit && currentValue.HasValue) return currentValue.Value;
-                else return default;
+                return default;
             }
 
-            input = input.Replace(',', '.');
-
-            if (float.TryParse(input, NumberStyles.Float, CultureInfo.InvariantCulture, out float duration))
+            // Aqui usamos a cultura atual do sistema — PT-PT se o PC estiver em PT
+            if (float.TryParse(input, out float duration))
             {
                 if (duration >= 0) return duration;
-                else WriteLine(InvalidEntrance + " Não pode ser negativa.");
+                WriteLine(InvalidEntrance + " A duração não pode ser negativa.");
             }
-            else { WriteLine(InvalidEntrance + " Use um número válido (ex: 1 ou 0,5)."); }
+            else
+            {
+                WriteLine(InvalidEntrance + " Use um número válido com vírgula (ex: 1 ou 0,5).");
+            }
         }
     }
 
+    internal override BaseEntity? CreateInstance() => Create();
     internal static Course? Create()
     {
         string prompt;
@@ -212,178 +216,10 @@ internal class Course : BaseEntity
         // aqui vai ser diferente, equanto nos alunos 
     }
 
+
+
 }
 
-
-internal class Discipline : BaseEntity
-{
-    [JsonInclude] internal short ECTS_i { get; private set; }
-    [JsonInclude] internal List<Teacher> Professor_l { get; private set; } = [];
-    [JsonInclude] internal List<Student> Students_l { get; private set; } = [];
-
-    internal protected const short MinEct = 3;
-    internal protected const short MaxSemesterEtc = 30;
-
-    // construtor para desserialização
-    public Discipline() : base(0, "") { }
-    // construtor principal
-    internal Discipline(int id, short ects, string name = "") : base(id, name)
-    {
-        ECTS_i = ects;
-    }
-
-    /// <summary>
-    /// Solicita ao usuário o número de ECTS de uma disciplina.
-    /// </summary>
-    /// <param name="prompt">Mensagem a exibir ao usuário.</param>
-    /// <param name="currentValue">
-    /// Valor atual dos ECTS (usado apenas quando <paramref name="isToEdit"/> for true).
-    /// Se o usuário pressionar Enter, esse valor será mantido.
-    /// </param>
-    /// <param name="isToEdit">Indica se a função está sendo usada em modo de edição.</param>
-    /// <returns>O valor de ECTS como <see cref="short"/>.</returns>
-    private static short InputDisciplineECTS(string prompt, short? currentValue = null, bool isToEdit = false)
-    {
-        while (true)
-        {
-            // Prompt correto dependendo se está a editar
-            if (isToEdit && currentValue.HasValue) Write($"{prompt} (Enter para manter '{currentValue}'): ");
-            else Write($"{prompt} ({MinEct}-{MaxSemesterEtc} ECTS, Enter para default): ");
-
-            string? input = ReadLine()?.Trim();
-
-            // Entrada vazia
-            if (string.IsNullOrWhiteSpace(input))
-            {
-                if (isToEdit && currentValue.HasValue) return currentValue.Value; // mantém valor atual
-                WriteLine(EmptyEntrance);
-                return MinEct; // default: mínimo permitido
-            }
-            // Tenta converter
-            if (short.TryParse(input, out short ects))
-            {
-                if (ects >= MinEct && ects <= MaxSemesterEtc)
-                    return ects;
-                WriteLine($"Valor inválido. Insira entre {MinEct} e {MaxSemesterEtc} ECTS.");
-            }
-            else
-            {
-                WriteLine($"{InvalidEntrance} Insira um número inteiro.");
-            }
-        }
-    }
-
-    internal static Discipline? Create()
-    {
-        string? input_s;
-        string prompt;
-
-        // --- Nome da disciplina ---
-        prompt = "Escreva o nome da disciplina";
-        string name = InputName(prompt);
-
-        // --- ECTS ---
-        prompt = "Escreva o número de ECTS da disciplina";
-        short ects = InputDisciplineECTS(prompt);
-
-        // --- Resumo ---
-        WriteLine("\nResumo da Disciplina:");
-        WriteLine($" Nome: {(string.IsNullOrEmpty(name) ? "<default>" : name)}");
-        WriteLine($" ECTS: {ects}");
-        Write("Tem a certeza que quer criar esta disciplina? (S/N): ");
-
-        input_s = ReadLine()?.Trim().ToUpper();
-        if (input_s != "S") return null;
-
-        // --- Criar ID ---
-        int newID = FileManager.GetTheNextAvailableID(FileManager.DataBaseType.Discipline);
-        if (newID == -1) { WriteLine(ProblemGetTheId); return null; }
-
-        // --- Criar objeto ---
-        Discipline disc = new(newID, ects, name);
-
-        // Guardar na base de dados
-        FileManager.WriteOnDataBase(FileManager.DataBaseType.Discipline, disc);
-
-        return disc;
-    }
-
-    internal static void Remove()
-    {
-        Write("Digite o nome ou ID da disciplina para remover: ");
-        string input = ReadLine() ?? "";
-
-        bool isId = int.TryParse(input, out int idInput);
-        var dbType = FileManager.DataBaseType.Discipline;
-
-        // Buscar disciplinas
-        var matches = isId
-            ? FileManager.Search<Discipline>(dbType, id: idInput)
-            : FileManager.Search<Discipline>(dbType, name: input);
-
-        if (matches.Count == 0)
-        {
-            WriteLine("Nenhuma disciplina encontrada.");
-            return;
-        }
-
-        WriteLine("Foram encontradas as seguintes disciplinas:");
-        for (int i = 0; i < matches.Count; i++)
-        {
-            var d = matches[i];
-            WriteLine($"{i + 1}: ID={d.ID_i}, Nome='{d.Name_s}', ECTS={d.ECTS_i}");
-        }
-
-        Write("Escolha o(s) número(s) da(s) disciplina(s) a remover: ");
-        string choiceInput = ReadLine() ?? "";
-
-        var indices = choiceInput
-            .Split([',', ' '], StringSplitOptions.RemoveEmptyEntries)
-            .Select(s => int.TryParse(s, out int x) ? x : -1)
-            .Where(x => x >= 1 && x <= matches.Count)
-            .Distinct()
-            .ToList();
-
-        if (indices.Count == 0)
-        {
-            WriteLine("Nenhuma seleção válida. Operação cancelada.");
-            return;
-        }
-
-        WriteLine("Você selecionou as seguintes disciplinas para remoção:");
-        foreach (var idx in indices)
-        {
-            var d = matches[idx - 1];
-            WriteLine($"- ID={d.ID_i}, Nome='{d.Name_s}', ECTS={d.ECTS_i}");
-        }
-
-        Write("Tem certeza que deseja remover todas essas disciplinas? (S/N): ");
-        string confirm = ReadLine()?.Trim().ToUpper() ?? "N";
-        if (confirm != "S")
-        {
-            WriteLine("Operação cancelada.");
-            return;
-        }
-
-        // Remover cada disciplina
-        foreach (var idx in indices)
-        {
-            var d = matches[idx - 1];
-            bool removed = FileManager.RemoveById<Discipline>(dbType, d.ID_i);
-
-            if (removed)
-                WriteLine($"✅ Disciplina removida: ID={d.ID_i}, Nome='{d.Name_s}'");
-            else
-                WriteLine($"❌ Erro ao remover: ID={d.ID_i}, Nome='{d.Name_s}'");
-        }
-    }
-
-
-    internal static void Select()
-    {
-
-    }
-}
 
 /*
 Um curso completo normalmente tem 180 a 360 ECTS, dependendo do nível:

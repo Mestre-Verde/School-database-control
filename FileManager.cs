@@ -29,7 +29,7 @@ internal static class FileManager
     private static string StudentFilePath { get; } = "schoolMembers/Student.cs";
     private static string TeacherFilePath { get; } = "schoolMembers/Teacher.cs";
     private static string CourseFilePath { get; } = "courseProgram/Course.cs";                 // Código fonte de cursos
-    private static string DisciplineFilePath { get; } = "courseProgram/Discipline.cs";
+    private static string SubjectsFilePath { get; } = "courseProgram/Subjects.cs";
     //------------------
     private static string StudentsJSONPath { get; } = "data/students.json";      // Dados dos estudantes
     private static string TeachersJSONPath { get; } = "data/teachers.json";      // Dados dos professores
@@ -41,7 +41,7 @@ internal static class FileManager
             TeacherFilePath,
             CourseFilePath,
             SchoolMemberFilePath,
-            DisciplineFilePath,
+            SubjectsFilePath,
 
             StudentsJSONPath,
             TeachersJSONPath,
@@ -54,31 +54,8 @@ internal static class FileManager
         Student,
         Teacher,
         Course,
-        Discipline
+        Subjects
     }
-    /// <summary> Retorna o caminho do arquivo JSON correspondente ao tipo de base de dados fornecido.</summary>
-    /// <returns>
-    /// Retorna uma variavel do tipo <see cref="string"/> com o caminho completo do arquivo JSON correspondente ao <paramref name="baseType"/>.
-    /// </returns>
-    /// <exception cref="ArgumentOutOfRangeException">
-    /// Lançada quando o <paramref name="baseType"/> não corresponde a nenhum valor definido no enum <see cref="DataBaseType"/>.
-    /// </exception>
-    /*private static string GetFilePath(DataBaseType baseType)
-    {
-        return baseType switch
-        {
-            DataBaseType.Student => StudentsJSONPath,
-            DataBaseType.Teacher => TeachersJSONPath,
-            DataBaseType.Course => CoursesJSONPath,
-            DataBaseType.Discipline => SubjectsJSONPath,
-
-            _ => throw new ArgumentOutOfRangeException(
-                nameof(baseType),
-                $"Na função FileManager.GetFilePath não foi encontrada uma base de dados correspondente ao valor recebido: {baseType}. " +
-                "Se adicionou um novo DataBaseType, lembre-se de incluir o caminho correspondente aqui."
-            )
-        };
-    }*/
     private static string GetFilePath(DataBaseType baseType)
     {
         return GetDataBaseInfo(baseType).path;
@@ -91,7 +68,7 @@ internal static class FileManager
             DataBaseType.Student => (StudentsJSONPath, typeof(Student)),
             DataBaseType.Teacher => (TeachersJSONPath, typeof(Teacher)),
             DataBaseType.Course => (CoursesJSONPath, typeof(Course)),
-            DataBaseType.Discipline => (SubjectsJSONPath, typeof(Discipline)),
+            DataBaseType.Subjects => (SubjectsJSONPath, typeof(Subjects)),
 
             _ => throw new ArgumentOutOfRangeException(nameof(baseType),
                 $"Base de dados não encontrada para o valor recebido: {baseType}. " +
@@ -334,6 +311,7 @@ internal static class FileManager
     }
 
     //--------------------
+    // função, caso uma base da dados esteja corrompida, não deixa o programa ir abaixo.
     private static Dictionary<string, T> SafeReadDatabase<T>(string path)
     {
         if (!File.Exists(path))

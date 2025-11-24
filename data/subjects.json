@@ -1,1 +1,30 @@
-{}
+{
+  "0": {
+    "ECTS_i": 6,
+    "Professor_l": [],
+    "Students_l": [],
+    "ID_i": 0,
+    "Name_s": "Eletrecidade"
+  },
+  "1": {
+    "ECTS_i": 7,
+    "Professor_l": [],
+    "Students_l": [],
+    "ID_i": 1,
+    "Name_s": "Matem\u00E1tica"
+  },
+  "2": {
+    "ECTS_i": 4,
+    "Professor_l": [],
+    "Students_l": [],
+    "ID_i": 2,
+    "Name_s": "Programa\u00E7\u00E3o"
+  },
+  "3": {
+    "ECTS_i": 5,
+    "Professor_l": [],
+    "Students_l": [],
+    "ID_i": 3,
+    "Name_s": "An\u00E1lise Matem\u00E1tica"
+  }
+}

@@ -1,7 +1,27 @@
 ﻿using static System.Console; // <-- isto importa Write e WriteLine
-//using Newtonsoft.Json;
-using System.Globalization;
-using System.Runtime.InteropServices;
+
+// Menu 1º grau(Principal)
+internal enum MainMenuCommands_e
+{
+    Exit,        // Sair do programa
+    Help,       // Mostrar ajuda
+    Add,        // Adicionar algo
+    Remove,     // Remover algo
+    Select,     // Selecionar um item
+    Search,       // Mostrar todos os dados
+    None       // Caso não reconheça o comando
+}
+// Menu 2º grau seleção do tipo de objeto
+internal enum GlobalObjectCommands_e
+{
+    Back,        // Voltar ao menu principal
+    Help,       // Mostrar ajuda
+    Student,    // Adicionar aluno
+    Teacher,    // Adicionar professor
+    Course,     // Adicionar curso
+    Subjects,
+    None       // Caso não reconheça o comando
+}
 
 // enums de SchoolMembers
 internal enum EditParamSchoolMember_e
@@ -43,7 +63,7 @@ internal enum EditParamCourse_e
     Duration,
     ManageSubjects,
 }
-internal enum EditParamDiscipline_e
+internal enum EditParamSubjects_e
 {
     Back,
     Help,
@@ -61,26 +81,6 @@ internal enum CourseType_e
     Doutoramento = 8
 }
 
-internal enum MainMenuCommands_e
-{
-    Exit,        // Sair do programa
-    Help,       // Mostrar ajuda
-    Add,        // Adicionar algo
-    Remove,     // Remover algo
-    Select,     // Selecionar um item
-    Search,       // Mostrar todos os dados
-    None       // Caso não reconheça o comando
-}
-internal enum GlobalObjectCommands_e
-{
-    Back,        // Voltar ao menu principal
-    Help,       // Mostrar ajuda
-    Student,    // Adicionar aluno
-    Teacher,    // Adicionar professor
-    Course,     // Adicionar curso
-    Discipline,
-    None       // Caso não reconheça o comando
-}
 
 class MenuRelated_cl
 {
@@ -95,15 +95,8 @@ class MenuRelated_cl
         [4] Select    -> Selecionar item
         [5] Search    -> Mostrar todos os dados
     ";
-    private static string CourseMenuCommands_s = @"
-        Editar Curso:
-            [0] Back
-            [1] Help
-            [2] Name
-            [3] Type
-            [4] Duration
-            [5] ManageSubjects
-    ";
+
+    // SchoolMembers
     private static string BuildObjectMenu(string typeFunction)
     {
         return $@"    Comandos para {typeFunction}r:
@@ -112,7 +105,7 @@ class MenuRelated_cl
         [2] Student     -> {typeFunction} um novo aluno
         [3] Teacher     -> {typeFunction} um novo professor
         [4] Course      -> {typeFunction} um novo curso
-        [5] Disciplines -> {typeFunction} uma nova disciplina
+        [5] Subjectss   -> {typeFunction} uma nova disciplina
     ";
     }
     internal static string BuildEditMenu(string typeName)
@@ -128,19 +121,8 @@ class MenuRelated_cl
             [6] Nacionalidade
     ";
     }
-    private static string BuildEditDisciplineMenu(string disciplineName)
-    {
-        return $@"
-        Editar disciplina '{disciplineName}':
-            [0] Voltar
-            [1] Help
-            [2] Nome
-            [3] ECTS
-            [4] ManageStudents
-            [5] ManageTeachers
-            
-        ";
-    }
+
+
 
     /// <summary>/// Executa um menu interativo com comandos pré-definidos.</summary>
     /// <param name="mainMenuText">Texto identificador do menu (ex.: "add", "remove").</param>
@@ -178,7 +160,7 @@ class MenuRelated_cl
                 case "2": input_s = "Student"; break;
                 case "3": input_s = "Teacher"; break;
                 case "4": input_s = "Course"; break;
-                case "5": input_s = "Discipline"; break;
+                case "5": input_s = "Subjects"; break;
             }
 
             // Tenta converter o texto para um comando válido enum
@@ -230,7 +212,7 @@ class MenuRelated_cl
             { GlobalObjectCommands_e.Student, () => _ = Student.Create() },// Para "Student", chamamos Student.Create() e descartamos o objeto retornado com "_ ="
             { GlobalObjectCommands_e.Teacher, () => _ = Teacher.Create() },// Para "Teacher", chamamos Teacher.Create() e descartamos o objeto retornado
             { GlobalObjectCommands_e.Course,  () => _ = Course.Create() },// Para "Course", chamamos Course.Create() e descartamos o objeto retornado
-            { GlobalObjectCommands_e.Discipline,() => _ = Discipline.Create() }
+            { GlobalObjectCommands_e.Subjects,() => _ = Subjects.Create() }
         };
         // Chama a função genérica que executa o loop do menu, passando o texto do menu e o dicionário de ações
         RunMenu("Add", BuildObjectMenu("Adiciona"), actions);
@@ -245,7 +227,7 @@ class MenuRelated_cl
             { GlobalObjectCommands_e.Student, Student.Remove },
             { GlobalObjectCommands_e.Teacher, Teacher.Remove },
             { GlobalObjectCommands_e.Course,  Course.Remove },
-            { GlobalObjectCommands_e.Discipline, Discipline.Remove}
+            { GlobalObjectCommands_e.Subjects, Subjects.Remove}
         };
 
         // Executa o menu de remoção usando a função genérica
@@ -261,7 +243,7 @@ class MenuRelated_cl
             { GlobalObjectCommands_e.Student, Student.Select },
             { GlobalObjectCommands_e.Teacher, Teacher.Select },
             { GlobalObjectCommands_e.Course, Course.Select },
-            {GlobalObjectCommands_e.Discipline,Discipline.Select}
+            {GlobalObjectCommands_e.Subjects,Subjects.Select}
         };
 
         // Executa o menu de seleção usando a função genérica
@@ -299,6 +281,64 @@ class MenuRelated_cl
         return option;
     }
 
+    // Subjects
+    internal static string BuildEditSubjectsMenu(string SubjectsName)
+    {
+        return $@"
+        Editar disciplina '{SubjectsName}':
+            [0] Back
+            [1] Help
+            [2] Nome
+            [3] ECTS
+            [4] ManageStudents
+            [5] ManageTeachers
+        ";
+    }
+    internal static EditParamSubjects_e MenuSubjectsParameters(string SubjectsName)
+    {
+        EditParamSubjects_e option;
+        while (true)
+        {
+            Write("(Subjects menu)> ");
+            string? input_s = ReadLine()?.Trim().ToLower();
+            if (string.IsNullOrWhiteSpace(input_s)) continue;
+
+            // Converter números para nomes do enum
+            switch (input_s)
+            {
+                case "0": input_s = "Back"; break;
+                case "1": input_s = "Help"; WriteLine(BuildEditSubjectsMenu(SubjectsName)); break;
+                case "2": input_s = "Name"; break;
+                case "3": input_s = "ECTS"; break;
+                case "4": input_s = "ManageStudents"; break;
+                case "5": input_s = "ManageTeachers"; break;
+
+            }
+
+            if (!Enum.TryParse(input_s, true, out option))
+            {
+                WriteLine(UnknowonCommand_s);
+                continue;
+            }
+
+            break;
+        }
+
+        return option;
+    }
+
+
+
+    //Course
+    private static string CourseMenuCommands_s = @"
+        Comandos para Curso:
+            [0] Back
+            [1] Help
+            [2] Name
+            [3] Type
+            [4] Duration
+            [5] ManageSubjects
+    ";
     internal static EditParamCourse_e MenuCourseParameters(string typeName)
     {
         EditParamCourse_e option;
@@ -329,43 +369,12 @@ class MenuRelated_cl
         }
         return option;
     }
-    internal static EditParamDiscipline_e MenuDisciplineParameters(string disciplineName)
-    {
-        EditParamDiscipline_e option;
-        while (true)
-        {
-            Write("(discipline menu)> ");
-            string? input_s = ReadLine()?.Trim().ToLower();
-            if (string.IsNullOrWhiteSpace(input_s)) continue;
-
-            // Converter números para nomes do enum
-            switch (input_s)
-            {
-                case "0": input_s = "Back"; break;
-                case "1": input_s = "Help"; WriteLine(BuildEditDisciplineMenu(disciplineName)); continue;
-                case "2": input_s = "Name"; break;
-                case "3": input_s = "ECTS"; break;
-                case "4": input_s = "ManageTeachers"; break;
-                case "5": input_s = "ManageStudents"; break;
-            }
-
-            if (!Enum.TryParse(input_s, true, out option))
-            {
-                WriteLine("Comando desconhecido!");
-                continue;
-            }
-
-            break;
-        }
-
-        return option;
-    }
-
 
 }
 //falta o Search, praticamente só será necessário usar o FileManager
 class Program
 {
+
     static void Setup()
     {
         WriteLine("Programa Students Manager iniciado.");
