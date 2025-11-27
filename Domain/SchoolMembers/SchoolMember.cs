@@ -368,6 +368,7 @@ public abstract class SchoolMember : BaseEntity
         parameters["Gender"] = InputGender($"Escreva o gênero do(a) {typeObject}");
 
         parameters["BirthDate"] = InputBirthDate("", ref age);
+        parameters["Age"] = age;
 
         parameters["Nationality"] = InputNationality($"Escreva a nacionalidade {typeObject}");
 

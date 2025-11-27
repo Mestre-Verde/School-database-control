@@ -20,6 +20,7 @@ public class Program
         WriteLine("Programa Students Manager iniciado.");
         FileManager.StartupCheckFilesWithProgress();// Verifica se os ficheiros essenciais existem
     }
+
     static void Loop()
     {
         MenuRelated_cl.MainMenu();

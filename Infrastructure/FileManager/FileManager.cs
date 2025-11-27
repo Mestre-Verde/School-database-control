@@ -116,7 +116,7 @@ public static class FileManager
     /// <summary>
     /// Verifica se todos os ficheiros necessários existem e cria os que faltam
     /// </summary>
-    /// <param name="setup"></param>
+    /// <param name="setup">True para mostrar strings, false para esconder</param>
     /// <returns></returns>
     internal static bool StartupCheckFilesWithProgress(bool setup = true)
     {
@@ -129,8 +129,7 @@ public static class FileManager
         int total = dirs.Count + files.Count;
         int count = 0;
 
-        if (setup)
-            WriteLine("A verificar diretórios e ficheiros...");
+        if (setup) WriteLine("A verificar diretórios e ficheiros...");
 
         // 1) Criar diretórios
         foreach (var dir in dirs)
@@ -143,6 +142,7 @@ public static class FileManager
 
             count++;
             DrawProgressBar(count, total);
+            Thread.Sleep(100); // 0,1s de delay para visualização
         }
 
         // 2) Criar ficheiros
@@ -184,6 +184,7 @@ public static class FileManager
 
             count++;
             DrawProgressBar(count, total);
+            Thread.Sleep(100); // 0,1s de delay para visualização
         }
 
         // Relatório final
@@ -243,6 +244,7 @@ public static class FileManager
     }
 
     //-----------------------
+
     // Método auxiliar genérico que calcula o próximo ID disponível num ficheiro JSON
     // <T> permite reutilizar o mesmo código para Student, Teacher, Course, etc.
     private static int GetNextAvailableIDFromFile<T>(string filePath)
