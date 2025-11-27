@@ -17,19 +17,6 @@ using School_System.Domain.CourseProgram;
 // Classe estática — não precisa ser instanciada
 public static class FileManager
 {
-
-    private static IEnumerable<string> ScanFilesInProject()
-    {
-        return Directory.GetFiles(".", "*.*", SearchOption.AllDirectories)
-            .Where(f => !f.Contains("bin/") &&
-                        !f.Contains("obj/") &&
-                        !f.Contains(".git/"))
-            .Select(f => f.Replace("\\", "/"));
-    }
-
-
-
-
     private static readonly Dictionary<string, string> DomainDirectories = new()
 {
     { "Domain",              "Domain" },
