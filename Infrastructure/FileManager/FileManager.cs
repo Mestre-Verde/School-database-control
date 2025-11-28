@@ -57,7 +57,13 @@ public static class FileManager
         { "SubjectsJSON",        "Infrastructure/Data/subjects.json" }
     };
 
+    // Combina todos os diretórios definidos nos dicionários individuais e devolve como uma sequência (IEnumerable<string>) de caminhos.
+    private static IEnumerable<string> AllDirectories => DomainDirectories.Values          // Pega todos os valores do dicionário DomainDirectories
+        .Concat(ApplicationDirectories.Values)   // Concatena os valores do ApplicationDirectories
+        .Concat(InfrastructureDirectories.Values); // Concatena os valores do InfrastructureDirectories
 
+    // Retorna todos os caminhos de arquivos definidos no dicionário Files
+    private static IEnumerable<string> AllFiles => Files.Values;
 
     public enum DataBaseType// Enum para percorrer os caminhos das base de dados.
     {
@@ -107,7 +113,7 @@ public static class FileManager
         catch { return false; }
     }
 
-    /// <summary>  Verifica se todos os ficheiros necessários existem e cria os que faltam </summary>
+    /// <summary> Verifica se todos os ficheiros necessários existem e cria os que faltam </summary>
     /// <param name="setup">True para mostrar strings, false para esconder</param>
     /// <returns></returns>
     internal static bool StartupCheckFilesWithProgress(bool setup = true)
@@ -193,7 +199,6 @@ public static class FileManager
 
         return !error;
     }
-
 
     //-----------------------
     //  Lê o conteúdo de um ficheiro, devolvendo "{}" se não existir
