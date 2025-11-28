@@ -1,0 +1,15 @@
+/home/MestreVerde/Programação/programação/C#/School_System/bin/Debug/net9.0/School_System
+/home/MestreVerde/Programação/programação/C#/School_System/bin/Debug/net9.0/School_System.deps.json
+/home/MestreVerde/Programação/programação/C#/School_System/bin/Debug/net9.0/School_System.runtimeconfig.json
+/home/MestreVerde/Programação/programação/C#/School_System/bin/Debug/net9.0/School_System.dll
+/home/MestreVerde/Programação/programação/C#/School_System/bin/Debug/net9.0/School_System.pdb
+/home/MestreVerde/Programação/programação/C#/School_System/obj/Debug/net9.0/School_System.GeneratedMSBuildEditorConfig.editorconfig
+/home/MestreVerde/Programação/programação/C#/School_System/obj/Debug/net9.0/School_System.AssemblyInfoInputs.cache
+/home/MestreVerde/Programação/programação/C#/School_System/obj/Debug/net9.0/School_System.AssemblyInfo.cs
+/home/MestreVerde/Programação/programação/C#/School_System/obj/Debug/net9.0/School_System.csproj.CoreCompileInputs.cache
+/home/MestreVerde/Programação/programação/C#/School_System/obj/Debug/net9.0/School_System.dll
+/home/MestreVerde/Programação/programação/C#/School_System/obj/Debug/net9.0/refint/School_System.dll
+/home/MestreVerde/Programação/programação/C#/School_System/obj/Debug/net9.0/School_System.pdb
+/home/MestreVerde/Programação/programação/C#/School_System/obj/Debug/net9.0/School_System.genruntimeconfig.cache
+/home/MestreVerde/Programação/programação/C#/School_System/obj/Debug/net9.0/ref/School_System.dll
+/home/MestreVerde/Programação/programação/C#/School_System/obj/Debug/net9.0/School_System.sourcelink.json
