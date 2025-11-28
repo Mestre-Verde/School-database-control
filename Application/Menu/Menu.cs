@@ -6,10 +6,10 @@ namespace Schoo_lSystem.Application.Menu;
 using static System.Console;
 
 using School_System.Infrastructure.FileManager;
-using Schoo_lSystem.Application.Menu;
 using School_System.Domain.Base;
 using School_System.Domain.CourseProgram;
 using School_System.Domain.SchoolMembers;
+
 // enums de Course
 internal enum EditParamCourse_e
 {

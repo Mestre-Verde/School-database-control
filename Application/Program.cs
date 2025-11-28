@@ -13,7 +13,7 @@ using School_System.Domain.Base;
 using School_System.Domain.CourseProgram;
 using School_System.Domain.SchoolMembers;
 
-public class Program
+class Program
 {
     static void Setup()
     {

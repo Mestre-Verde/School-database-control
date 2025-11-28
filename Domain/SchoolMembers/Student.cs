@@ -9,7 +9,7 @@ using School_System.Domain.Base;
 using School_System.Domain.CourseProgram;
 using School_System.Domain.SchoolMembers;
 
-internal class Student : SchoolMember
+class Student : SchoolMember
 {
     [JsonInclude] internal int TutorId_i { get; private set; } = -1;
     [JsonInclude] internal List<double> Grades_i { get; private set; } = [];// Lista de notas
@@ -18,6 +18,7 @@ internal class Student : SchoolMember
     {
         return $"ID={ID_i}, Nome='{Name_s}', Idade={Age_by}, Gênero={Gender_c},Nascimento={BirthDate_dt:yyyy-MM-dd}, Nacionalidade={Nationality}, Email={Email_s}, Tutor:{TutorId_i}.";
     }
+
     // Construtor parameterless obrigatório para JSON
     public Student() : base() { }
 
@@ -37,6 +38,7 @@ internal class Student : SchoolMember
     /// <param name="currentValue">Valor atual do TutorId_i, usado em edição.</param>
     /// <param name="isToEdit">Indica se é edição (true) ou criação (false).</param>
     /// <returns>O ID do tutor fornecido pelo usuário ou o valor atual/default se Enter for pressionado.</returns>
+    // TODO: implementar uma procura na base de dadso do professor para obter o id.
     protected static int InputTutorId(string prompt, int? currentValue = null, bool isToEdit = false)
     // depois de deixares a função select super modular (colocar na class de 1º grau) colocar aqui para uma melhor seleção dos professores.
     {
@@ -68,7 +70,7 @@ internal class Student : SchoolMember
 
         if (string.IsNullOrWhiteSpace(input))
         {
-            WriteLine("Nenhuma nota adicionada.");
+            WriteLine(EmptyEntrance);
             return new List<double>(); // lista vazia
         }
 
@@ -87,10 +89,8 @@ internal class Student : SchoolMember
             }
         }
 
-        if (added.Count > 0)
-            WriteLine($"✅ {added.Count} nota(s) adicionada(s) com sucesso.");
-        else
-            WriteLine("Nenhuma nota válida foi adicionada.");
+        if (added.Count > 0) WriteLine($"✅ {added.Count} nota(s) adicionada(s) com sucesso.");
+        else WriteLine("Nenhuma nota válida foi adicionada.");
 
         return added;
     }
