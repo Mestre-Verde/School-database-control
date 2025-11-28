@@ -18,51 +18,45 @@ using School_System.Domain.CourseProgram;
 public static class FileManager
 {
     private static readonly Dictionary<string, string> DomainDirectories = new()
-{
-    { "Domain",              "Domain" },
-    { "Base",                "Domain/Base" },
-    { "SchoolMembers",       "Domain/SchoolMembers" },
-    { "CourseProgram",       "Domain/CourseProgram" },
-    { "Interfaces",          "Domain/Interfaces" }
-};
+    {
+        { "Domain",              "Domain" },
+        { "Base",                "Domain/Base" },
+        { "SchoolMembers",       "Domain/SchoolMembers" },
+        { "CourseProgram",       "Domain/CourseProgram" },
+        { "Interfaces",          "Domain/Interfaces" }
+    };
     private static readonly Dictionary<string, string> ApplicationDirectories = new()
-{
-    { "Application",         "Application" },
-    { "Menu",                "Application/Menu" }
-};
+    {
+        { "Application",         "Application" },
+        { "Menu",                "Application/Menu" }
+    };
     private static readonly Dictionary<string, string> InfrastructureDirectories = new()
-{
-    { "Infrastructure",      "Infrastructure" },
-    { "FileManager",         "Infrastructure/FileManager" },
-    { "Data",                "Infrastructure/Data" },
-    { "Backup",              "Infrastructure/Data/backup" }
-};
+    {
+        { "Infrastructure",      "Infrastructure" },
+        { "FileManager",         "Infrastructure/FileManager" },
+        { "Data",                "Infrastructure/Data" },
+        { "Backup",              "Infrastructure/Data/backup" }
+    };
     private static readonly Dictionary<string, string> Files = new()
-{
-    // Domain
-    { "BaseEntity",          "Domain/Base/BaseEntity.cs" },
-    { "SchoolMember",        "Domain/SchoolMembers/SchoolMember.cs" },
-    { "Student",             "Domain/SchoolMembers/Student.cs" },
-    { "Teacher",             "Domain/SchoolMembers/Teacher.cs" },
-    { "Course",              "Domain/CourseProgram/Course.cs" },
-    { "Subject",             "Domain/CourseProgram/Subject.cs" },
+    {
+        // Domain
+        { "BaseEntity",          "Domain/Base/BaseEntity.cs" },
+        { "SchoolMember",        "Domain/SchoolMembers/SchoolMember.cs" },
+        { "Student",             "Domain/SchoolMembers/Student.cs" },
+        { "Teacher",             "Domain/SchoolMembers/Teacher.cs" },
+        { "Course",              "Domain/CourseProgram/Course.cs" },
+        { "Subject",             "Domain/CourseProgram/Subject.cs" },
 
-    // Infrastructure
-    { "FileManager",         "Infrastructure/FileManager/FileManager.cs" },
+        // Infrastructure
+        { "FileManager",         "Infrastructure/FileManager/FileManager.cs" },
 
-    // Data
-    { "StudentsJSON",        "Infrastructure/Data/students.json" },
-    { "TeachersJSON",        "Infrastructure/Data/teachers.json" },
-    { "CoursesJSON",         "Infrastructure/Data/courses.json" },
-    { "SubjectsJSON",        "Infrastructure/Data/subjects.json" }
-};
+        // Data
+        { "StudentsJSON",        "Infrastructure/Data/students.json" },
+        { "TeachersJSON",        "Infrastructure/Data/teachers.json" },
+        { "CoursesJSON",         "Infrastructure/Data/courses.json" },
+        { "SubjectsJSON",        "Infrastructure/Data/subjects.json" }
+    };
 
-    private static IEnumerable<string> AllDirectories =>
-        DomainDirectories.Values
-        .Concat(ApplicationDirectories.Values)
-        .Concat(InfrastructureDirectories.Values);
-
-    private static IEnumerable<string> AllFiles => Files.Values;
 
 
     public enum DataBaseType// Enum para percorrer os caminhos das base de dados.
@@ -113,9 +107,7 @@ public static class FileManager
         catch { return false; }
     }
 
-    /// <summary>
-    /// Verifica se todos os ficheiros necessários existem e cria os que faltam
-    /// </summary>
+    /// <summary>  Verifica se todos os ficheiros necessários existem e cria os que faltam </summary>
     /// <param name="setup">True para mostrar strings, false para esconder</param>
     /// <returns></returns>
     internal static bool StartupCheckFilesWithProgress(bool setup = true)
@@ -311,9 +303,10 @@ public static class FileManager
         if (keyToRemove != null)
         {
             // --- Backup sem indentação ---
-            string backupPath = Path.Combine("backup", $"{baseType}.txt");
-            Directory.CreateDirectory("backup"); // garante pasta
+            string backupDir = InfrastructureDirectories["Backup"]; // "Infrastructure/Data/backup"
+            Directory.CreateDirectory(backupDir); // garante que a pasta existe
 
+            string backupPath = Path.Combine(backupDir, $"{baseType}.txt"); // caminho completo do backup
             string backupEntry = JsonSerializer.Serialize(dict[keyToRemove]); // sem WriteIndented
             File.AppendAllText(backupPath, backupEntry + Environment.NewLine);
 
@@ -321,7 +314,6 @@ public static class FileManager
             dict.Remove(keyToRemove);
             File.WriteAllText(path, JsonSerializer.Serialize(dict, new JsonSerializerOptions { WriteIndented = true }));
 
-            //WriteLine($"[DEBUG] ID={id} removido com sucesso. Backup gravado em '{backupPath}'");
             return true;
         }
         WriteLine("[DEBUG] Nenhum objeto correspondente encontrado.");
@@ -465,6 +457,5 @@ public static class FileManager
         WriteLine($"[DEBUG] Pesquisa retornou {result.Count} objeto(s).");
         return result;
     }
-
 
 }
