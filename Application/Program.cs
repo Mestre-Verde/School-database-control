@@ -12,12 +12,15 @@ using Schoo_lSystem.Application.Menu;
 using School_System.Domain.Base;
 using School_System.Domain.CourseProgram;
 using School_System.Domain.SchoolMembers;
+using School_System.Application.Utils;
+using School_System.Domain.Scholarship;
 
 class Program
 {
     static void Setup()
     {
         WriteLine("Programa Students Manager iniciado.");
+        WriteLine("Link do GitHub deste projeto:https://github.com/Mestre-Verde/School-database-control/tree/main");
         FileManager.StartupCheckFilesWithProgress();// Verifica se os ficheiros essenciais existem
     }
 

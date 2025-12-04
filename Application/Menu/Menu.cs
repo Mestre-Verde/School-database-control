@@ -92,13 +92,15 @@ public static class MenuRelated_cl
     // Menu 2º grau , seleção do tipo de objeto
     private enum GlobalObjectCommands_e
     {
-        Back,        // Voltar ao menu principal
-        Help,       // Mostrar ajuda
-        Student,    // Adicionar aluno
-        Teacher,    // Adicionar professor
-        Course,     // Adicionar curso
+        Back,                   // Voltar ao menu principal
+        Help,                   // Mostrar ajuda
+        UndergraduateStudent,   // Adicionar estudante de graduação
+        GraduateStudent,        // Adicionar estudante de pós-graduação
+        InternationalStudent,   // Adicionar estudante internacional
+        Teacher,                // Adicionar professor
+        Course,                 // Adicionar curso
         Subject,
-        None       // Caso não reconheça o comando
+        None                    // Caso não reconheça o comando
     }
     private static string BuildObjectMenu(string typeFunction)
     {
@@ -109,12 +111,14 @@ public static class MenuRelated_cl
             nova = "nova ";
         }
         return $@"    Comandos para {typeFunction}r:
-        [0] Back        -> Voltar ao menu principal
-        [1] Help        -> Mostrar este texto
-        [2] Student     -> {typeFunction} um {novo}aluno
-        [3] Teacher     -> {typeFunction} um {novo}professor
-        [4] Course      -> {typeFunction} um {novo}curso
-        [5] Subject    -> {typeFunction} uma {nova}disciplina
+        [0] Back                    -> Voltar ao menu principal
+        [1] Help                    -> Mostrar este texto
+        [2] UndergraduateStudent    -> {typeFunction} um {novo}estudante de graduação
+        [3] GraduateStudent         -> {typeFunction} um {novo}estudante de pós-graduação
+        [4] InternationalStudent    -> {typeFunction} um {novo}estudante internacional
+        [5] Teacher                 -> {typeFunction} um {novo}professor
+        [6] Course                  -> {typeFunction} um {novo}curso
+        [7] Subject                 -> {typeFunction} uma {nova}disciplina
     ";
     }
 
@@ -140,55 +144,46 @@ public static class MenuRelated_cl
     private static void RunMenu(string mainMenuText, string menuString, Dictionary<GlobalObjectCommands_e, Action> actions)
     {
         WriteLine(menuString); // mostra o menu inicial
-
         while (true)
         {
             Write($"\n(menu {mainMenuText})> ");
             string? input_s = ReadLine()?.Trim().ToLower();
-
             // Permite usar números como atalhos no menu
             switch (input_s)
             {
                 case "0": input_s = "Back"; break;
                 case "1": input_s = "Help"; break;
-                case "2": input_s = "Student"; break;
-                case "3": input_s = "Teacher"; break;
-                case "4": input_s = "Course"; break;
-                case "5": input_s = "Subject"; break;
+                case "2": input_s = "UndergraduateStudent"; break;
+                case "3": input_s = "GraduateStudent"; break;
+                case "4": input_s = "InternationalStudent"; break;
+                case "5": input_s = "Teacher"; break;
+                case "6": input_s = "Course"; break;
+                case "7": input_s = "Subject"; break;
             }
-
             // Tenta converter o texto para um comando válido enum
-            if (!Enum.TryParse(input_s, true, out GlobalObjectCommands_e command))
-            {
-                command = GlobalObjectCommands_e.None;
-            }
+            if (!Enum.TryParse(input_s, true, out GlobalObjectCommands_e command)) { command = GlobalObjectCommands_e.None; }
             // Voltar ao menu anterior
-            if (command == GlobalObjectCommands_e.Back)
-            {
-                WriteLine(BackToMenu_s);
-                break;
-            }
+            if (command == GlobalObjectCommands_e.Back) { WriteLine(BackToMenu_s); break; }
             // Mostrar novamente o menu
-            if (command == GlobalObjectCommands_e.Help)
-            {
-                WriteLine(menuString);
-                continue;
-            }
+            if (command == GlobalObjectCommands_e.Help) { WriteLine(menuString); continue; }
             // Executa a ação associada ao comando
             if (actions.TryGetValue(command, out Action? action)) { action(); }
             else { Write(UnknowonCommand_s); } // comando inválido
         }
     }
+    // Cria um dicionário que associa cada comando do menu a uma ação
+    // Aqui usamos Action, que é um delegate que representa um método sem parâmetros e sem retorno
     private static void MenuAddObject()
     {
-        // Cria um dicionário que associa cada comando do menu a uma ação
-        // Aqui usamos Action, que é um delegate que representa um método sem parâmetros e sem retorno
+
         var actions = new Dictionary<GlobalObjectCommands_e, Action>
         {
-            { GlobalObjectCommands_e.Student, () => _ = Student.Create() },// Para "Student", chamamos Student.Create() e descartamos o objeto retornado com "_ ="
-            { GlobalObjectCommands_e.Teacher, () => _ = Teacher.Create() },// Para "Teacher", chamamos Teacher.Create() e descartamos o objeto retornado
-            { GlobalObjectCommands_e.Course,  () => _ = Course.Create() },// Para "Course", chamamos Course.Create() e descartamos o objeto retornado
-            { GlobalObjectCommands_e.Subject,() => _ = Subject.Create() }
+            { GlobalObjectCommands_e.UndergraduateStudent, () => _ = UndergraduateStudent.Create() },
+            { GlobalObjectCommands_e.GraduateStudent, () => _ = GraduateStudent.Create() },
+            { GlobalObjectCommands_e.InternationalStudent, () => _ = InternationalStudent.Create() },
+            { GlobalObjectCommands_e.Teacher, () => _ = Teacher.Create() },
+            { GlobalObjectCommands_e.Course,  () => _ = Course.Create() },
+            { GlobalObjectCommands_e.Subject, () => _ = Subject.Create() }
         };
         // Chama a função genérica que executa o loop do menu, passando o texto do menu e o dicionário de ações
         RunMenu("Add", BuildObjectMenu("Adiciona"), actions);
@@ -198,8 +193,9 @@ public static class MenuRelated_cl
         // Dicionário de ações para o menu de remoção
         var actions = new Dictionary<GlobalObjectCommands_e, Action>
         {
-            // Neste caso Remove() já é void, então não precisamos de "_ ="
-            { GlobalObjectCommands_e.Student, Student.Remove },
+            { GlobalObjectCommands_e.UndergraduateStudent, UndergraduateStudent.Remove },
+            { GlobalObjectCommands_e.GraduateStudent, GraduateStudent.Remove },
+            { GlobalObjectCommands_e.InternationalStudent, InternationalStudent.Remove },
             { GlobalObjectCommands_e.Teacher, Teacher.Remove },
             { GlobalObjectCommands_e.Course,  Course.Remove },
             { GlobalObjectCommands_e.Subject, Subject.Remove}
@@ -213,8 +209,9 @@ public static class MenuRelated_cl
         // Dicionário de ações para o menu de seleção
         var actions = new Dictionary<GlobalObjectCommands_e, Action>
         {
-            // Para Select()
-            { GlobalObjectCommands_e.Student, Student.Select },
+            { GlobalObjectCommands_e.UndergraduateStudent, UndergraduateStudent.Select },
+            { GlobalObjectCommands_e.GraduateStudent, GraduateStudent.Select },
+            { GlobalObjectCommands_e.InternationalStudent, InternationalStudent.Select },
             { GlobalObjectCommands_e.Teacher, Teacher.Select },
             { GlobalObjectCommands_e.Course, Course.Select },
             { GlobalObjectCommands_e.Subject,Subject.Select }
@@ -236,6 +233,7 @@ public static class MenuRelated_cl
         Nationality = 6,
         Email = 7
     }
+
     internal enum EditParamStudent_e
     {
         Back = 0,
@@ -249,7 +247,7 @@ public static class MenuRelated_cl
         Tutor = 8,
         Grades = 9
     }
-    private const string MenuEditStudents_s = @"
+    private const string MenuEditStudent_s = @"
     Editar dados dos estudantes:
         [0] Back        -> Voltar ao menu principal
         [1] Help        -> Mostrar este texto
@@ -262,19 +260,17 @@ public static class MenuRelated_cl
         [8] Tutor       -> Alterar o tutor
         [9] Grades      -> Alterar notas
 ";
-    internal static string GetMenuEditStudents() => MenuEditStudents_s;
+    internal static string GetMenuEditStudent() => MenuEditStudent_s;
     internal static EditParamStudent_e MenuEditStudent()
     {
         while (true)
         {
             Write("\n(edit student)> ");
             string? input_s = ReadLine()?.Trim();
-
-            // Atalhos numéricos
-            switch (input_s)
+            switch (input_s)// Atalhos numéricos
             {
                 case "0": return EditParamStudent_e.Back;
-                case "1": return EditParamStudent_e.Help;
+                case "1": Write(MenuEditStudent_s); return EditParamStudent_e.Help;
                 case "2": return EditParamStudent_e.Name;
                 case "3": return EditParamStudent_e.Age;
                 case "4": return EditParamStudent_e.Gender;
@@ -284,10 +280,64 @@ public static class MenuRelated_cl
                 case "8": return EditParamStudent_e.Tutor;
                 case "9": return EditParamStudent_e.Grades;
             }
-
             // Se for texto OU número, validar se existe no enum
             if (Enum.TryParse(input_s, true, out EditParamStudent_e result) && Enum.IsDefined(typeof(EditParamStudent_e), result)) { return result; }
             WriteLine(UnknowonCommand_s);
+        }
+    }
+
+    internal enum EditParamTeacher_e
+    {
+        Back = 0,
+        Help = 1,
+        Name = 2,
+        Age = 3,
+        Gender = 4,
+        BirthDate = 5,
+        Nationality = 6,
+        Email = 7,
+        Department = 8
+    }
+    private const string MenuEditTeacher_s = @"
+        Editar dados do professor:
+            [0] Back        -> Voltar ao menu principal
+            [1] Help        -> Mostrar este texto
+            [2] Name        -> Alterar o nome
+            [3] Age         -> Alterar a idade
+            [4] Gender      -> Alterar o género
+            [5] BirthDate   -> Alterar a data de nascimento
+            [6] Nationality -> Alterar a nacionalidade
+            [7] Email       -> Alterar o email
+            [8] Department  -> Alterar o departamento
+        ";
+    internal static string GetMenuEditTeacher() => MenuEditTeacher_s;
+    internal static EditParamTeacher_e MenuEditTeacher()
+    {
+        while (true)
+        {
+            Write("\n(edit teacher)> ");
+            string? input_s = ReadLine()?.Trim();
+
+            switch (input_s) // atalhos numéricos
+            {
+                case "0": return EditParamTeacher_e.Back;
+                case "1": Write(MenuEditTeacher_s); return EditParamTeacher_e.Help;
+                case "2": return EditParamTeacher_e.Name;
+                case "3": return EditParamTeacher_e.Age;
+                case "4": return EditParamTeacher_e.Gender;
+                case "5": return EditParamTeacher_e.BirthDate;
+                case "6": return EditParamTeacher_e.Nationality;
+                case "7": return EditParamTeacher_e.Email;
+                case "8": return EditParamTeacher_e.Department;
+            }
+
+            // Se for texto, tentar converter para enum
+            if (Enum.TryParse(input_s, true, out EditParamTeacher_e result) && Enum.IsDefined(typeof(EditParamTeacher_e), result))
+            {
+                return result;
+            }
+
+            WriteLine(UnknowonCommand_s); // mensagem de comando desconhecido
         }
     }
 

@@ -50,12 +50,12 @@
     "Name_s": "Ana SILVA"
   },
   "4": {
-    "Department_s": "",
+    "Department_s": "Fisica",
     "Age_by": 42,
     "Gender_c": "F",
     "BirthDate_dt": "1981-11-30T00:00:00",
     "Nationality": 2,
-    "Email_s": "",
+    "Email_s": "BeaCost8@ipvc.pt",
     "ID_i": 4,
     "Name_s": "Beatriz Costa"
   },
@@ -138,5 +138,35 @@
     "Email_s": "fv63@ipvc.estg.pt",
     "ID_i": 13,
     "Name_s": "Frederico Vasco"
+  },
+  "14": {
+    "Department_s": "Fisica",
+    "Age_by": 34,
+    "Gender_c": "M",
+    "BirthDate_dt": "1991-12-03T00:00:00",
+    "Nationality": 1,
+    "Email_s": "daVKK832@ipvc.pt",
+    "ID_i": 14,
+    "Name_s": "Leonardo DaV"
+  },
+  "15": {
+    "Department_s": "Matem\u00E1tica",
+    "Age_by": 35,
+    "Gender_c": "F",
+    "BirthDate_dt": "1990-03-18T00:00:00",
+    "Nationality": 1,
+    "Email_s": "diolingAA2@ipvc.pt",
+    "ID_i": 15,
+    "Name_s": "Diolinda Azevedo"
+  },
+  "16": {
+    "Department_s": "Matem\u00E1tica",
+    "Age_by": 27,
+    "Gender_c": "F",
+    "BirthDate_dt": "1998-01-17T00:00:00",
+    "Nationality": 1,
+    "Email_s": "JanaBoas@ipvc.esa.pt",
+    "ID_i": 16,
+    "Name_s": "Joana Vilas Boas"
   }
 }

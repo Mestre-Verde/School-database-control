@@ -1,0 +1,5 @@
+{"Type_e":0,"Duration_f":0,"Subjects_l":[],"ID_i":1,"Name_s":""}
+{"Type_e":0,"Duration_f":0,"Subjects_l":[],"ID_i":4,"Name_s":""}
+{"Type_e":0,"Duration_f":0,"Subjects_l":[],"ID_i":5,"Name_s":""}
+{"Type_e":0,"Duration_f":0,"Subjects_l":[],"ID_i":6,"Name_s":""}
+{"Type_e":0,"Duration_f":0,"Subjects_l":[],"ID_i":7,"Name_s":""}

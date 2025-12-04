@@ -1,30 +1,32 @@
 {
   "0": {
-    "ECTS_i": 6,
-    "Professor_l": [],
-    "Students_l": [],
+    "ECTS_i": 5,
+    "Professor": null,
+    "Grade": 0,
     "ID_i": 0,
-    "Name_s": "Eletrecidade"
+    "Name_s": "Matem\u00E1tica"
   },
   "1": {
-    "ECTS_i": 7,
-    "Professor_l": [],
-    "Students_l": [],
+    "ECTS_i": 9,
+    "Professor": null,
+    "Grade": 0,
     "ID_i": 1,
-    "Name_s": "Matem\u00E1tica"
+    "Name_s": "Eletr\u00F3nica"
   },
   "2": {
     "ECTS_i": 4,
-    "Professor_l": [],
-    "Students_l": [],
+    "Professor": {
+      "Department_s": "Departamento de Matem\u00E1tica",
+      "Age_by": 0,
+      "Gender_c": "M",
+      "BirthDate_dt": "1989-04-17T00:00:00",
+      "Nationality": 1,
+      "Email_s": "fv63@ipvc.estg.pt",
+      "ID_i": 13,
+      "Name_s": "Frederico Vasco"
+    },
+    "Grade": 0,
     "ID_i": 2,
-    "Name_s": "Programa\u00E7\u00E3o"
-  },
-  "3": {
-    "ECTS_i": 5,
-    "Professor_l": [],
-    "Students_l": [],
-    "ID_i": 3,
-    "Name_s": "An\u00E1lise Matem\u00E1tica"
+    "Name_s": "Topicos de mat"
   }
 }

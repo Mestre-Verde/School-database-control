@@ -23,12 +23,15 @@ public static class FileManager
         { "Base",                "Domain/Base" },
         { "SchoolMembers",       "Domain/SchoolMembers" },
         { "CourseProgram",       "Domain/CourseProgram" },
-        { "Interfaces",          "Domain/Interfaces" }
+        { "Interfaces",          "Domain/Interfaces" },
+        { "Scholarship",         "Domain/Scholarship" }
+
     };
     private static readonly Dictionary<string, string> ApplicationDirectories = new()
     {
         { "Application",         "Application" },
-        { "Menu",                "Application/Menu" }
+        { "Menu",                "Application/Menu" },
+        { "Utils",               "Application/Utils"}
     };
     private static readonly Dictionary<string, string> InfrastructureDirectories = new()
     {
@@ -39,6 +42,10 @@ public static class FileManager
     };
     private static readonly Dictionary<string, string> Files = new()
     {
+        // Applications
+        { "Menu",                "Application/Menu/Menu.cs"},
+        { "InputParameters",     "Application/Utils/InputParameters.cs"},
+
         // Domain
         { "BaseEntity",          "Domain/Base/BaseEntity.cs" },
         { "SchoolMember",        "Domain/SchoolMembers/SchoolMember.cs" },
@@ -46,28 +53,37 @@ public static class FileManager
         { "Teacher",             "Domain/SchoolMembers/Teacher.cs" },
         { "Course",              "Domain/CourseProgram/Course.cs" },
         { "Subject",             "Domain/CourseProgram/Subject.cs" },
+        { "UndergraduateStudent","Domain/SchoolMembers/UndergraduateStudent.cs"},
+        { "GraduateStudent",     "Domain/SchoolMembers/GraduateStudent.cs"},
+        { "InternationalStudent","Domain/SchoolMembers/InternationalStudent.cs"},
+        {"Scholarship",          "Domain/Scholarship/Scholarship.cs"},
 
         // Infrastructure
         { "FileManager",         "Infrastructure/FileManager/FileManager.cs" },
 
         // Data
-        { "StudentsJSON",        "Infrastructure/Data/students.json" },
-        { "TeachersJSON",        "Infrastructure/Data/teachers.json" },
-        { "CoursesJSON",         "Infrastructure/Data/courses.json" },
-        { "SubjectsJSON",        "Infrastructure/Data/subjects.json" }
+        { "TeachersJSON",               "Infrastructure/Data/teachers.json" },
+        { "CoursesJSON",                "Infrastructure/Data/courses.json" },
+        { "SubjectsJSON",               "Infrastructure/Data/subjects.json" },
+        { "UndergraduateStudentsJSON",  "Infrastructure/Data/undergraduate_students.json" },
+        { "GraduateStudentsJSON",       "Infrastructure/Data/graduate_students.json" },
+        { "InternationalStudentsJSON",  "Infrastructure/Data/international_students.json" }
     };
 
     // Combina todos os diretórios definidos nos dicionários individuais e devolve como uma sequência (IEnumerable<string>) de caminhos.
-    private static IEnumerable<string> AllDirectories => DomainDirectories.Values          // Pega todos os valores do dicionário DomainDirectories
+    private static IEnumerable<string> AllDirectories =>
+        DomainDirectories.Values          // Pega todos os valores do dicionário DomainDirectories
         .Concat(ApplicationDirectories.Values)   // Concatena os valores do ApplicationDirectories
         .Concat(InfrastructureDirectories.Values); // Concatena os valores do InfrastructureDirectories
-
+        
     // Retorna todos os caminhos de arquivos definidos no dicionário Files
     private static IEnumerable<string> AllFiles => Files.Values;
 
     public enum DataBaseType// Enum para percorrer os caminhos das base de dados.
     {
-        Student,
+        UndergraduateStudent,
+        GraduateStudent,
+        InternationalStudent,
         Teacher,
         Course,
         Subject
@@ -79,10 +95,12 @@ public static class FileManager
     {
         return baseType switch
         {
-            DataBaseType.Student => (Files["StudentsJSON"], typeof(Student)),
+            DataBaseType.UndergraduateStudent => (Files["UndergraduateStudentsJSON"], typeof(UndergraduateStudent)),
+            DataBaseType.GraduateStudent => (Files["GraduateStudentsJSON"], typeof(GraduateStudent)),
+            DataBaseType.InternationalStudent => (Files["InternationalStudentsJSON"], typeof(InternationalStudent)),
             DataBaseType.Teacher => (Files["TeachersJSON"], typeof(Teacher)),
             DataBaseType.Course => (Files["CoursesJSON"], typeof(Course)),
-            DataBaseType.Subject => (Files["SubjectsJSON"], typeof(Subject)), // nome correto da tua classe
+            DataBaseType.Subject => (Files["SubjectsJSON"], typeof(Subject)),
 
             _ => throw new ArgumentOutOfRangeException(nameof(baseType),
                 $"Base de dados não encontrada para o valor recebido: {baseType}. " +

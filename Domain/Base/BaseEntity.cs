@@ -6,6 +6,7 @@ namespace School_System.Domain.Base;
 using static System.Console;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using School_System.Application.Utils;
 
 using School_System.Infrastructure.FileManager;
 
@@ -13,67 +14,111 @@ public abstract class BaseEntity(int id, string name)
 {
     [JsonInclude] internal int ID_i { get; private set; } = id;
     [JsonInclude] internal protected string Name_s { get; set; } = name;
-    protected abstract string Describe(); // função para mostrar os parametros de um objto, ecencial para modulação!!
 
-    protected static readonly string InvalidEntrance = "Entrada inválida. Tente novamente.";
-    protected static readonly string EmptyEntrance = "Entrada nula ou em branco, valor default utilizado.";
-    protected const string ProblemGetTheId = "❗ Erro: Não foi possível obter um ID válido. Criação cancelada.❗";
 
-    //----------------------------------
-    // funções para mudança de Atributos
-    //----------------------------------
 
-    /// <summary>
-    /// Pede ao usuário para inserir ou alterar um nome.
-    /// </summary>
-    /// <param name="prompt">Mensagem a exibir para o usuário.</param>
-    /// <param name="isToEdit">Indica se é edição (true) ou criação (false).</param>
-    /// <param name="currentValue">Valor atual, caso seja edição (null se criação).</param>
-    /// <returns>O nome fornecido ou o valor atual/default caso não seja alterado.</returns>
-    protected static string InputName(string prompt, string? currentValue = null, bool isToEdit = false)
+    // OBRIGATÓRIO para todas as classes
+    protected abstract string FormatToString();
+
+    // serve somente para mostrar quendo um novo objeto é criado
+    protected abstract void Introduce();
+
+    // ToString universal para mostrar as informações do objeto(Obrigat]orio ser public(pois subescreve uma função existente))
+    public override string ToString() => FormatToString();
+
+    // Descrição global para todos os objetos que heram esta class
+    protected string BaseFormat() { return $"ID={ID_i}, Nome='{Name_s ?? "N/A"}'"; }
+
+    //-----------------------------
+
+    // função helper para poder imprimir qualquer tipo de variavel
+    private static string FormatParameter(object? value)
     {
-        while (true)
-        {
-            if (isToEdit && !string.IsNullOrEmpty(currentValue))
-                Write($"{prompt} (Enter para manter '{currentValue}'): ");
-            else
-                Write($"{prompt} (Enter para default): ");
+        if (value == null) return "Nenhum";
 
-            string? input = ReadLine()?.Trim();
+        // Se for uma lista de objetos BaseEntity (como Subject ou Teacher)
+        if (value is IEnumerable<BaseEntity> entityList)
+            return string.Join(", ", entityList.Select(e => e.Name_s));
 
-            if (string.IsNullOrWhiteSpace(input))
-            {
-                WriteLine(EmptyEntrance);
-                return isToEdit && !string.IsNullOrEmpty(currentValue) ? currentValue : "";
-            }
+        // Se for uma lista de objetos genérica
+        if (value is IEnumerable<object> objList)
+            return string.Join(", ", objList.Select(o => o?.ToString() ?? "null"));
 
-            if (!Regex.IsMatch(input, @"^[a-zA-Z0-9À-ÿ \-']+$"))
-            {
-                WriteLine("❌ Nome inválido. Apenas letras, números, espaços, hífen e apóstrofo são permitidos.");
-                continue;
-            }
+        // Se for enum
+        if (value.GetType().IsEnum)
+            return value.ToString();
 
-            return input;
-        }
+        // Se for DateTime
+        if (value is DateTime dt)
+            return dt.ToString("yyyy-MM-dd");
+
+        // Char
+        if (value is char c)
+            return c.ToString();
+
+        // Qualquer outro tipo (int, float, string etc.)
+        return value.ToString() ?? "null";
     }
 
-    //----------------------------------
-    // funções Globais
-    //----------------------------------
 
-    internal abstract BaseEntity? CreateInstance();// Fábrica obrigatória (não estática)
-
-    /// <summary>
-    /// Remove um ou mais objetos de uma base de dados, dado o nome ou ID.
-    /// Pode ser usado para qualquer classe que herde de BaseEntity.
+    /// <summary> Fabrica global para criar qualquer objeto que herde de BaseEntity.
+    /// Só precisa passar o nome, os campos específicos via Action, e a função que cria o objeto a partir do dicionário.
     /// </summary>
+    protected static E? CreateEntity<E>(
+        string typeObject,
+        FileManager.DataBaseType dbType,
+        Action<Dictionary<string, object>> collectSpecificFields,
+        Func<Dictionary<string, object>, E> factory
+    ) where E : BaseEntity
+    {
+        var parameters = new Dictionary<string, object>();
+
+        // Nome padrão para todos
+        parameters["Name"] = InputParameters.InputName($"Escreva o nome {typeObject}");
+
+        // Campos específicos da subclasse
+        collectSpecificFields(parameters);
+
+        // Resumo final
+        WriteLine($"\nResumo {typeObject}:");
+        foreach (var kv in parameters)
+            WriteLine($" {kv.Key}: {FormatParameter(kv.Value)}");
+
+        // Confirmação
+        while (true)
+        {
+            Write("Tem a certeza que quer criar? (S/N): ");
+            string? input = ReadLine()?.Trim().ToUpper();
+
+            if (input == "S") break;
+            else if (input == "N") return null;
+            else WriteLine("Por favor, responda apenas 'S' ou 'N'.");
+        }
+
+        // Criação do ID
+        int newID = FileManager.GetTheNextAvailableID(dbType);
+        if (newID == -1) { WriteLine(InputParameters.ProblemGetTheId); return null; }
+        parameters["ID"] = newID;
+
+        // Criação do objeto
+        var obj = factory(parameters);
+
+        // Gravação na base de dados
+        FileManager.WriteOnDataBase(dbType, obj);
+
+        return obj;
+    }
+
+
+    /// <summary> Remove um ou mais objetos de uma base de dados, dado o nome ou ID.Pode ser usado para qualquer classe que herde de BaseEntity. </summary>
     /// <typeparam name="E">Tipo da entidade (aluno, tutor, disciplina, etc.).</typeparam>
     /// <param name="typeName">Nome da entidade para mostrar ao utilizador (ex: "aluno").</param>
     /// <param name="dbType">Base de dados onde procurar e remover.</param>
     protected static void RemoveEntity<E>(string typeName, FileManager.DataBaseType dbType) where E : BaseEntity
     {
         // 1. Procurar entidades (já imprime resultados)
-        var matches = AskAndSearch<E>(typeName, dbType, true);
+        var matches = AskAndSearch<E>(typeName, dbType, returnAll: true, allowMultiple: true);
+
 
         if (matches.Count == 0) return;
 
@@ -95,7 +140,7 @@ public abstract class BaseEntity(int id, string name)
         // 3. Confirmar
         WriteLine($"Você selecionou os seguintes {typeName}s:");
         foreach (var idx in indices)
-            WriteLine(matches[idx - 1].Describe());
+            WriteLine(matches[idx - 1].FormatToString());
 
         Write($"Tem certeza que deseja remover todos esses {typeName}s? (S/N): ");
         if ((ReadLine()?.Trim().ToUpper()) != "S")
@@ -110,13 +155,13 @@ public abstract class BaseEntity(int id, string name)
             var ent = matches[idx - 1];
             bool ok = FileManager.RemoveById<E>(dbType, ent.ID_i);
             WriteLine(ok
-                ? $"✔️ {typeName} removido: {ent.Describe()}"
-                : $"❗ Erro ao remover: {ent.Describe()}");
+                ? $"✔️ {typeName} removido: {ent.FormatToString()}"
+                : $"❗ Erro ao remover: {ent.FormatToString()}");
         }
     }
 
     // --- Pergunta ao usuário e pesquisa na base de dados ---
-    protected static List<T> AskAndSearch<T>(string typeName, FileManager.DataBaseType dbType, bool returnAll = false) where T : BaseEntity
+    internal protected static List<T> AskAndSearch<T>(string typeName, FileManager.DataBaseType dbType, bool returnAll = false, bool allowMultiple = false) where T : BaseEntity
     {
         Write($"Digite o nome ou ID do {typeName}: ");
         string? input_s = ReadLine();
@@ -130,33 +175,54 @@ public abstract class BaseEntity(int id, string name)
         if (matches.Count == 0)
         {
             WriteLine($"Nenhum {typeName} encontrado.");
-            return [];
+            return new List<T>();
         }
 
+        // Caso seja apenas 1 resultado ou returnAll, retorna todos
         if (matches.Count == 1 || returnAll)
         {
             WriteLine($"{matches.Count} {typeName}(s) encontrado(s):");
             for (int i = 0; i < matches.Count; i++)
-                WriteLine($"[{i + 1}]: {matches[i].Describe()}");
-            return matches;
+                WriteLine($"[{i + 1}]: {matches[i].FormatToString()}");
+            return allowMultiple ? matches : new List<T> { matches[0] };
         }
 
-
-        // Mais de um objeto encontrado e não é para remover todos
+        // Mais de um resultado encontrado e não é para retornar todos
         WriteLine($"Foram encontrados {matches.Count} {typeName}s:");
         for (int i = 0; i < matches.Count; i++)
-            WriteLine($"{i + 1}: {matches[i].Describe()}");
+            WriteLine($"[{i + 1}]: {matches[i].FormatToString()}");
 
-        Write($"Escolha qual deseja selecionar (1 - {matches.Count}): ");
-        if (!int.TryParse(ReadLine(), out int choice) || choice < 1 || choice > matches.Count)
+        if (allowMultiple)
         {
-            WriteLine("Entrada inválida. Nenhum selecionado.");
-            return new List<T>();
+            Write($"Escolha quais deseja selecionar (números separados por vírgula, Enter para cancelar): ");
+            string? multiInput = ReadLine()?.Trim();
+            if (string.IsNullOrEmpty(multiInput)) return new List<T>();
+
+            var selected = new List<T>();
+            foreach (var part in multiInput.Split(',').Select(s => s.Trim()))
+            {
+                if (int.TryParse(part, out int idx) && idx >= 1 && idx <= matches.Count)
+                {
+                    var item = matches[idx - 1];
+                    if (!selected.Contains(item))
+                        selected.Add(item);
+                }
+                else
+                {
+                    WriteLine($"Número inválido: {part}. Ignorado.");
+                }
+            }
+            return selected;
         }
-
-        return new List<T> { matches[choice - 1] };
+        else
+        {
+            Write($"Escolha qual deseja selecionar (1 - {matches.Count}): ");
+            if (!int.TryParse(ReadLine(), out int choice) || choice < 1 || choice > matches.Count)
+            {
+                WriteLine("Entrada inválida. Nenhum selecionado.");
+                return new List<T>();
+            }
+            return new List<T> { matches[choice - 1] };
+        }
     }
-
-
-    internal virtual void Introduce() { }
 }
