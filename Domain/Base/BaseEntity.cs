@@ -5,17 +5,14 @@ namespace School_System.Domain.Base;
 
 using static System.Console;
 using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
 using School_System.Application.Utils;
 
 using School_System.Infrastructure.FileManager;
 
 public abstract class BaseEntity(int id, string name)
-{
+{ 
     [JsonInclude] internal int ID_i { get; private set; } = id;
     [JsonInclude] internal protected string Name_s { get; set; } = name;
-
-
 
     // OBRIGATÓRIO para todas as classes
     protected abstract string FormatToString();
@@ -36,19 +33,19 @@ public abstract class BaseEntity(int id, string name)
     {
         if (value == null) return "Nenhum";
 
-        // Se for uma lista de objetos BaseEntity (como Subject ou Teacher)
+        // Lista de BaseEntity
         if (value is IEnumerable<BaseEntity> entityList)
-            return string.Join(", ", entityList.Select(e => e.Name_s));
+            return string.Join(", ", entityList.Select(e => e.Name_s ?? "N/A"));
 
-        // Se for uma lista de objetos genérica
+        // Lista genérica
         if (value is IEnumerable<object> objList)
             return string.Join(", ", objList.Select(o => o?.ToString() ?? "null"));
 
-        // Se for enum
-        if (value.GetType().IsEnum)
-            return value.ToString();
+        // Enum
+        if (value?.GetType().IsEnum == true)
+            return value.ToString() ?? "N/A";
 
-        // Se for DateTime
+        // DateTime
         if (value is DateTime dt)
             return dt.ToString("yyyy-MM-dd");
 
@@ -56,8 +53,8 @@ public abstract class BaseEntity(int id, string name)
         if (value is char c)
             return c.ToString();
 
-        // Qualquer outro tipo (int, float, string etc.)
-        return value.ToString() ?? "null";
+        // Outros tipos (int, float, string, etc.)
+        return value?.ToString() ?? "null";
     }
 
 
@@ -118,8 +115,6 @@ public abstract class BaseEntity(int id, string name)
     {
         // 1. Procurar entidades (já imprime resultados)
         var matches = AskAndSearch<E>(typeName, dbType, returnAll: true, allowMultiple: true);
-
-
         if (matches.Count == 0) return;
 
         // 2. Permitir escolher múltiplos indices
@@ -163,40 +158,47 @@ public abstract class BaseEntity(int id, string name)
     // --- Pergunta ao usuário e pesquisa na base de dados ---
     internal protected static List<T> AskAndSearch<T>(string typeName, FileManager.DataBaseType dbType, bool returnAll = false, bool allowMultiple = false) where T : BaseEntity
     {
+        // Solicita input ao utilizador
         Write($"Digite o nome ou ID do {typeName}: ");
         string? input_s = ReadLine();
 
         bool isId_b = int.TryParse(input_s, out int idInput);
 
+        // Pesquisa na base de dados
         var matches = isId_b
             ? FileManager.Search<T>(dbType, id: idInput)
             : FileManager.Search<T>(dbType, name: input_s);
 
+        // Nenhum resultado
         if (matches.Count == 0)
         {
             WriteLine($"Nenhum {typeName} encontrado.");
             return new List<T>();
         }
 
-        // Caso seja apenas 1 resultado ou returnAll, retorna todos
+        // Caso 1: apenas 1 resultado ou returnAll
         if (matches.Count == 1 || returnAll)
         {
             WriteLine($"{matches.Count} {typeName}(s) encontrado(s):");
             for (int i = 0; i < matches.Count; i++)
                 WriteLine($"[{i + 1}]: {matches[i].FormatToString()}");
+
             return allowMultiple ? matches : new List<T> { matches[0] };
         }
 
-        // Mais de um resultado encontrado e não é para retornar todos
+        // Caso 2: múltiplos resultados, não returnAll
         WriteLine($"Foram encontrados {matches.Count} {typeName}s:");
         for (int i = 0; i < matches.Count; i++)
             WriteLine($"[{i + 1}]: {matches[i].FormatToString()}");
 
         if (allowMultiple)
         {
+            // Seleção múltipla
             Write($"Escolha quais deseja selecionar (números separados por vírgula, Enter para cancelar): ");
             string? multiInput = ReadLine()?.Trim();
-            if (string.IsNullOrEmpty(multiInput)) return new List<T>();
+
+            if (string.IsNullOrEmpty(multiInput))
+                return new List<T>();
 
             var selected = new List<T>();
             foreach (var part in multiInput.Split(',').Select(s => s.Trim()))
@@ -216,6 +218,7 @@ public abstract class BaseEntity(int id, string name)
         }
         else
         {
+            // Seleção única
             Write($"Escolha qual deseja selecionar (1 - {matches.Count}): ");
             if (!int.TryParse(ReadLine(), out int choice) || choice < 1 || choice > matches.Count)
             {
@@ -225,4 +228,38 @@ public abstract class BaseEntity(int id, string name)
             return new List<T> { matches[choice - 1] };
         }
     }
+
+
+
+    // TODO:    
+    // 1. Definição do Delegado para a função de comparação
+    // Assumimos que o tipo 'E' (Atual) e o tipo 'E' (Original) são a mesma classe BaseEntity
+    public delegate void PrintComparisonDelegate<E>(E current, E original);
+
+    // 2. Modificação da função Select para receber o delegado
+    internal protected static void Select<E>(
+        string typename,
+        FileManager.DataBaseType dataBaseType,
+        PrintComparisonDelegate<E> printComparison // <--- Recebe a função de comparação específica
+    ) where E : BaseEntity // Restrição para usar a funcionalidade de BaseEntity
+    {
+        // A lógica de Select<E> aqui seria:
+        // 1. Pesquisar e selecionar um objeto 'current' do tipo E.
+        // 2. Fazer uma cópia do original antes da edição (dynamic original = current.Clone() ou usar a própria lista).
+        // 3. Chamar a lógica de edição (Edit(current)).
+        // 4. Antes de salvar, chamar a função de comparação fornecida:
+
+        // Supondo que 'current' e 'original' são as instâncias:
+        // E current = ...;
+        // E original = ...;
+
+        // printComparison(current, original); // <--- Chamada modular
+
+        // ... Restante da lógica de seleção e salvamento
+
+    }
+
+
+
+
 }

@@ -11,6 +11,42 @@ using School_System.Domain.CourseProgram;
 using School_System.Domain.SchoolMembers;
 using School_System.Application.Utils;
 
+
+public enum Nationality_e
+{
+    Other,      // 0
+    PT,         // Portugal
+    ES,         // Espanha
+    FR,         // França
+    US,         // Estados Unidos
+    GB,         // Reino Unido
+    DE,         // Alemanha
+    IT,         // Itália
+    BR,         // Brasil
+    JP,         // Japão
+    CN,         // China
+    IN,         // Índia
+    CA,         // Canadá
+    AU,         // Austrália
+    RU          // Rússia
+}
+public enum VisaState_e
+{
+    NONE,
+    ValidStudentVisa,
+    PendingRenewal,
+    Expired,
+    Temporary
+}
+public enum CourseType_e
+{
+    NONE = 0,
+    CTESP = 5, // nivel 5
+    Licenciatura = 6,
+    Mestrado = 7,
+    Doutoramento = 8
+}
+
 /// <summary>
 /// Contém funções estáticas para auxiliar na obtenção e validação de 
 /// valores de entrada do utilizador (parâmetros/atributos) para as entidades de domínio.
@@ -21,6 +57,12 @@ public static class InputParameters  // Nome da classe alterado
     private const string InvalidEntrance = "Entrada inválida. Tente novamente.";
     private const string EmptyEntrance = "Entrada nula ou em branco, valor default utilizado.";
     internal const string ProblemGetTheId = "❗ Erro: Não foi possível obter um ID válido. Criação cancelada.❗";
+
+    internal const short MinCourseEct = 60;  // mínimo razoável para um curso
+    internal  const short MaxCourseEct = 360; // máximo típico de licenciatura prolongada
+
+    internal  const short MaxEctsPerYear = 60;
+    internal  const short MaxEctsPerSemester = MaxEctsPerYear / 2;
 
     /// <summary>  Pede ao usuário para inserir ou alterar um nome. </summary>
     /// <param name="prompt">Mensagem a exibir para o usuário.</param>
@@ -44,9 +86,25 @@ public static class InputParameters  // Nome da classe alterado
                 return isToEdit && !string.IsNullOrEmpty(currentValue) ? currentValue : "";
             }
 
-            if (!Regex.IsMatch(input, @"^[a-zA-Z0-9À-ÿ \-']+$"))
+            /*
+            ^    -> início da string
+            [a-zA-Z0-9À-ÿ \-'\.ºª,]+ -> conjunto de caracteres permitidos, um ou mais:
+                a-z           -> letras minúsculas
+                A-Z           -> letras maiúsculas
+                0-9           -> dígitos
+                À-ÿ           -> letras acentuadas (latinas)
+                (espaço)      -> espaço
+                \-            -> hífen
+                '             -> apóstrofo
+                \.            -> ponto
+                º            -> símbolo º
+                ª            -> símbolo ª
+                ,             -> vírgula
+            $   -> fim da string
+            */
+            if (!Regex.IsMatch(input, @"^[a-zA-Z0-9À-ÿ \-'\.ºª,]+$"))
             {
-                WriteLine("❌ Nome inválido. Apenas letras, números, espaços, hífen e apóstrofo são permitidos.");
+                WriteLine("❌ Nome inválido. Apenas letras, números, espaços, hífen, apóstrofo, ponto, º e ª são permitidos.");
                 continue;
             }
 
@@ -68,20 +126,16 @@ public static class InputParameters  // Nome da classe alterado
     {
         while (true)
         {
-            if (isToEdit && currentValue.HasValue)
-                Write($"{prompt} (Enter para manter {currentValue}): ");
-            else
-                Write($"{prompt} (Enter para calcular pela data de nascimento): ");
+            if (isToEdit && currentValue.HasValue) Write($"{prompt} (Enter para manter {currentValue}): ");
+            else Write($"{prompt} (Enter para calcular pela data de nascimento): ");
 
             string? input = ReadLine()?.Trim();
 
             if (string.IsNullOrWhiteSpace(input))
             {
                 WriteLine(EmptyEntrance);
-                if (isToEdit && currentValue.HasValue)
-                    return currentValue.Value; // mantém valor atual
-                else
-                    return 0; // default → será calculado a partir da data de nascimento
+                if (isToEdit && currentValue.HasValue) return currentValue.Value; // mantém valor atual
+                else return 0; // default → será calculado a partir da data de nascimento
             }
 
             if (byte.TryParse(input, out byte age) && age >= minValue)
@@ -111,9 +165,9 @@ public static class InputParameters  // Nome da classe alterado
         while (true)
         {
             if (isToEdit && currentValue.HasValue && currentValue != default)
-                Write($"{prompt}(M/F) (Enter para manter '{currentValue}'): ");
+                Write($"{prompt} (M/F),(Enter para manter '{currentValue}'): ");
             else
-                Write($"{prompt}(M/F) (Enter para default): ");
+                Write($"{prompt} (M/F),(Enter para default): ");
 
             string? input = ReadLine()?.Trim().ToUpper();
 
@@ -137,96 +191,103 @@ public static class InputParameters  // Nome da classe alterado
     }
 
     /// <summary>
-    /// Solicita ao usuário a data de nascimento de um membro, permitindo criação ou edição.
+    /// Solicita ao usuário a data de nascimento, suportando criação e edição.
+    /// Pode funcionar a partir da idade (pedindo apenas mês/dia) ou a partir da data completa.
     /// </summary>
-    /// <param name="prompt">Mensagem a exibir ao usuário. Se vazio, será usado um prompt padrão dependendo do contexto (criação/edição e se a idade é conhecida).</param>
-    /// <param name="age">Idade do membro (opcional). Se fornecida (> 0), a função pedirá apenas o mês e o dia e calculará o ano automaticamente. Se não fornecida (0 ou default), a função pedirá a data completa (dia, mês e ano).</param>
-    /// <param name="currentValue">Data atual do membro, usada quando em modo de edição para permitir manter o valor existente.Se null, assume default (DateTime.MinValue). </param>
-    /// <param name="isToEdit">
-    /// Indica se a função está sendo chamada em modo de edição (true) ou criação de novo objeto (false).
-    /// Em edição, o usuário pode pressionar Enter para manter o valor atual.
-    /// </param>
-    /// <returns>
-    /// Retorna um objeto <see cref="DateTime"/> representando a data de nascimento informada pelo usuário.
-    /// - Se em criação e usuário não fornece entrada, retorna <see cref="DateTime.MinValue"/>.
-    /// - Se em edição e usuário pressiona Enter, mantém o <paramref name="currentValue"/>.
-    /// </returns>
-    /// <remarks>
-    /// Comportamento detalhado:
-    /// - Caso <paramref name="age"/> seja fornecida (>0):
-    ///     - Calcula o ano estimado como <c>anoAtual - age</c>.
-    ///     - Pede apenas mês e dia.
-    ///     - Se o usuário não fornecer, usa 1º de janeiro ou mantém o valor atual em edição.
-    /// - Caso <paramref name="age"/> não seja fornecida (0 ou default):
-    ///     - Pede a data completa (dia, mês e ano) ou Enter para default.
-    ///     - Valida se a data é válida, repetindo até obter uma entrada correta.
-    /// - A função ajusta a idade se não fornecida, calculando a partir do ano informado.
-    /// </remarks>
-    public static DateTime InputBirthDate(string prompt, ref byte age, DateTime? currentValue = null, bool isToEdit = false)
+    /// <param name="prompt">Mensagem inicial exibida ao usuário.</param>
+    /// <param name="age">Idade já conhecida (0 = pedir data completa).</param>
+    /// <param name="currentValue">Data atual (usada apenas em edição).</param>
+    /// <param name="isToEdit">Indica se a função está a editar (true) ou criar (false).</param>
+    /// <returns>A data de nascimento obtida ou mantida.</returns>
+    public static DateTime InputBirthDate(string prompt, ref byte age, byte minAge, DateTime? currentValue = null, bool isToEdit = false)
     {
-        DateTime date = currentValue ?? default;
-        int anoAtual = DateTime.Now.Year;
+        int currentYear = DateTime.Now.Year;
+
         while (true)
         {
-            int anoEstimado = (age > 0) ? anoAtual - age : 0;
-
-            if (age == 0) // idade não fornecida
+            // CASO 1 — Idade não conhecida → pedir data completa
+            if (age == 0)
             {
-                Write(prompt != "" ? prompt : "Escreva a data de nascimento (ex: 5 11 1980, 1980-11-05, ou Enter para default): ");
-                string? input_s = ReadLine()?.Trim();
+                if (isToEdit && currentValue.HasValue)
+                    Write($"{prompt} (Enter para manter '{currentValue.Value:yyyy-MM-dd}'): ");
+                else
+                    Write($"{prompt} (ex: 5 11 1980 ou 1980-11-05) (Enter para default): ");
 
-                if (string.IsNullOrWhiteSpace(input_s))
+                string? input = ReadLine()?.Trim();
+
+                if (string.IsNullOrWhiteSpace(input))
                 {
+                    if (isToEdit && currentValue.HasValue)
+                        return currentValue.Value;
+
                     WriteLine(EmptyEntrance);
-                    if (isToEdit && currentValue.HasValue) return currentValue.Value;// mantém valor atual
-                    return default; // default ao criar
+                    return default;
                 }
 
-                input_s = input_s.Replace(',', ' ');
-                input_s = Regex.Replace(input_s, @"\s+", " ");
+                input = Regex.Replace(input.Replace(',', ' '), @"\s+", " ");
 
-                if (!DateTime.TryParse(input_s, out DateTime parsedDate))
+                if (!DateTime.TryParse(input, out DateTime parsed))
                 {
                     WriteLine(InvalidEntrance);
                     continue;
                 }
 
-                date = parsedDate.Date;
-            }
-            else // idade fornecida → pede mês e dia
-            {
-                WriteLine($"Ano de nascimento estimado: {anoEstimado}");
-                while (true)
+                // Calcula idade
+                int calculatedAge = currentYear - parsed.Year;
+
+                // Verifica validade
+                if (calculatedAge < minAge || calculatedAge > 120)
                 {
-                    Write("Escreva o mês e o dia (ex: 12 31 ou 11,30) ou Enter para manter default: ");
-                    string? input_s = ReadLine()?.Trim();
-
-                    if (string.IsNullOrWhiteSpace(input_s))
-                    {
-                        date = (isToEdit && currentValue.HasValue) ? currentValue.Value : new DateTime(anoEstimado, 1, 1);
-                        break;
-                    }
-
-                    input_s = input_s.Replace(',', ' ');
-                    input_s = Regex.Replace(input_s, @"\s+", " ");
-                    string[] parts = input_s.Split(' ');
-
-                    if (parts.Length < 2) { WriteLine(InvalidEntrance); continue; }
-
-                    if (!int.TryParse(parts[0], out int mesTmp) || mesTmp < 1 || mesTmp > 12) { WriteLine(InvalidEntrance); continue; }
-                    if (!int.TryParse(parts[1], out int diaTmp) || diaTmp < 1 || diaTmp > DateTime.DaysInMonth(anoEstimado, mesTmp)) { WriteLine(InvalidEntrance); continue; }
-
-                    date = new DateTime(anoEstimado, mesTmp, diaTmp);
-                    break;
+                    WriteLine($"Idade inválida. Deve estar entre {minAge} e 120 anos.");
+                    continue;
                 }
+
+                age = (byte)calculatedAge;
+                return parsed.Date;
             }
 
-            // Ajusta idade se necessário
-            if (age == 0 && date != default) age = (byte)(anoAtual - date.Year);
-            break; // data válida obtida
-        }
+            // CASO 2 — Idade já conhecida → pedir apenas mês e dia
+            int estimatedYear = currentYear - age;
+            WriteLine($"Ano de nascimento estimado: {estimatedYear}");
 
-        return date;
+            if (isToEdit && currentValue.HasValue)
+                Write($"Insira mês e dia de nascimento (ex: 12 31 ou 11,30) (Enter para manter '{currentValue.Value:MM-dd}'): ");
+            else
+                Write("Insira mês e dia de nascimento (ex: 12 31 ou 11,30) (Enter para default): ");
+
+            string? inputMD = ReadLine()?.Trim();
+
+            if (string.IsNullOrWhiteSpace(inputMD))
+            {
+                return (isToEdit && currentValue.HasValue)
+                    ? currentValue.Value
+                    : new DateTime(estimatedYear, 1, 1);
+            }
+
+            inputMD = Regex.Replace(inputMD.Replace(',', ' '), @"\s+", " ");
+
+            string[] parts = inputMD.Split(' ');
+
+            if (parts.Length < 2)
+            {
+                WriteLine(InvalidEntrance);
+                continue;
+            }
+
+            if (!int.TryParse(parts[0], out int month) || month < 1 || month > 12)
+            {
+                WriteLine(InvalidEntrance);
+                continue;
+            }
+
+            if (!int.TryParse(parts[1], out int day) || day < 1 || day > DateTime.DaysInMonth(estimatedYear, month))
+            {
+                WriteLine(InvalidEntrance);
+                continue;
+            }
+
+            return new DateTime(estimatedYear, month, day);
+        }
     }
 
     /// <summary>
@@ -310,8 +371,17 @@ public static class InputParameters  // Nome da classe alterado
     /// <returns>Email válido como string.</returns>
     public static string InputEmail(string prompt, string? currentValue = null, bool isToEdit = false)
     {
-        // Validação rigorosa de email
-        var emailPattern = @"^(?!.*\.\.)(?!.*\.$)(?!^\.)[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$";
+        /*
+        ^ → início da string
+        .+ → um ou mais caracteres (qualquer coisa) antes do @
+        @ → obrigatoriamente o @
+        .+ → um ou mais caracteres depois do @
+        \. → um ponto
+        .+ → um ou mais caracteres depois do ponto
+        $ → fim da string
+        */
+        var emailPattern = @"^.+@.+\..+$";
+
         while (true)
         {
             if (isToEdit && !string.IsNullOrEmpty(currentValue))
@@ -382,52 +452,42 @@ public static class InputParameters  // Nome da classe alterado
     {
         while (true)
         {
-            if (isToEdit && currentCourse != null)
-                Write($"{prompt} (Enter para manter '{currentCourse.Name_s}'): ");
-            else
-                Write($"{prompt} (Enter para cancelar): ");
-
-            // Pesquisa cursos na base de dados, retornando todos os matches
             var matches = BaseEntity.AskAndSearch<Course>("curso", FileManager.DataBaseType.Course);
 
-            // 🚨 Nenhum curso encontrado
+            // No course found → message + return default/current
             if (matches.Count == 0)
             {
-                if (isToEdit && currentCourse != null)
-                {
-                    WriteLine($"Nenhum curso encontrado. Mantendo '{currentCourse.Name_s}'.");
-                    return currentCourse;
-                }
-
-                WriteLine("Nenhum curso disponível. Saltando seleção de curso...");
-                return null;
+                WriteLine("Valor default utilizado.");
+                return isToEdit ? currentCourse : default;
             }
 
-            // Se houver apenas 1 resultado, pedir confirmação
+            // Only one course → ask confirmation
             if (matches.Count == 1)
             {
                 var selected = matches[0];
-                Write($"Confirmar o curso '{selected.Name_s}' (ID {selected.ID_i})? (S/N): ");
-                if ((ReadLine()?.Trim().ToUpper()) == "S") return selected;
+                Write($"Escolher o curso '{selected.Name_s}' (ID {selected.ID_i})? (S/N): ");
+                string? answer = ReadLine()?.Trim().ToUpper();
+
+                if (string.IsNullOrWhiteSpace(answer)) return isToEdit ? currentCourse : default;
+
+                if (answer == "S") return selected;
 
                 WriteLine("Seleção cancelada. Vamos tentar novamente.\n");
                 continue;
             }
 
-            // Mais de 1 resultado → pede escolha
+            //  Multiple courses → let user choose by number
             WriteLine("\nCursos encontrados:");
             for (int i = 0; i < matches.Count; i++)
-            {
-                string name = matches[i]?.Name_s ?? "Sem nome";
-                WriteLine($"{i + 1}. {name} (ID {matches[i].ID_i})");
-            }
+                WriteLine($"{i + 1}. {matches[i].Name_s} (ID {matches[i].ID_i})");
 
             Write($"Escolha qual curso deseja selecionar (1 - {matches.Count}, Enter para cancelar): ");
-            string? input = ReadLine()?.Trim();
+            string? choiceInput = ReadLine()?.Trim();
 
-            if (string.IsNullOrEmpty(input)) return currentCourse;
+            if (string.IsNullOrEmpty(choiceInput))
+                return isToEdit ? currentCourse : default;
 
-            if (!int.TryParse(input, out int choice) || choice < 1 || choice > matches.Count)
+            if (!int.TryParse(choiceInput, out int choice) || choice < 1 || choice > matches.Count)
             {
                 WriteLine(InvalidEntrance);
                 continue;
@@ -435,7 +495,8 @@ public static class InputParameters  // Nome da classe alterado
 
             var selectedCourse = matches[choice - 1];
             Write($"Confirmar o curso '{selectedCourse.Name_s}' (ID {selectedCourse.ID_i})? (S/N): ");
-            if ((ReadLine()?.Trim().ToUpper()) == "S") return selectedCourse;
+            if ((ReadLine()?.Trim().ToUpper()) == "S")
+                return selectedCourse;
 
             WriteLine("Seleção cancelada. Vamos tentar novamente.\n");
         }
@@ -464,7 +525,7 @@ public static class InputParameters  // Nome da classe alterado
             if (matches.Count == 1)
             {
                 selected = matches[0];
-                Write($"Confirmar o professor '{selected.Name_s}' (ID {selected.ID_i})? (S/N): ");
+                Write($"Confirmar o(a) professor(a) '{selected.Name_s}' (ID {selected.ID_i})? (S/N): ");
                 string? confirm = ReadLine()?.Trim().ToUpper();
                 if (confirm == "S") return selected;
 
@@ -491,7 +552,7 @@ public static class InputParameters  // Nome da classe alterado
 
             if (!int.TryParse(input, out int choice) || choice < 1 || choice > matches.Count)
             {
-                WriteLine("Entrada inválida. Tente novamente.\n");
+                WriteLine(InvalidEntrance);
                 continue;
             }
 
@@ -505,14 +566,10 @@ public static class InputParameters  // Nome da classe alterado
     }
 
 
-
     //InternationalStudent
 
-    /// <summary> Solicita ao usuário o estado do visto (VisaState_e).</summary>
-    /// <summary> Solicita ao usuário o estado do visto (VisaState_e).</summary>
     public static VisaState_e InputVisaStatus(string prompt, VisaState_e? currentValue = null, bool isToEdit = false)
     {
-        // Dicionário de mapeamento de nomes do enum (ignora maiúsculas/minúsculas)
         var visaStatusMap = Enum.GetValues(typeof(VisaState_e))
                                  .Cast<VisaState_e>()
                                  .ToDictionary(v => v.ToString(), v => v, StringComparer.OrdinalIgnoreCase);
@@ -529,11 +586,14 @@ public static class InputParameters  // Nome da classe alterado
             if (string.IsNullOrWhiteSpace(input))
             {
                 WriteLine(EmptyEntrance);
-                if (isToEdit && currentValue.HasValue) return currentValue.Value; // mantém valor atual
-                return default; // valor default
+
+                if (isToEdit && currentValue.HasValue)
+                    return currentValue.Value;
+
+                WriteLine("⚠ O estado do visto é obrigatório.");
+                continue;
             }
 
-            // Se digitou "Ajuda", exibe todas as opções
             if (string.Equals(input, "Ajuda", StringComparison.OrdinalIgnoreCase))
             {
                 WriteLine("\nOpções disponíveis para Status do Visto:");
@@ -542,10 +602,9 @@ public static class InputParameters  // Nome da classe alterado
                 continue;
             }
 
-            // Tenta converter pelo nome do enum
-            if (visaStatusMap.TryGetValue(input, out VisaState_e result)) return result;
+            if (visaStatusMap.TryGetValue(input, out VisaState_e result))
+                return result;
 
-            // Tenta converter pelo número do enum
             if (int.TryParse(input, out int numValue) && Enum.IsDefined(typeof(VisaState_e), numValue))
                 return (VisaState_e)numValue;
 
@@ -556,7 +615,6 @@ public static class InputParameters  // Nome da classe alterado
 
 
     //Courses
-
 
     /// <summary>
     /// Solicita ao usuário que selecione um tipo de curso.
@@ -650,36 +708,91 @@ public static class InputParameters  // Nome da classe alterado
         }
     }
 
-    public static List<Subject> InputSubjects(string prompt = "Selecione as disciplinas do curso", List<Subject>? currentSubjects = null, bool isToEdit = false)
+    /// <summary>  Só deve ser usado no modo Edit</summary>
+    /// <param name="prompt"></param>
+    /// <param name="currentSubjects"></param>
+    /// <returns></returns>
+    public static List<Subject> InputSubjects(string prompt = "Editar disciplinas do curso.", List<Subject>? currentSubjects = null)
     {
+        // A lista de disciplinas atual (as que estão no curso antes da edição).
         var selectedSubjects = currentSubjects != null ? new List<Subject>(currentSubjects) : new List<Subject>();
 
-        if (isToEdit && selectedSubjects.Count > 0) WriteLine($"{prompt} (Enter para manter as disciplinas já selecionadas: {selectedSubjects.Count})");
-        else WriteLine(prompt);
+        // 1. Apresentação inicial e instruções.
+        WriteLine("==========================================");
+        WriteLine(prompt);
 
-        // Pergunta ao usuário e pesquisa na base de dados, permitindo selecionar múltiplos
-        var matches = BaseEntity.AskAndSearch<Subject>(
-            "disciplina",
-            FileManager.DataBaseType.Subject,
-            returnAll: false,
-            allowMultiple: true
-        );
-
-        if (matches.Count == 0)
+        if (selectedSubjects.Count > 0)
         {
-            WriteLine("Nenhuma disciplina selecionada.");
-            return selectedSubjects; // retorna a lista atual ou vazia
+            WriteLine($"Disciplinas atualmente selecionadas (Total: {selectedSubjects.Count}):");
+            foreach (var s in selectedSubjects)
+                WriteLine($" - {s.Name_s} (ID {s.ID_i})");
+        }
+        else
+        {
+            WriteLine("Nenhuma disciplina está atualmente selecionada.");
         }
 
-        // Adiciona as disciplinas selecionadas à lista existente, evitando duplicados
-        foreach (var s in matches)
+        WriteLine("\nInstruções: Digite o ID ou nome da disciplina para ADICIONAR. Digite 'REMOVER [ID/Nome]' para remover. Digite 'FIM' para terminar.");
+        WriteLine("==========================================");
+
+        // Loop de seleção contínua
+        while (true)
         {
-            if (!selectedSubjects.Contains(s))
-                selectedSubjects.Add(s);
+            Write("Ação (Adicionar/Remover/FIM): ");
+            string? input = ReadLine()?.Trim();
+
+            // 2. CONDIÇÃO DE SAÍDA: Enter vazio ou 'FIM'
+            if (string.IsNullOrWhiteSpace(input) || input.Equals("FIM", StringComparison.OrdinalIgnoreCase))
+                break;
+
+            // 3. Processamento de REMOÇÃO
+            if (input.StartsWith("REMOVER", StringComparison.OrdinalIgnoreCase))
+            {
+                var removalPart = input.Substring("REMOVER".Length).Trim();
+
+                if (string.IsNullOrWhiteSpace(removalPart))
+                {
+                    WriteLine("❌ Por favor, especifique o ID ou nome da disciplina a remover.");
+                    continue;
+                }
+
+                continue;
+            }
+
+            // 4. Processamento de ADIÇÃO (Input normal)
+            // Chama AskAndSearch para encontrar o item
+            // A busca é por item único (allowMultiple: false) para evitar o parsing complexo.
+            var matches = BaseEntity.AskAndSearch<Subject>(
+                "disciplina",
+                FileManager.DataBaseType.Subject,
+                returnAll: false,
+                allowMultiple: false
+            );
+
+            // 5. Adicionar o item se encontrado
+            if (matches.Count == 1)
+            {
+                var subject = matches[0];
+                if (!selectedSubjects.Contains(subject))
+                {
+                    selectedSubjects.Add(subject);
+                    WriteLine($"✅ Disciplina '{subject.Name_s}' (ID {subject.ID_i}) adicionada.");
+                }
+                else
+                {
+                    WriteLine($"⚠️ Disciplina '{subject.Name_s}' já estava selecionada.");
+                }
+            }
+            else if (matches.Count > 1)
+            {
+                // Isto pode acontecer se a pesquisa por nome for muito genérica.
+                WriteLine("⚠️ Múltiplas disciplinas encontradas. Por favor, use o ID ou nome exato.");
+            }
         }
 
-        // Mostra resumo final
-        WriteLine("\nDisciplinas selecionadas:");
+        // Resumo final da edição
+        WriteLine("\n--- Edição Concluída ---");
+        WriteLine($"Disciplinas Finais (Total: {selectedSubjects.Count}):");
         foreach (var s in selectedSubjects)
             WriteLine($" - {s.Name_s} (ID {s.ID_i})");
 
@@ -695,7 +808,7 @@ public static class InputParameters  // Nome da classe alterado
         {
             // Prompt correto dependendo se está a editar
             if (isToEdit && currentValue.HasValue) Write($"{prompt} (Enter para manter '{currentValue}'): ");
-            else Write($"{prompt} ({minEct}-{Course.MaxEctsPerSemester} ECTS, Enter para default): ");
+            else Write($"{prompt} ({minEct}-{MaxEctsPerSemester} ECTS, Enter para default): ");
 
             string? input = ReadLine()?.Trim();
 
@@ -709,9 +822,9 @@ public static class InputParameters  // Nome da classe alterado
             // Tenta converter
             if (short.TryParse(input, out short ects))
             {
-                if (ects >= minEct && ects <= Course.MaxEctsPerSemester)
+                if (ects >= minEct && ects <= MaxEctsPerSemester)
                     return ects;
-                WriteLine($"Valor inválido. Insira entre {minEct} e {Course.MaxEctsPerSemester} ECTS.");
+                WriteLine($"Valor inválido. Insira entre {minEct} e {MaxEctsPerSemester} ECTS.");
             }
             else
             {

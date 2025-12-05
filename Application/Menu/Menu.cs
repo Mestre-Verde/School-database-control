@@ -5,8 +5,6 @@ namespace Schoo_lSystem.Application.Menu;
 
 using static System.Console;
 
-using School_System.Infrastructure.FileManager;
-using School_System.Domain.Base;
 using School_System.Domain.CourseProgram;
 using School_System.Domain.SchoolMembers;
 
@@ -31,7 +29,7 @@ internal enum EditParamSubjects_e
 }
 
 
-public static class MenuRelated_cl
+public static class Menu
 {
     private const string UnknowonCommand_s = "❌ Comando desconhecido.\n";
     private const string BackToMenu_s = "🔙 A voltar ao menu anterior...\n";
@@ -175,7 +173,6 @@ public static class MenuRelated_cl
     // Aqui usamos Action, que é um delegate que representa um método sem parâmetros e sem retorno
     private static void MenuAddObject()
     {
-
         var actions = new Dictionary<GlobalObjectCommands_e, Action>
         {
             { GlobalObjectCommands_e.UndergraduateStudent, () => _ = UndergraduateStudent.Create() },
@@ -233,7 +230,6 @@ public static class MenuRelated_cl
         Nationality = 6,
         Email = 7
     }
-
     internal enum EditParamStudent_e
     {
         Back = 0,
@@ -244,48 +240,8 @@ public static class MenuRelated_cl
         BirthDate = 5,
         Nationality = 6,
         Email = 7,
-        Tutor = 8,
-        Grades = 9
+        Grades
     }
-    private const string MenuEditStudent_s = @"
-    Editar dados dos estudantes:
-        [0] Back        -> Voltar ao menu principal
-        [1] Help        -> Mostrar este texto
-        [2] Name        -> Alterar o nome
-        [3] Age         -> Alterar a idade
-        [4] Gender      -> Alterar o género
-        [5] BirthDate   -> Alterar a data de nascimento
-        [6] Nationality -> Alterar a nacionalidade
-        [7] Email       -> Alterar o email
-        [8] Tutor       -> Alterar o tutor
-        [9] Grades      -> Alterar notas
-";
-    internal static string GetMenuEditStudent() => MenuEditStudent_s;
-    internal static EditParamStudent_e MenuEditStudent()
-    {
-        while (true)
-        {
-            Write("\n(edit student)> ");
-            string? input_s = ReadLine()?.Trim();
-            switch (input_s)// Atalhos numéricos
-            {
-                case "0": return EditParamStudent_e.Back;
-                case "1": Write(MenuEditStudent_s); return EditParamStudent_e.Help;
-                case "2": return EditParamStudent_e.Name;
-                case "3": return EditParamStudent_e.Age;
-                case "4": return EditParamStudent_e.Gender;
-                case "5": return EditParamStudent_e.BirthDate;
-                case "6": return EditParamStudent_e.Nationality;
-                case "7": return EditParamStudent_e.Email;
-                case "8": return EditParamStudent_e.Tutor;
-                case "9": return EditParamStudent_e.Grades;
-            }
-            // Se for texto OU número, validar se existe no enum
-            if (Enum.TryParse(input_s, true, out EditParamStudent_e result) && Enum.IsDefined(typeof(EditParamStudent_e), result)) { return result; }
-            WriteLine(UnknowonCommand_s);
-        }
-    }
-
     internal enum EditParamTeacher_e
     {
         Back = 0,
@@ -298,47 +254,170 @@ public static class MenuRelated_cl
         Email = 7,
         Department = 8
     }
-    private const string MenuEditTeacher_s = @"
-        Editar dados do professor:
-            [0] Back        -> Voltar ao menu principal
-            [1] Help        -> Mostrar este texto
-            [2] Name        -> Alterar o nome
-            [3] Age         -> Alterar a idade
-            [4] Gender      -> Alterar o género
-            [5] BirthDate   -> Alterar a data de nascimento
-            [6] Nationality -> Alterar a nacionalidade
-            [7] Email       -> Alterar o email
-            [8] Department  -> Alterar o departamento
-        ";
-    internal static string GetMenuEditTeacher() => MenuEditTeacher_s;
-    internal static EditParamTeacher_e MenuEditTeacher()
+    internal enum EditParamGraduateStudent_e
     {
-        while (true)
+        Back = 0,
+        Help = 1,
+        Name = 2,
+        Age = 3,
+        Gender = 4,
+        BirthDate = 5,
+        Nationality = 6,
+        Email = 7,
+        Major = 8,
+        Year = 9,
+        ThesisTopic = 10,
+        Advisor = 11
+    }
+    internal enum EditParamInternationalStudent_e
+    {
+        Back = 0,
+        Help = 1,
+        Name = 2,
+        Age = 3,
+        Gender = 4,
+        BirthDate = 5,
+        Nationality = 6,
+        Email = 7,
+        Major = 8,
+        Year = 9,
+        Country = 10,
+        VisaStatus = 11
+    }
+    internal enum EditParamCourse_e
+    {
+        Back = 0,
+        Help = 1,
+        Name = 2,
+        Type = 3,
+        Duration = 4,
+    }
+    internal enum EditParamSubject_e
+    {
+        Back = 0,
+        Help = 1,
+        Name = 2,
+        ECTS = 3,
+        Professor = 4,
+        Grade = 5
+    }
+
+    // Função genérica que processa a leitura de menu de qualquer enum
+    // T deve ser um tipo enum não-nulo (struct, Enum)
+    private static T AskMenu<T>(string prompt, string menuText) where T : struct, Enum
+    {
+        while (true) // Loop infinito até receber uma entrada válida
         {
-            Write("\n(edit teacher)> ");
-            string? input_s = ReadLine()?.Trim();
+            Write($"\n({prompt})> "); // Mostra o prompt do menu
+            string? input = ReadLine()?.Trim(); // Lê a entrada do usuário e remove espaços em branco
 
-            switch (input_s) // atalhos numéricos
+            // --- Atalhos numéricos ---
+            // Se o input for um número válido e existir no enum, retorna o enum correspondente
+            if (int.TryParse(input, out int num) && Enum.IsDefined(typeof(T), num))
             {
-                case "0": return EditParamTeacher_e.Back;
-                case "1": Write(MenuEditTeacher_s); return EditParamTeacher_e.Help;
-                case "2": return EditParamTeacher_e.Name;
-                case "3": return EditParamTeacher_e.Age;
-                case "4": return EditParamTeacher_e.Gender;
-                case "5": return EditParamTeacher_e.BirthDate;
-                case "6": return EditParamTeacher_e.Nationality;
-                case "7": return EditParamTeacher_e.Email;
-                case "8": return EditParamTeacher_e.Department;
+                return (T)Enum.ToObject(typeof(T), num); // Converte int para enum
             }
 
-            // Se for texto, tentar converter para enum
-            if (Enum.TryParse(input_s, true, out EditParamTeacher_e result) && Enum.IsDefined(typeof(EditParamTeacher_e), result))
+            // --- Mostrar menu (Help) ---
+            // Se o usuário digitar "1", exibe o texto do menu e retorna Help
+            if (input == "1")
             {
-                return result;
+                WriteLine(menuText); // Mostra o menu completo
+                return (T)Enum.ToObject(typeof(T), 1); // Retorna o valor correspondente a Help
             }
 
-            WriteLine(UnknowonCommand_s); // mensagem de comando desconhecido
+            // --- Tentar converter texto para enum ---
+            // Permite digitar diretamente o nome do enum (ex: "Name", "Age", etc.)
+            if (Enum.TryParse(input, true, out T result) && Enum.IsDefined(typeof(T), result))
+            {
+                return result; // Retorna o enum correspondente
+            }
+
+            // --- Entrada inválida ---
+            // Se não for reconhecido nem como número nem como texto, avisa o usuário
+            WriteLine("Comando desconhecido.");
         }
     }
 
+    // ------------------ Menus ------------------
+
+    // Geração genérica de menu para membros de escola
+    private static string GenerateSchoolMemberMenu(string memberType, string extraParameters = "")
+    {
+        return $@"
+    Editar dados {memberType}:
+        [0] Back          -> Voltar
+        [1] Help          -> Mostrar este texto
+        [2] Name          -> Alterar o nome
+        [3] Age           -> Alterar a idade
+        [4] Gender        -> Alterar o género
+        [5] BirthDate     -> Alterar a data de nascimento
+        [6] Nationality   -> Alterar a nacionalidade
+        [7] Email         -> Alterar o email
+{extraParameters}";
+    }
+
+    // Textos específicos de cada tipo
+    private const string MenuEditTeacherExtra = @"        [8] Department    -> Alterar o departamento";
+
+    private const string MenuEditUndergradExtra = @"";
+    private const string MenuEditGraduateExtra = @"        [8] Major         -> Alterar o curso
+        [9] Year          -> Alterar o ano atual
+        [10] ThesisTopic  -> Alterar o tema da dissertação/tese
+        [11] Advisor      -> Alterar o orientador";
+    private const string MenuEditInternationalExtra = @"        [8] Major        -> Alterar o curso
+        [9] Year         -> Alterar o ano atual
+        [10] Country     -> Alterar o país de origem
+        [11] VisaStatus  -> Alterar o estado do visto";
+
+    // GetMenus
+    internal static string GetMenuEditTeacher() => GenerateSchoolMemberMenu("do Professor", MenuEditTeacherExtra);
+    internal static string GetMenuEditUndergraduateStudent() => GenerateSchoolMemberMenu("do estudante CETEsP/Licenciatura", MenuEditUndergradExtra);
+    internal static string GetMenuEditGraduateStudent() => GenerateSchoolMemberMenu("do estudante de Mestrado/Doutoramento", MenuEditGraduateExtra);
+    internal static string GetMenuEditInternationalStudent() => GenerateSchoolMemberMenu("do estudante internacional", MenuEditInternationalExtra);
+
+    // ------------------ Inputs ------------------
+
+    // Chamadas genéricas
+    internal static EditParamTeacher_e MenuEditTeacher() => AskMenu<EditParamTeacher_e>("edit teacher", GetMenuEditTeacher());
+
+    internal static EditParamStudent_e MenuEditUndergraduateStudent() => AskMenu<EditParamStudent_e>("edit undergraduate student", GetMenuEditUndergraduateStudent());
+
+    internal static EditParamGraduateStudent_e MenuEditGraduateStudent() => AskMenu<EditParamGraduateStudent_e>("edit graduate student", GetMenuEditGraduateStudent());
+
+    internal static EditParamInternationalStudent_e MenuEditInternationalStudent() => AskMenu<EditParamInternationalStudent_e>("edit international student", GetMenuEditInternationalStudent());
+
+    // ------------------ Subjects & Courses (3º grau) ------------------
+
+    private const string MenuEditSubject_s = @"
+        Editar dados da disciplina:
+            [0] Back       -> Voltar
+            [1] Help       -> Mostrar estado atual vs original
+            [2] Name       -> Alterar o nome da disciplina
+            [3] ECTS       -> Alterar os ECTS
+            [4] Professor  -> Alterar o professor responsável
+            [5] Grade      -> Alterar a nota
+        ";
+
+    private const string MenuEditCourse_s = @"
+        Editar dados do Curso:
+            [0] Back       -> Voltar
+            [1] Help       -> Mostrar estado atual vs original
+            [2] Name       -> Alterar o nome
+            [3] Type       -> Alterar o tipo de curso
+            [4] Duration   -> Alterar a tempo total do curso
+        ";
+
+    internal static string GetMenuEditSubject() => MenuEditSubject_s;
+    internal static string GetMenuEditCourse() => MenuEditCourse_s;
+
+    internal static EditParamSubject_e MenuEditSubject() =>
+        AskMenu<EditParamSubject_e>("edit subject", MenuEditSubject_s);
+
+    internal static EditParamCourse_e MenuEditCourse() =>
+        AskMenu<EditParamCourse_e>("edit course", MenuEditCourse_s);
+
 }
+
+
+
