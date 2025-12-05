@@ -11,6 +11,8 @@ using School_System.Domain.CourseProgram;
 using School_System.Domain.SchoolMembers;
 using School_System.Application.Utils;
 
+
+
 internal class Teacher : SchoolMember
 {
     [JsonInclude] internal string Department_s { get; private set; } = "";
@@ -36,21 +38,33 @@ internal class Teacher : SchoolMember
     {
         return CreateEntity("do(a) professor(a)", FileManager.DataBaseType.Teacher,
             // Primeiro os campos específicos
-            dict =>
+            parameters =>
             {
-                dict["Department"] = InputParameters.InputName("Departamento do(a) professor(a)");
+                // --- Variáveis temporárias ---
+                DateTime? trash = null;
+
+                // --- Campos base ---
+                byte age = InputParameters.InputAge($"Escreva a idade do(a) professor(a)", ref trash, null, false, MinAge);
+                parameters["Age"] = age;
+                parameters["Gender"] = InputParameters.InputGender($"Escreva o gênero do(a) professor(a)");
+                DateTime birthDate = InputParameters.InputBirthDate($"Escreva a data de nascimento do(a) professor(a)", ref age, MinAge);
+                parameters["BirthDate"] = birthDate;
+                parameters["Nationality"] = InputParameters.InputNationality($"Escreva a nacionalidade do(a) professor(a)");
+                parameters["Email"] = InputParameters.InputEmail($"Escreva o email do(a) professor(a)");
+                
+                parameters["Department"] = InputParameters.InputName("Departamento do(a) professor(a)");
             },
 
             // Depois o factory para criar o objeto
-            dict => new Teacher(
-                (string)dict["Name"],
-                (byte)dict["Age"],
-                (int)dict["ID"],
-                (char)dict["Gender"],
-                (DateTime)dict["BirthDate"],
-                (Nationality_e)dict["Nationality"],
-                (string)dict["Email"],
-                (string)dict["Department"]
+            parameters => new Teacher(
+                (string)parameters["Name"],
+                (byte)parameters["Age"],
+                (int)parameters["ID"],
+                (char)parameters["Gender"],
+                (DateTime)parameters["BirthDate"],
+                (Nationality_e)parameters["Nationality"],
+                (string)parameters["Email"],
+                (string)parameters["Department"]
             )
         );
     }
@@ -102,55 +116,55 @@ internal class Teacher : SchoolMember
         bool hasChanged = false;
 
         // 2. Mostrar menu inicial
-        Write(MenuRelated_cl.GetMenuEditTeacher());
+        Write(Menu.GetMenuEditTeacher());
 
         // 3. Loop de edição
         while (true)
         {
-            var option = MenuRelated_cl.MenuEditTeacher();
-            if (option == MenuRelated_cl.EditParamTeacher_e.Back) break;
+            var option = Menu.MenuEditTeacher();
+            if (option == Menu.EditParamTeacher_e.Back) break;
 
             switch (option)
             {
-                case MenuRelated_cl.EditParamTeacher_e.Help:
+                case Menu.EditParamTeacher_e.Help:
                     PrintTeacherComparison(teacher, original);
                     break;
 
-                case MenuRelated_cl.EditParamTeacher_e.Name:
+                case Menu.EditParamTeacher_e.Name:
                     teacher.Name_s = InputParameters.InputName("Escreva o nome do(a) professor(a)", teacher.Name_s, true);
                     hasChanged = true;
                     break;
 
-                case MenuRelated_cl.EditParamTeacher_e.Age:
+                case Menu.EditParamTeacher_e.Age:
                     DateTime? tmp = teacher.BirthDate_dt;
                     teacher.Age_by = InputParameters.InputAge("Escreva a idade do(a) professor(a)", ref tmp, teacher.Age_by, true, MinAge);
                     if (tmp.HasValue) teacher.BirthDate_dt = tmp.Value;
                     hasChanged = true;
                     break;
 
-                case MenuRelated_cl.EditParamTeacher_e.Gender:
+                case Menu.EditParamTeacher_e.Gender:
                     teacher.Gender_c = InputParameters.InputGender("Escreva o gênero do(a) professor(a)", teacher.Gender_c, true);
                     hasChanged = true;
                     break;
 
-                case MenuRelated_cl.EditParamTeacher_e.BirthDate:
+                case Menu.EditParamTeacher_e.BirthDate:
                     byte ageTemp = teacher.Age_by;
-                    teacher.BirthDate_dt = InputParameters.InputBirthDate("Escreva a data de nascimento do(a) professor(a)", ref ageTemp, teacher.BirthDate_dt, true);
+                    teacher.BirthDate_dt = InputParameters.InputBirthDate("Escreva a data de nascimento do(a) professor(a)", ref ageTemp, 20, teacher.BirthDate_dt, true);
                     teacher.Age_by = ageTemp;
                     hasChanged = true;
                     break;
 
-                case MenuRelated_cl.EditParamTeacher_e.Nationality:
+                case Menu.EditParamTeacher_e.Nationality:
                     teacher.Nationality = InputParameters.InputNationality("Escreva a nacionalidade do(a) professor(a)", teacher.Nationality, true);
                     hasChanged = true;
                     break;
 
-                case MenuRelated_cl.EditParamTeacher_e.Email:
+                case Menu.EditParamTeacher_e.Email:
                     teacher.Email_s = InputParameters.InputEmail("Escreva o email do professor(a)", teacher.Email_s, true);
                     hasChanged = true;
                     break;
 
-                case MenuRelated_cl.EditParamTeacher_e.Department:
+                case Menu.EditParamTeacher_e.Department:
                     teacher.Department_s = InputParameters.InputName("Escreva o nome do departamento", teacher.Department_s, true);
                     hasChanged = true;
                     break;
@@ -180,3 +194,4 @@ internal class Teacher : SchoolMember
         }
     }
 }
+

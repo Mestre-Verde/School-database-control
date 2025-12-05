@@ -26,7 +26,7 @@ class Program
 
     static void Loop()
     {
-        MenuRelated_cl.MainMenu();
+        Menu.MainMenu();
     }
 
     static void Main()

@@ -3,40 +3,21 @@ namespace School_System.Domain.CourseProgram;
 
 using static System.Console;
 using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
-using System.Data.Common;
 
 using School_System.Infrastructure.FileManager;
-using Schoo_lSystem.Application.Menu;
 using School_System.Domain.Base;
-using School_System.Domain.CourseProgram;
-using School_System.Domain.SchoolMembers;
 using School_System.Application.Utils;
-
-public enum CourseType_e
-{
-    NONE = 0,
-    CTESP = 5, // nivel 5
-    Licenciatura = 6,
-    Mestrado = 7,
-    Doutoramento = 8
-}
+using Schoo_lSystem.Application.Menu;
 
 public class Course : BaseEntity
 {
-    [JsonInclude] internal CourseType_e Type_e { get; private set; }
-    [JsonInclude] internal float Duration_f { get; set; } // duração em anos pode ser 0,5
-    [JsonInclude] internal List<Subject> Subjects_l { get; private set; } = []; // o curso tem disciplinas default
-    internal protected const short MinCourseEct = 60;  // mínimo razoável para um curso
-    internal protected const short MaxCourseEct = 360; // máximo típico de licenciatura prolongada
-
-    internal protected const short MaxEctsPerYear = 60;
-    internal protected const short MaxEctsPerSemester = MaxEctsPerYear / 2;
+    [JsonInclude] private CourseType_e Type_e;
+    [JsonInclude] private float Duration_f { get; set; } // duração em anos pode ser 0,5
 
     protected override string FormatToString()
     {
         string baseDesc = BaseFormat();
-        return $"{baseDesc}, Tipo: {Type_e}, Duração: {Duration_f} anos, Disciplinas: {Subjects_l.Count()}";
+        return $"{baseDesc}, Tipo: {Type_e}, Duração: {Duration_f} anos";
     }
 
     protected override void Introduce() { Write("\nNovo Curso: "); WriteLine(FormatToString()); }
@@ -45,33 +26,28 @@ public class Course : BaseEntity
     public Course() : base(0, "") { }
 
     // Construtor principal
-    private Course(string name = "", int id = default, CourseType_e type = default, float duracao = default, List<Subject>? subjects = null)
+    private Course(string name = "", int id = default, CourseType_e type = default, float duracao = default)
         : base(id, name)
     {
         Type_e = type;
         Duration_f = duracao;
-        Subjects_l = subjects ?? new List<Subject>();// Se a lista passada for null, inicializa vazia
 
         Introduce();
     }
 
     internal static Course? Create()
     {
-        return CreateEntity<Course>(
-            "do curso",
-            FileManager.DataBaseType.Course,
+        return CreateEntity("do Curso", FileManager.DataBaseType.Course,
             dict =>
             {
                 dict["Type"] = InputParameters.InputCourseType("Escreva o tipo de curso");
                 dict["Duration"] = InputParameters.InputCourseDuration("Escreva a duração do curso em anos");
-                dict["Subjects"] = InputParameters.InputSubjects("Selecione as disciplinas do curso");
             },
             dict => new Course(
                 (string)dict["Name"],
                 (int)dict["ID"],
                 (CourseType_e)dict["Type"],
-                (float)dict["Duration"],
-                (List<Subject>)dict["Subjects"]
+                (float)dict["Duration"]
             )
         );
     }
@@ -80,7 +56,94 @@ public class Course : BaseEntity
 
     internal static void Select()
     {
-        // aqui vai ser diferente, equanto nos alunos 
+        var selected = AskAndSearch<Course>("curso", FileManager.DataBaseType.Course);
+        if (selected.Count == 0) return;
+
+        Course course = selected[0];
+        EditCourse(course);
     }
+    private static void PrintCourseComparison(Course current, dynamic original)
+    {
+        WriteLine("\n===== ESTADO DO CURSO =====");
+        WriteLine($"{"Campo",-15} | {"Atual",-25} | {"Original"}");
+        WriteLine(new string('-', 70));
+
+        void Show(string label, object? now, object? old) => WriteLine($"{label,-15} | {now,-25} | {old}");
+
+        Show("Nome", current.Name_s, original.Name_s);
+        Show("Tipo", current.Type_e, original.Type_e);
+        Show("Duração", current.Duration_f, original.Duration_f);
+
+        WriteLine(new string('=', 70));
+    }
+    internal static void EditCourse(Course course)
+    {
+        // 1. Guardar original
+        var original = new
+        {
+            course.Name_s,
+            course.Type_e,
+            course.Duration_f,
+        };
+
+        bool hasChanged = false;
+
+        Write(Menu.GetMenuEditCourse());
+
+        while (true)
+        {
+            var option = Menu.MenuEditCourse();
+            if (option == Menu.EditParamCourse_e.Back) break;
+
+            switch (option)
+            {
+                case Menu.EditParamCourse_e.Help:
+                    PrintCourseComparison(course, original);
+                    break;
+
+                case Menu.EditParamCourse_e.Name:
+                    course.Name_s = InputParameters.InputName(
+                        "Escreva o nome do curso",
+                        course.Name_s,
+                        true);
+                    hasChanged = true;
+                    break;
+
+                case Menu.EditParamCourse_e.Type:
+                    course.Type_e = InputParameters.InputCourseType(
+                        "Escreva o tipo do curso",
+                        course.Type_e,
+                        true);
+                    hasChanged = true;
+                    break;
+
+                case Menu.EditParamCourse_e.Duration:
+                    course.Duration_f = InputParameters.InputCourseDuration(
+                        "Escreva a duração do curso em anos",
+                        course.Duration_f,
+                        true);
+                    hasChanged = true;
+                    break;
+            }
+        }
+
+        // 3. Guardar
+        if (!hasChanged) return;
+
+        Write("\nGuardar alterações? (S/N): ");
+        if ((ReadLine()?.Trim().ToUpper()) == "S")
+        {
+            FileManager.WriteOnDataBase(FileManager.DataBaseType.Course, course);
+            WriteLine("✔️ Alterações salvas.");
+        }
+        else
+        {
+            WriteLine("❌ Alterações descartadas.");
+            course.Name_s = original.Name_s;
+            course.Type_e = original.Type_e;
+            course.Duration_f = original.Duration_f;
+        }
+    }
+
 
 }

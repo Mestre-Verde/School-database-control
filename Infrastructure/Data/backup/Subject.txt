@@ -1,0 +1,2 @@
+{"ECTS_i":7,"Professor":null,"Grade":0,"ID_i":5,"Name_s":"Aprendizagem de M\u00E1quina (Machine Learning)"}
+{"ECTS_i":6,"Professor":null,"Grade":0,"ID_i":4,"Name_s":"Arquitetura de Microprocessadores"}

@@ -4,42 +4,27 @@
     "Duration_f": 2,
     "Subjects_l": [],
     "ID_i": 0,
-    "Name_s": "Electrotecnio"
+    "Name_s": "CTeSP em Automa\u00E7\u00E3o Industrial"
   },
   "1": {
-    "Type_e": 7,
-    "Duration_f": 2,
+    "Type_e": 6,
+    "Duration_f": 3,
     "Subjects_l": [],
     "ID_i": 1,
-    "Name_s": "Mestrado em Eletrecidade"
+    "Name_s": "Licenciatura em Engenharia de Software"
   },
   "2": {
-    "Type_e": 5,
-    "Duration_f": 2,
-    "Subjects_l": [
-      {
-        "ECTS_i": 5,
-        "Professor": null,
-        "Grade": 0,
-        "ID_i": 0,
-        "Name_s": "Matem\u00E1tica"
-      }
-    ],
+    "Type_e": 7,
+    "Duration_f": 1.5,
+    "Subjects_l": [],
     "ID_i": 2,
-    "Name_s": "Mecatr\u00F3nica"
+    "Name_s": "Mestrado em Sistemas de Energia Sustent\u00E1vel"
   },
   "3": {
-    "Type_e": 7,
-    "Duration_f": 2,
+    "Type_e": 8,
+    "Duration_f": 4,
     "Subjects_l": [],
     "ID_i": 3,
-    "Name_s": ""
-  },
-  "4": {
-    "Type_e": 8,
-    "Duration_f": 4.5,
-    "Subjects_l": [],
-    "ID_i": 4,
-    "Name_s": "Doutoramento em ciencia do mundo"
+    "Name_s": "Doutoramento em Intelig\u00EAncia Artificial Aplicada"
   }
 }

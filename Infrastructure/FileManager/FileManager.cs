@@ -9,6 +9,7 @@ using static System.Console;
 using System.Text.Json;
 using System.Reflection;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 
 using School_System.Domain.Base;
 using School_System.Domain.SchoolMembers;
@@ -56,7 +57,7 @@ public static class FileManager
         { "UndergraduateStudent","Domain/SchoolMembers/UndergraduateStudent.cs"},
         { "GraduateStudent",     "Domain/SchoolMembers/GraduateStudent.cs"},
         { "InternationalStudent","Domain/SchoolMembers/InternationalStudent.cs"},
-        {"Scholarship",          "Domain/Scholarship/Scholarship.cs"},
+        { "Scholarship",         "Domain/Scholarship/Scholarship.cs"},
 
         // Infrastructure
         { "FileManager",         "Infrastructure/FileManager/FileManager.cs" },
@@ -75,7 +76,7 @@ public static class FileManager
         DomainDirectories.Values          // Pega todos os valores do dicionário DomainDirectories
         .Concat(ApplicationDirectories.Values)   // Concatena os valores do ApplicationDirectories
         .Concat(InfrastructureDirectories.Values); // Concatena os valores do InfrastructureDirectories
-        
+
     // Retorna todos os caminhos de arquivos definidos no dicionário Files
     private static IEnumerable<string> AllFiles => Files.Values;
 
@@ -108,6 +109,8 @@ public static class FileManager
         };
     }
 
+    //---------------------
+    
     // Desenha uma barra de progresso simples no terminal
     private static void DrawProgressBar(int value, int max)
     {
@@ -115,35 +118,89 @@ public static class FileManager
         int filledBlocks = (int)Math.Round((double)value / max * totalBlocks); // Percentagem preenchida
 
         // Cria visual da barra com '#' e '-'
-        string bar = "[" +
-            new string('#', filledBlocks) +
-            new string('-', totalBlocks - filledBlocks) +
-            $"] {value * 100 / max}% ";
+        string bar = "[" + new string('#', filledBlocks) + new string('-', totalBlocks - filledBlocks) + $"] {value * 100 / max}% ";
 
         CursorLeft = 0; // Reposiciona o cursor para sobrescrever a linha anterior
         Write(bar);     // Escreve a barra atualizada
     }
 
-    /// <summary>     Verifica se o ficheiro contém JSON válido.  </summary>
+    /// <summary> Verifica se o ficheiro contém JSON válido. </summary>
     private static bool IsValidJson(string json)
     {
         try { JsonDocument.Parse(json); return true; }
         catch { return false; }
     }
 
+    /// <summary> Tenta limpar ou reparar JSONs parcialmente corrompidos </summary>
+    private static string TryCleanJson(string raw)
+    {
+        string c = raw.Trim().Trim('\uFEFF');
+
+        // -------------------------
+        // 1) Remover vírgula a mais
+        // -------------------------
+        c = Regex.Replace(c, ",\\s*}", "}");
+        c = Regex.Replace(c, ",\\s*]", "]");
+
+        // ---------------------------------------------------------
+        // 2) ADICIONAR vírgula quando falta ENTRE OBJECTOS 
+        // ---------------------------------------------------------
+        // "}" imediatamente seguido de aspas → falta vírgula
+        c = Regex.Replace(c, @"}\s*""", "},\n\"");
+
+        // "]" seguido de aspas → falta vírgula num array
+        c = Regex.Replace(c, @"]\s*""", "],\n\"");
+
+        // ---------------------------------------------------------
+        // 3) Fechar objetos/arrays que ficaram abertos
+        // ---------------------------------------------------------
+        int openObj = c.Count(ch => ch == '{');
+        int closeObj = c.Count(ch => ch == '}');
+        if (openObj > closeObj)
+            c += "}";
+
+        int openArr = c.Count(ch => ch == '[');
+        int closeArr = c.Count(ch => ch == ']');
+        if (openArr > closeArr)
+            c += "]";
+
+        // ---------------------------------------------------------
+        // 4) Se isto não parece JSON → embrulhar em { }
+        // ---------------------------------------------------------
+        if (!c.StartsWith("{") && !c.StartsWith("["))
+            c = "{" + c;
+
+        if (!c.EndsWith("}") && !c.EndsWith("]"))
+            c += "}";
+
+        // ---------------------------------------------------------
+        // 5) fallback: ainda inválido → return "{}"
+        // ---------------------------------------------------------
+        if (!IsValidJson(c))
+            c = "{}";
+
+        return c;
+    }
+
+
     /// <summary> Verifica se todos os ficheiros necessários existem e cria os que faltam </summary>
     /// <param name="setup">True para mostrar strings, false para esconder</param>
     /// <returns></returns>
+    /// <summary> Verifica se todos os ficheiros necessários existem e cria/corrige os que faltam </summary>
     internal static bool StartupCheckFilesWithProgress(bool setup = true)
     {
         var missing = new List<string>();
-        bool error = false;
+        var fixedJsons = new List<string>();
+        var failedJsons = new List<string>();
 
         var dirs = AllDirectories.ToList();
         var files = AllFiles.ToList();
 
         int total = dirs.Count + files.Count;
         int count = 0;
+
+        string backupDir = InfrastructureDirectories["Backup"];
+        Directory.CreateDirectory(backupDir);
 
         if (setup) WriteLine("A verificar diretórios e ficheiros...");
 
@@ -158,65 +215,109 @@ public static class FileManager
 
             count++;
             DrawProgressBar(count, total);
-            Thread.Sleep(100); // 0,1s de delay para visualização
+            Thread.Sleep(10);
         }
 
-        // 2) Criar ficheiros
+        // 2) Criar/verificar ficheiros
         foreach (var file in files)
         {
             string? parent = Path.GetDirectoryName(file);
             if (!string.IsNullOrWhiteSpace(parent))
                 Directory.CreateDirectory(parent);
 
+            // Criar ficheiros inexistentes
             if (!File.Exists(file))
             {
-                // JSON → criar {}
                 if (file.EndsWith(".json"))
                     File.WriteAllText(file, "{}");
                 else
-                    File.WriteAllText(file, ""); // cs ou outros
+                    File.WriteAllText(file, "");
 
                 missing.Add(file);
             }
-            else
+            // Verificar JSON
+            else if (file.EndsWith(".json"))
             {
-                // Validar JSON
-                if (file.EndsWith(".json"))
-                {
-                    string content = File.ReadAllText(file).Trim();
+                string content = File.ReadAllText(file).Trim();
 
-                    if (string.IsNullOrWhiteSpace(content))
+                if (string.IsNullOrWhiteSpace(content))
+                {
+                    File.WriteAllText(file, "{}");
+                    fixedJsons.Add(file);
+                }
+                else if (!IsValidJson(content))
+                {
+                    WriteLine($"\n❌ JSON inválido → {file}");
+
+                    // ------------------------------------------------------
+                    // 1) Criar backup sempre antes de tocar no ficheiro
+                    // ------------------------------------------------------
+                    string fileName = Path.GetFileName(file);
+                    string backupName = Path.Combine(
+                        backupDir,
+                        $"{fileName}.bak_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}"
+                    );
+
+                    File.Copy(file, backupName, overwrite: false);
+                    WriteLine($"📦 Backup criado → {backupName}");
+
+                    // ------------------------------------------------------
+                    // 2) Tentar correções automáticas
+                    // ------------------------------------------------------
+                    string cleaned = TryCleanJson(content);
+
+                    if (IsValidJson(cleaned))
                     {
-                        WriteLine($"\n⚠ JSON vazio corrigido → {file}");
-                        File.WriteAllText(file, "{}");
+                        File.WriteAllText(file, cleaned);
+                        fixedJsons.Add(file);
+                        WriteLine($"✔ Corrigido automaticamente → {file}");
                     }
-                    else if (!IsValidJson(content))
+                    else
                     {
-                        WriteLine($"\n❌ JSON inválido → {file}");
-                        error = true;
+                        // ------------------------------------------------------
+                        // 3) Se não deu → reconstruir novo JSON mínimo
+                        // (mas o original está guardado em backup)
+                        // ------------------------------------------------------
+                        File.WriteAllText(file, "{}");
+                        failedJsons.Add(file);
+                        WriteLine($"⚠ Corrupção séria. Novo JSON criado → {file}");
                     }
                 }
             }
 
             count++;
             DrawProgressBar(count, total);
-            Thread.Sleep(100); // 0,1s de delay para visualização
+            Thread.Sleep(100);
         }
+        // 3) Mensagem final
+        WriteLine();
 
-        // Relatório final
         if (missing.Count > 0 && setup)
         {
-            WriteLine("\n📄 Criados:");
-            foreach (var m in missing)
-                WriteLine(" - " + m);
-        }
-        else if (setup)
-        {
-            WriteLine("\n✅ Tudo OK.");
+            WriteLine("📄 Criados:");
+            missing.ForEach(m => WriteLine(" - " + m));
         }
 
-        return !error;
+        if (fixedJsons.Count > 0)
+        {
+            WriteLine("\n🔧 JSON corrigidos:");
+            fixedJsons.ForEach(j => WriteLine(" - " + j));
+        }
+
+        if (failedJsons.Count > 0)
+        {
+            WriteLine("\n⚠ JSONs gravemente corrompidos (backup criado):");
+            failedJsons.ForEach(j => WriteLine(" - " + j));
+        }
+
+        if (failedJsons.Count == 0)
+            WriteLine("\n✅ Tudo OK.");
+        else
+            WriteLine("\n⚠ Atenção: Alguns JSON foram reconstruídos. Consulte os backups.");
+
+        return failedJsons.Count == 0;
     }
+
 
     //-----------------------
     //  Lê o conteúdo de um ficheiro, devolvendo "{}" se não existir
