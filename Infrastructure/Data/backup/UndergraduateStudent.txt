@@ -1,3 +1,8 @@
-{"Major":null,"Year":0,"GPA_d":0,"EnrolledSubjects_l":[],"Scholarships":[],"Age_by":0,"Gender_c":"\u0000","BirthDate_dt":"0001-01-01T00:00:00","Nationality":0,"Email_s":"","ID_i":0,"Name_s":""}
-{"Major":null,"Year":0,"GPA_d":0,"EnrolledSubjects_l":[],"Scholarships":[],"Age_by":0,"Gender_c":"\u0000","BirthDate_dt":"0001-01-01T00:00:00","Nationality":0,"Email_s":"","ID_i":1,"Name_s":""}
-{"Major":{"Type_e":5,"Duration_f":2,"Subjects_l":[{"ECTS_i":5,"Professor":null,"Grade":0,"ID_i":0,"Name_s":"Matem\u00E1tica"}],"ID_i":2,"Name_s":"Mecatr\u00F3nica"},"Year":1,"GPA_d":0,"EnrolledSubjects_l":[{"ECTS_i":5,"Professor":null,"Grade":0,"ID_i":0,"Name_s":"Matem\u00E1tica"}],"Scholarships":[],"Age_by":18,"Gender_c":"M","BirthDate_dt":"2007-03-16T00:00:00","Nationality":1,"Email_s":"craaggd234@gamil.com","ID_i":2,"Name_s":"Carlos"}
+{"Major":null,"Year":0,"GPA":0,"EnrolledSubjects":[],"Scholarships":[],"Gender_c":"\u0000","Nationality":0,"Email_s":"","Age_by":0,"BirthDate_dt":"0001-01-01T00:00:00","ID_i":4,"Name_s":""}
+{"Major":null,"Year":1,"GPA":0,"EnrolledSubjects":[],"Scholarships":[],"Gender_c":"F","Nationality":12,"Email_s":"","Age_by":32,"BirthDate_dt":"1993-12-04T00:00:00","ID_i":5,"Name_s":""}
+{"Major":null,"Year":3,"GPA":0,"EnrolledSubjects":[],"Scholarships":[],"Gender_c":"\u0000","Nationality":0,"Email_s":"","Age_by":0,"BirthDate_dt":"0001-01-01T00:00:00","ID_i":5,"Name_s":""}
+{"Major":null,"Year":0,"GPA":0,"EnrolledSubjects":[],"Scholarships":[],"Gender_c":"\u0000","Nationality":0,"Email_s":"","Age_by":0,"BirthDate_dt":"0001-01-01T00:00:00","ID_i":7,"Name_s":""}
+{"Major":null,"Year":0,"GPA":0,"EnrolledSubjects":[],"Scholarships":[],"Gender_c":"\u0000","Nationality":0,"Email_s":"","Age_by":0,"BirthDate_dt":"0001-01-01T00:00:00","ID_i":8,"Name_s":""}
+{"Major":null,"Year":3,"GPA":0,"EnrolledSubjects":[],"Scholarships":[],"Gender_c":"\u0000","Nationality":0,"Email_s":"","Age_by":0,"BirthDate_dt":"0001-01-01T00:00:00","ID_i":5,"Name_s":""}
+{"Major":null,"Year":0,"GPA":0,"EnrolledSubjects":[],"Scholarships":[],"Gender_c":"\u0000","Nationality":0,"Email_s":"","Age_by":0,"BirthDate_dt":"0001-01-01T00:00:00","ID_i":7,"Name_s":""}
+{"Major":null,"Year":0,"GPA":0,"EnrolledSubjects":[],"Scholarships":[],"Gender_c":"\u0000","Nationality":0,"Email_s":"","Age_by":0,"BirthDate_dt":"0001-01-01T00:00:00","ID_i":8,"Name_s":""}

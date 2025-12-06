@@ -1,1 +1,6 @@
-{"ThesisTopic":"","Advisor":null,"Major":null,"Year":0,"GPA_d":0,"EnrolledSubjects_l":[],"Scholarships":[],"Age_by":0,"Gender_c":"\u0000","BirthDate_dt":"0001-01-01T00:00:00","Nationality":0,"Email_s":"","ID_i":0,"Name_s":""}
+{"ThesisTopic":"","Advisor":null,"Major":null,"Year":0,"GPA":0,"EnrolledSubjects":[],"Scholarships":[],"Gender_c":"\u0000","Nationality":0,"Email_s":"","Age_by":0,"BirthDate_dt":"0001-01-01T00:00:00","ID_i":3,"Name_s":""}
+{"ThesisTopic":"","Advisor":null,"Major":null,"Year":0,"GPA":0,"EnrolledSubjects":[],"Scholarships":[],"Gender_c":"\u0000","Nationality":0,"Email_s":"","Age_by":0,"BirthDate_dt":"0001-01-01T00:00:00","ID_i":3,"Name_s":""}
+{"ThesisTopic":"","Advisor":null,"Major":null,"Year":0,"GPA":0,"EnrolledSubjects":[],"Scholarships":[],"Gender_c":"\u0000","Nationality":0,"Email_s":"","Age_by":0,"BirthDate_dt":"0001-01-01T00:00:00","ID_i":3,"Name_s":""}
+{"ThesisTopic":"","Advisor":null,"Major":null,"Year":0,"GPA":0,"EnrolledSubjects":[],"Scholarships":[],"Gender_c":"\u0000","Nationality":0,"Email_s":"","Age_by":0,"BirthDate_dt":"0001-01-01T00:00:00","ID_i":6,"Name_s":""}
+{"ThesisTopic":"","Advisor":null,"Major":null,"Year":0,"GPA":0,"EnrolledSubjects":[],"Scholarships":[],"Gender_c":"\u0000","Nationality":0,"Email_s":"","Age_by":0,"BirthDate_dt":"0001-01-01T00:00:00","ID_i":7,"Name_s":""}
+{"ThesisTopic":"","Advisor":null,"Major":null,"Year":0,"GPA":0,"EnrolledSubjects":[],"Scholarships":[],"Gender_c":"\u0000","Nationality":0,"Email_s":"","Age_by":25,"BirthDate_dt":"2000-04-02T00:00:00","ID_i":8,"Name_s":""}

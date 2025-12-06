@@ -54,14 +54,8 @@ public class Course : BaseEntity
 
     internal static void Remove() { RemoveEntity<Course>("Curso", FileManager.DataBaseType.Course); }
 
-    internal static void Select()
-    {
-        var selected = AskAndSearch<Course>("curso", FileManager.DataBaseType.Course);
-        if (selected.Count == 0) return;
+    internal static void Select() { SelectEntity<Course>("curso", FileManager.DataBaseType.Course, EditCourse); }
 
-        Course course = selected[0];
-        EditCourse(course);
-    }
     private static void PrintCourseComparison(Course current, dynamic original)
     {
         WriteLine("\n===== ESTADO DO CURSO =====");
@@ -76,6 +70,7 @@ public class Course : BaseEntity
 
         WriteLine(new string('=', 70));
     }
+
     internal static void EditCourse(Course course)
     {
         // 1. Guardar original
@@ -102,26 +97,17 @@ public class Course : BaseEntity
                     break;
 
                 case Menu.EditParamCourse_e.Name:
-                    course.Name_s = InputParameters.InputName(
-                        "Escreva o nome do curso",
-                        course.Name_s,
-                        true);
+                    course.Name_s = InputParameters.InputName("Escreva o nome do curso", course.Name_s, true);
                     hasChanged = true;
                     break;
 
                 case Menu.EditParamCourse_e.Type:
-                    course.Type_e = InputParameters.InputCourseType(
-                        "Escreva o tipo do curso",
-                        course.Type_e,
-                        true);
+                    course.Type_e = InputParameters.InputCourseType("Escreva o tipo do curso", course.Type_e, true);
                     hasChanged = true;
                     break;
 
                 case Menu.EditParamCourse_e.Duration:
-                    course.Duration_f = InputParameters.InputCourseDuration(
-                        "Escreva a duração do curso em anos",
-                        course.Duration_f,
-                        true);
+                    course.Duration_f = InputParameters.InputCourseDuration("Escreva a duração do curso em anos", course.Duration_f, true);
                     hasChanged = true;
                     break;
             }

@@ -28,7 +28,6 @@ internal enum EditParamSubjects_e
     ManageTeachers
 }
 
-
 public static class Menu
 {
     private const string UnknowonCommand_s = "❌ Comando desconhecido.\n";
@@ -302,52 +301,47 @@ public static class Menu
         Grade = 5
     }
 
-    // Função genérica que processa a leitura de menu de qualquer enum
-    // T deve ser um tipo enum não-nulo (struct, Enum)
+    /// <summary> Função genérica para ler opções de um menu baseado em enums.
+    /// A restrição <c>where T : struct, Enum</c> garante que T é um tipo enum válido:
+    /// - <c>struct</c> obriga T a ser um tipo por valor (como todos os enums),
+    /// - <c>Enum</c> garante que T é especificamente um enum.
+    /// Isto permite usar métodos como <c>Enum.TryParse</c> e <c>Enum.IsDefined</c>
+    /// com segurança e evita que tipos inválidos sejam passados para a função.
+    /// </summary>
     private static T AskMenu<T>(string prompt, string menuText) where T : struct, Enum
     {
-        while (true) // Loop infinito até receber uma entrada válida
+        while (true)
         {
-            Write($"\n({prompt})> "); // Mostra o prompt do menu
-            string? input = ReadLine()?.Trim(); // Lê a entrada do usuário e remove espaços em branco
+            Write($"\n({prompt})> ");
+            string? input = ReadLine()?.Trim();
+
+            // --- Help tem prioridade ---
+            if (input == "1") // Mostrar menu antes do TryParse
+            {
+                WriteLine(menuText);
+                return (T)Enum.ToObject(typeof(T), 1);
+            }
 
             // --- Atalhos numéricos ---
-            // Se o input for um número válido e existir no enum, retorna o enum correspondente
-            if (int.TryParse(input, out int num) && Enum.IsDefined(typeof(T), num))
-            {
-                return (T)Enum.ToObject(typeof(T), num); // Converte int para enum
-            }
+            if (int.TryParse(input, out int num) && Enum.IsDefined(typeof(T), num)) { return (T)Enum.ToObject(typeof(T), num); }
 
-            // --- Mostrar menu (Help) ---
-            // Se o usuário digitar "1", exibe o texto do menu e retorna Help
-            if (input == "1")
-            {
-                WriteLine(menuText); // Mostra o menu completo
-                return (T)Enum.ToObject(typeof(T), 1); // Retorna o valor correspondente a Help
-            }
-
-            // --- Tentar converter texto para enum ---
-            // Permite digitar diretamente o nome do enum (ex: "Name", "Age", etc.)
-            if (Enum.TryParse(input, true, out T result) && Enum.IsDefined(typeof(T), result))
-            {
-                return result; // Retorna o enum correspondente
-            }
+            // --- Nome do enum ---
+            if (Enum.TryParse(input, true, out T result) && Enum.IsDefined(typeof(T), result)) { return result; }
 
             // --- Entrada inválida ---
-            // Se não for reconhecido nem como número nem como texto, avisa o usuário
             WriteLine("Comando desconhecido.");
         }
     }
 
     // ------------------ Menus ------------------
 
-    // Geração genérica de menu para membros de escola
+    // Geração genérica de menus para membros de escola
     private static string GenerateSchoolMemberMenu(string memberType, string extraParameters = "")
     {
         return $@"
     Editar dados {memberType}:
-        [0] Back          -> Voltar
-        [1] Help          -> Mostrar este texto
+        [0] Back          -> Voltar & salvar
+        [1] Help          -> Mostrar este texto & uma comparação de dados
         [2] Name          -> Alterar o nome
         [3] Age           -> Alterar a idade
         [4] Gender        -> Alterar o género
@@ -359,7 +353,6 @@ public static class Menu
 
     // Textos específicos de cada tipo
     private const string MenuEditTeacherExtra = @"        [8] Department    -> Alterar o departamento";
-
     private const string MenuEditUndergradExtra = @"";
     private const string MenuEditGraduateExtra = @"        [8] Major         -> Alterar o curso
         [9] Year          -> Alterar o ano atual
@@ -411,11 +404,9 @@ public static class Menu
     internal static string GetMenuEditSubject() => MenuEditSubject_s;
     internal static string GetMenuEditCourse() => MenuEditCourse_s;
 
-    internal static EditParamSubject_e MenuEditSubject() =>
-        AskMenu<EditParamSubject_e>("edit subject", MenuEditSubject_s);
+    internal static EditParamSubject_e MenuEditSubject() => AskMenu<EditParamSubject_e>("edit subject", MenuEditSubject_s);
 
-    internal static EditParamCourse_e MenuEditCourse() =>
-        AskMenu<EditParamCourse_e>("edit course", MenuEditCourse_s);
+    internal static EditParamCourse_e MenuEditCourse() => AskMenu<EditParamCourse_e>("edit course", MenuEditCourse_s);
 
 }
 

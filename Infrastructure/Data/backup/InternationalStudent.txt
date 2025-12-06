@@ -1,0 +1,5 @@
+{"Country":0,"VisaStatus":2,"Major":null,"Year":0,"GPA":0,"EnrolledSubjects":[],"Scholarships":[],"Gender_c":"\u0000","Nationality":0,"Email_s":"","Age_by":0,"BirthDate_dt":"0001-01-01T00:00:00","ID_i":4,"Name_s":""}
+{"Country":0,"VisaStatus":4,"Major":null,"Year":0,"GPA":0,"EnrolledSubjects":[],"Scholarships":[],"Gender_c":"\u0000","Nationality":0,"Email_s":"","Age_by":0,"BirthDate_dt":"0001-01-01T00:00:00","ID_i":5,"Name_s":""}
+{"Country":0,"VisaStatus":3,"Major":null,"Year":0,"GPA":0,"EnrolledSubjects":[],"Scholarships":[],"Gender_c":"\u0000","Nationality":0,"Email_s":"","Age_by":0,"BirthDate_dt":"0001-01-01T00:00:00","ID_i":6,"Name_s":""}
+{"Country":0,"VisaStatus":1,"Major":null,"Year":0,"GPA":0,"EnrolledSubjects":[],"Scholarships":[],"Gender_c":"\u0000","Nationality":0,"Email_s":"","Age_by":0,"BirthDate_dt":"0001-01-01T00:00:00","ID_i":7,"Name_s":""}
+{"Country":14,"VisaStatus":4,"Major":null,"Year":4,"GPA":0,"EnrolledSubjects":[],"Scholarships":[],"Gender_c":"\u0000","Nationality":0,"Email_s":"","Age_by":0,"BirthDate_dt":"0001-01-01T00:00:00","ID_i":8,"Name_s":""}

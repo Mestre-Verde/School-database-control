@@ -39,7 +39,7 @@ public class Subject : BaseEntity
 
     internal static Subject? Create()
     {
-        return BaseEntity.CreateEntity("da Disciplina", FileManager.DataBaseType.Subject,
+        return CreateEntity("da Disciplina", FileManager.DataBaseType.Subject,
             dict =>
             {
                 dict["ECTS"] = InputParameters.InputSubjectsECTS("Escreva o número de ECTS da disciplina", MinEct);
@@ -59,17 +59,8 @@ public class Subject : BaseEntity
 
     internal static void Remove() { RemoveEntity<Subject>("Disciplina", FileManager.DataBaseType.Subject); }
 
-    internal static void Select()
-    {
-        var selected = AskAndSearch<Subject>(
-            "disciplina",
-            FileManager.DataBaseType.Subject);
+    internal static void Select() { SelectEntity<Subject>("disciplina", FileManager.DataBaseType.Subject, EditSubject); }
 
-        if (selected.Count == 0) return;
-
-        Subject subject = selected[0];
-        EditSubject(subject);
-    }
     private static void PrintSubjectComparison(Subject current, dynamic original)
     {
         WriteLine("\n===== ESTADO DA DISCIPLINA =====");
@@ -86,6 +77,7 @@ public class Subject : BaseEntity
 
         WriteLine(new string('=', 60));
     }
+
     private static void EditSubject(Subject subject)
     {
         // 1. Guardar estado original
@@ -135,10 +127,7 @@ public class Subject : BaseEntity
                     break;
 
                 case Menu.EditParamSubject_e.Grade:
-                    subject.Grade = (byte)InputParameters.InputInt(
-                        "Escreva a nota (0-20)",
-                        0, 20,
-                        subject.Grade, true);
+                    subject.Grade = (byte)InputParameters.InputInt("Escreva a nota (0-20)", 0, 20, subject.Grade, true);
                     hasChanged = true;
                     break;
             }

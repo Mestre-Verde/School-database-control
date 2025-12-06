@@ -13,7 +13,6 @@ internal abstract class SchoolMember : BaseEntity
     [JsonInclude] internal protected DateTime BirthDate_dt;// Data de nascimento (struct DateTime) 
     [JsonInclude] internal protected Nationality_e Nationality { get; protected set; }// Nacionalidade (enum) incorpurado para todos os tipos
     [JsonInclude] internal protected string Email_s { get; protected set; } = "";
-    [JsonIgnore] protected const byte MinAge = 6;
 
     protected override string FormatToString()
     {

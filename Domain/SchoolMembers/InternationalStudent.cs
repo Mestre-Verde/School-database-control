@@ -1,7 +1,7 @@
 namespace School_System.Domain.SchoolMembers;
 
 using static System.Console; // Permite usar Write e WriteLine diretamente
-using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;// para incluir os atributos
 
 using School_System.Infrastructure.FileManager;
 using School_System.Domain.CourseProgram;
@@ -24,42 +24,38 @@ internal class InternationalStudent : Student
 
     public InternationalStudent() : base() { }
 
-    private InternationalStudent(
-        int id, string name, byte age, char gender, DateTime? birthDate, Nationality_e nationality, string email,
-         Course? major = null, int year = 1, List<Subject>? enrolledSubjects = null,
-        Nationality_e country = default, VisaState_e visaStatus = default)
+    private InternationalStudent(int id, string name, byte age, char gender, DateTime? birthDate, Nationality_e nationality, string email,
+                                Course? major = null, int year = default, List<Subject>? enrolledSubjects = null,
+                                Nationality_e country = default, VisaState_e visaStatus = default)
     : base(id, name, age, gender, birthDate, nationality, email, major, year, enrolledSubjects)
     {
         Country = country;
         VisaStatus = visaStatus;
 
-
         Introduce();
     }
+
     internal static InternationalStudent? Create()
     {
         return CreateEntity("estudante internacional", FileManager.DataBaseType.InternationalStudent, parameters =>
         {
             // --- Variáveis temporárias ---
-            DateTime? trash = null;
+            DateTime? _trash = null;
 
 
             // --- Campos base ---
-            byte age = InputParameters.InputAge($"Escreva a idade do(a) estudante", ref trash, null, false, MinAge);
+            byte age = InputParameters.InputAge($"Escreva a idade do(a) estudante", ref _trash, null, false, InputParameters.MinAge);
+            DateTime birthDate = InputParameters.InputBirthDate($"Escreva a data de nascimento do(a) estudante", ref age, InputParameters.MinAge);
+
             parameters["Age"] = age;
-
             parameters["Gender"] = InputParameters.InputGender($"Escreva o gênero do(a) estudante");
-
-            DateTime birthDate = InputParameters.InputBirthDate($"Escreva a data de nascimento do(a) estudante", ref age, MinAge);
             parameters["BirthDate"] = birthDate;
-
             parameters["Nationality"] = InputParameters.InputNationality($"Escreva a nacionalidade do(a) estudante");
             parameters["Email"] = InputParameters.InputEmail($"Escreva o email do(a) estudante");
-
-            // --- Campos específicos do InternationalStudent ---
+            // Student 
             parameters["Major"] = InputParameters.InputCourse();
             parameters["Year"] = InputParameters.InputInt($"Escreva ano atual do(a) estudante", 1, 4);
-
+            // --- Campos específicos do InternationalStudent ---
             parameters["Country"] = InputParameters.InputNationality("Escreva o país de origem do(a) estudante");
             parameters["VisaStatus"] = InputParameters.InputVisaStatus("Escreva o estado do visto");
 
@@ -83,26 +79,15 @@ internal class InternationalStudent : Student
 
     internal static void Remove() { RemoveEntity<InternationalStudent>("estudante internacional", FileManager.DataBaseType.InternationalStudent); }
 
-    internal static void Select()
-    {
-        // Pesquisa um estudante internacional usando AskAndSearch
-        var selected = AskAndSearch<InternationalStudent>(
-            "estudante internacional",
-            FileManager.DataBaseType.InternationalStudent);
+    internal static void Select() { SelectEntity<InternationalStudent>("estudante internacional", FileManager.DataBaseType.InternationalStudent, EditInternationalStudent); }
 
-        if (selected.Count == 0) return;
-
-        InternationalStudent student = selected[0];
-        EditInternationalStudent(student);
-    }
     private static void PrintInternationalStudentComparison(InternationalStudent current, dynamic original)
     {
         WriteLine("\n===== 🛈 ESTADO DO ESTUDANTE INTERNACIONAL =====");
         WriteLine($"{"Campo",-15} | {"Atual",-25} | {"Original"}");
         WriteLine(new string('-', 60));
 
-        void Show(string label, object? now, object? old)
-            => WriteLine($"{label,-15} | {now,-25} | {old}");
+        void Show(string label, object? now, object? old) => WriteLine($"{label,-15} | {now,-25} | {old}");
 
         Show("Nome", current.Name_s, original.Name_s);
         Show("Idade", current.Age_by, original.Age_by);
@@ -117,6 +102,7 @@ internal class InternationalStudent : Student
 
         WriteLine(new string('=', 60));
     }
+
     private static void EditInternationalStudent(InternationalStudent student)
     {
         // 1. Guardar estado original
@@ -129,7 +115,7 @@ internal class InternationalStudent : Student
             student.Nationality,
             student.Email_s,
             Major_s = student.Major?.Name_s ?? "Nenhum",
-            Year = student.Year,
+            student.Year,
             student.Country,
             student.VisaStatus
         };
@@ -158,7 +144,7 @@ internal class InternationalStudent : Student
 
                 case Menu.EditParamInternationalStudent_e.Age:
                     DateTime? tmp = student.BirthDate_dt;
-                    student.Age_by = InputParameters.InputAge("Escreva a idade do(a) estudante", ref tmp, student.Age_by, true, MinAge);
+                    student.Age_by = InputParameters.InputAge("Escreva a idade do(a) estudante", ref tmp, student.Age_by, true, InputParameters.MinAge);
                     if (tmp.HasValue) student.BirthDate_dt = tmp.Value;
                     hasChanged = true;
                     break;
@@ -170,7 +156,7 @@ internal class InternationalStudent : Student
 
                 case Menu.EditParamInternationalStudent_e.BirthDate:
                     byte ageTemp = student.Age_by;
-                    student.BirthDate_dt = InputParameters.InputBirthDate("Escreva a data de nascimento do(a) estudante", ref ageTemp, MinAge, student.BirthDate_dt, true);
+                    student.BirthDate_dt = InputParameters.InputBirthDate("Escreva a data de nascimento do(a) estudante", ref ageTemp, InputParameters.MinAge, student.BirthDate_dt, true);
                     student.Age_by = ageTemp;
                     hasChanged = true;
                     break;
@@ -186,12 +172,12 @@ internal class InternationalStudent : Student
                     break;
 
                 case Menu.EditParamInternationalStudent_e.Major:
-                    student.Major = InputParameters.InputCourse();
+                    student.Major = InputParameters.InputCourse(currentCourse: student.Major, isToEdit: true);
                     hasChanged = true;
                     break;
 
                 case Menu.EditParamInternationalStudent_e.Year:
-                    student.Year = InputParameters.InputInt("Escreva o ano atual", 1, 4, student.Year, true);
+                    student.Year = InputParameters.InputInt("Escreva o ano atual", 1, InputParameters.MaxCourseYear, student.Year, true);
                     hasChanged = true;
                     break;
 

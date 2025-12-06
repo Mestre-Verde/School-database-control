@@ -7,7 +7,7 @@ using School_System.Domain.CourseProgram;
 using School_System.Domain.Scholarship;
 using School_System.Application.Utils;
 
-internal class Student : SchoolMember
+internal abstract class Student : SchoolMember
 {
     [JsonInclude] protected decimal GPA = default;
     [JsonInclude] protected Course? Major { get; set; }
