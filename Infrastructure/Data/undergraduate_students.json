@@ -2,13 +2,13 @@
   "0": {
     "Major": null,
     "Year": 1,
-    "GPA_d": 0,
+    "GPA": 0,
     "EnrolledSubjects": [],
     "Scholarships": [],
     "Gender_c": "M",
     "Nationality": 1,
     "Email_s": "ajjj232@gmail.com",
-    "Age_by": 0,
+    "Age_by": 25,
     "BirthDate_dt": "2000-08-24T00:00:00",
     "ID_i": 0,
     "Name_s": "\u00C1lvaro Mend\u00E8s"
@@ -16,7 +16,7 @@
   "1": {
     "Major": null,
     "Year": 2,
-    "GPA_d": 0,
+    "GPA": 0,
     "EnrolledSubjects": [],
     "Scholarships": [],
     "Gender_c": "F",
@@ -30,7 +30,7 @@
   "2": {
     "Major": null,
     "Year": 1,
-    "GPA_d": 0,
+    "GPA": 0,
     "EnrolledSubjects": [],
     "Scholarships": [],
     "Gender_c": "M",
@@ -44,7 +44,7 @@
   "3": {
     "Major": null,
     "Year": 2,
-    "GPA_d": 0,
+    "GPA": 0,
     "EnrolledSubjects": [],
     "Scholarships": [],
     "Gender_c": "F",
@@ -57,8 +57,22 @@
   },
   "4": {
     "Major": null,
-    "Year": 0,
-    "GPA_d": 0,
+    "Year": 1,
+    "GPA": 0,
+    "EnrolledSubjects": [],
+    "Scholarships": [],
+    "Gender_c": "M",
+    "Nationality": 1,
+    "Email_s": "DuduCripto@ipvc.pt",
+    "Age_by": 20,
+    "BirthDate_dt": "2005-11-16T00:00:00",
+    "ID_i": 4,
+    "Name_s": "Duarte da Cruz Moreira"
+  },
+  "5": {
+    "Major": null,
+    "Year": 3,
+    "GPA": 0,
     "EnrolledSubjects": [],
     "Scholarships": [],
     "Gender_c": "\u0000",
@@ -66,21 +80,54 @@
     "Email_s": "",
     "Age_by": 0,
     "BirthDate_dt": "0001-01-01T00:00:00",
-    "ID_i": 4,
+    "ID_i": 5,
     "Name_s": ""
   },
-  "5": {
-    "Major": null,
+  "6": {
+    "Major": {
+      "Duration_f": 2,
+      "Type_e": 5,
+      "ID_i": 0,
+      "Name_s": "CTeSP em Automa\u00E7\u00E3o Industrial"
+    },
     "Year": 1,
-    "GPA_d": 0,
+    "GPA": 0,
     "EnrolledSubjects": [],
     "Scholarships": [],
     "Gender_c": "F",
-    "Nationality": 12,
+    "Nationality": 14,
+    "Email_s": "marg3@ipvc.pt",
+    "Age_by": 18,
+    "BirthDate_dt": "2007-11-10T00:00:00",
+    "ID_i": 6,
+    "Name_s": "Margarida Alves"
+  },
+  "7": {
+    "Major": null,
+    "Year": 0,
+    "GPA": 0,
+    "EnrolledSubjects": [],
+    "Scholarships": [],
+    "Gender_c": "\u0000",
+    "Nationality": 0,
     "Email_s": "",
-    "Age_by": 32,
-    "BirthDate_dt": "1993-12-04T00:00:00",
-    "ID_i": 5,
+    "Age_by": 0,
+    "BirthDate_dt": "0001-01-01T00:00:00",
+    "ID_i": 7,
+    "Name_s": ""
+  },
+  "8": {
+    "Major": null,
+    "Year": 0,
+    "GPA": 0,
+    "EnrolledSubjects": [],
+    "Scholarships": [],
+    "Gender_c": "\u0000",
+    "Nationality": 0,
+    "Email_s": "",
+    "Age_by": 0,
+    "BirthDate_dt": "0001-01-01T00:00:00",
+    "ID_i": 8,
     "Name_s": ""
   }
 }

@@ -41,17 +41,18 @@ internal class Teacher : SchoolMember
             parameters =>
             {
                 // --- Variáveis temporárias ---
-                DateTime? trash = null;
+                DateTime? _trash = null;
 
                 // --- Campos base ---
-                byte age = InputParameters.InputAge($"Escreva a idade do(a) professor(a)", ref trash, null, false, MinAge);
+                byte age = InputParameters.InputAge($"Escreva a idade do(a) professor(a)", ref _trash, null, false, InputParameters.MinAge);
+                DateTime birthDate = InputParameters.InputBirthDate($"Escreva a data de nascimento do(a) professor(a)", ref age, InputParameters.MinAge);
+
                 parameters["Age"] = age;
                 parameters["Gender"] = InputParameters.InputGender($"Escreva o gênero do(a) professor(a)");
-                DateTime birthDate = InputParameters.InputBirthDate($"Escreva a data de nascimento do(a) professor(a)", ref age, MinAge);
                 parameters["BirthDate"] = birthDate;
                 parameters["Nationality"] = InputParameters.InputNationality($"Escreva a nacionalidade do(a) professor(a)");
                 parameters["Email"] = InputParameters.InputEmail($"Escreva o email do(a) professor(a)");
-                
+
                 parameters["Department"] = InputParameters.InputName("Departamento do(a) professor(a)");
             },
 
@@ -74,12 +75,29 @@ internal class Teacher : SchoolMember
     internal static void Select()
     {
         // Pesquisa um professor usando AskAndSearch
-        var selected = AskAndSearch<Teacher>("professor", FileManager.DataBaseType.Teacher);
-        if (selected.Count == 0) return;
+        var searchResult = AskAndSearch<Teacher>(
+            "professor",
+            FileManager.DataBaseType.Teacher);
 
-        Teacher teacher = selected[0];
-        EditTeacher(teacher); // Menu de edição específico da classe
+        // Base de dados vazia → nada a fazer
+        if (searchResult.IsDatabaseEmpty)
+        {
+            WriteLine("A base de dados de professores está vazia.");
+            return;
+        }
+
+        var matches = searchResult.Results;
+
+        // Nenhum resultado → nada a fazer
+        if (matches.Count == 0) return;
+
+        // Seleciona apenas o primeiro professor encontrado
+        Teacher teacher = matches[0];
+
+        // Chama função de edição específica
+        EditTeacher(teacher);
     }
+
 
     private static void PrintTeacherComparison(Teacher current, dynamic original)
     {
@@ -137,7 +155,7 @@ internal class Teacher : SchoolMember
 
                 case Menu.EditParamTeacher_e.Age:
                     DateTime? tmp = teacher.BirthDate_dt;
-                    teacher.Age_by = InputParameters.InputAge("Escreva a idade do(a) professor(a)", ref tmp, teacher.Age_by, true, MinAge);
+                    teacher.Age_by = InputParameters.InputAge("Escreva a idade do(a) professor(a)", ref tmp, teacher.Age_by, true, InputParameters.MinAge);
                     if (tmp.HasValue) teacher.BirthDate_dt = tmp.Value;
                     hasChanged = true;
                     break;

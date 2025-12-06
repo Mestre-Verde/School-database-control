@@ -1,6 +1,7 @@
 namespace School_System.Domain.SchoolMembers;
 
 using static System.Console;
+
 using School_System.Infrastructure.FileManager;
 using School_System.Domain.CourseProgram;
 using School_System.Application.Utils;
@@ -14,30 +15,31 @@ internal class UndergraduateStudent : Student
     // Construtor parameterless obrigatório para JSON
     public UndergraduateStudent() { }
 
-    private UndergraduateStudent(int id, string name, byte age, char gender, DateTime? birthDate, Nationality_e nationality, string email, Course? major = null, int year = 1, List<Subject>? enrolledSubjects = null)
+    private UndergraduateStudent(int id, string name, byte age, char gender, DateTime? birthDate, Nationality_e nationality, string email,
+                                Course? major = null, int year = default, List<Subject>? enrolledSubjects = null)
         : base(id, name, age, gender, birthDate, nationality, email, major, year, enrolledSubjects)
     {
-        // Se NÃO foi dada uma lista → usar a lista oficial do curso
         Introduce();
     }
 
     internal static UndergraduateStudent? Create()
     {
-        return CreateEntity("do(a) estudante de CETEsP ou Licenciatura", FileManager.DataBaseType.UndergraduateStudent, parameters =>
+        return CreateEntity("do(a) estudante de CETEsP ou Licenciatura", FileManager.DataBaseType.UndergraduateStudent, static parameters =>
         {
             // --- Variáveis temporárias ---
-            DateTime? trash = null;
+            DateTime? _trash = null;
 
             // --- Campos base ---
-            byte age = InputParameters.InputAge($"Escreva a idade do(a) estudante", ref trash, null, false, MinAge);
+            byte age = InputParameters.InputAge($"Escreva a idade do(a) estudante", ref _trash, null, false, InputParameters.MinAge);
+            DateTime birthDate = InputParameters.InputBirthDate($"Escreva a data de nascimento do(a) estudante", ref age, InputParameters.MinAge);
+
             parameters["Age"] = age;
             parameters["Gender"] = InputParameters.InputGender($"Escreva o gênero do(a) estudante");
-            DateTime birthDate = InputParameters.InputBirthDate($"Escreva a data de nascimento do(a) estudante", ref age, MinAge);
             parameters["BirthDate"] = birthDate;
             parameters["Nationality"] = InputParameters.InputNationality($"Escreva a nacionalidade do(a) estudante");
             parameters["Email"] = InputParameters.InputEmail($"Escreva o email do(a) estudante");
             parameters["Major"] = InputParameters.InputCourse();
-            parameters["Year"] = InputParameters.InputInt($"Escreva o ano atual do(a) estudante", 1, 4);
+            parameters["Year"] = InputParameters.InputInt($"Escreva o ano atual do(a) estudante", 1, InputParameters.MaxCourseYear);
         },
         dict => new UndergraduateStudent(
             (int)dict["ID"],
@@ -55,15 +57,7 @@ internal class UndergraduateStudent : Student
 
     internal static void Remove() { RemoveEntity<UndergraduateStudent>("estudante de CETEsP ou Licenciatura", FileManager.DataBaseType.UndergraduateStudent); }
 
-    internal static void Select()
-    {
-        // Pesquisa um estudante usando AskAndSearch
-        var selected = AskAndSearch<UndergraduateStudent>("estudante CETEsP/Licenciatura", FileManager.DataBaseType.UndergraduateStudent);
-        if (selected.Count == 0) return;
-
-        UndergraduateStudent student = selected[0];
-        EditUndergraduateStudent(student); // Menu de edição específico da classe
-    }
+    internal static void Select() { SelectEntity<UndergraduateStudent>("estudante CETEsP/Licenciatura", FileManager.DataBaseType.UndergraduateStudent, EditUndergraduateStudent); }
 
     private static void PrintUndergraduateStudentComparison(UndergraduateStudent current, dynamic original)
     {
@@ -119,7 +113,7 @@ internal class UndergraduateStudent : Student
 
                 case Menu.EditParamStudent_e.Age:
                     DateTime? tmp = student.BirthDate_dt;
-                    student.Age_by = InputParameters.InputAge("Escreva a idade do estudante", ref tmp, student.Age_by, true, MinAge);
+                    student.Age_by = InputParameters.InputAge("Escreva a idade do estudante", ref tmp, student.Age_by, true, InputParameters.MinAge);
                     if (tmp.HasValue) student.BirthDate_dt = tmp.Value;
                     hasChanged = true;
                     break;
@@ -131,7 +125,7 @@ internal class UndergraduateStudent : Student
 
                 case Menu.EditParamStudent_e.BirthDate:
                     byte ageTemp = student.Age_by;
-                    student.BirthDate_dt = InputParameters.InputBirthDate("Escreva a data de nascimento do estudante", ref ageTemp, MinAge, student.BirthDate_dt, true);
+                    student.BirthDate_dt = InputParameters.InputBirthDate("Escreva a data de nascimento do estudante", ref ageTemp, InputParameters.MinAge, student.BirthDate_dt, true);
                     student.Age_by = ageTemp;
                     hasChanged = true;
                     break;

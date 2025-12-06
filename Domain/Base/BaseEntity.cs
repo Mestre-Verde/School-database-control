@@ -10,7 +10,7 @@ using School_System.Application.Utils;
 using School_System.Infrastructure.FileManager;
 
 public abstract class BaseEntity(int id, string name)
-{ 
+{
     [JsonInclude] internal int ID_i { get; private set; } = id;
     [JsonInclude] internal protected string Name_s { get; set; } = name;
 
@@ -58,30 +58,46 @@ public abstract class BaseEntity(int id, string name)
     }
 
 
-    /// <summary> Fabrica global para criar qualquer objeto que herde de BaseEntity.
-    /// Só precisa passar o nome, os campos específicos via Action, e a função que cria o objeto a partir do dicionário.
+    /// <summary> Fábrica global para criar *qualquer entidade* que herde de BaseEntity (Student, Course, Subject, etc). 
+    /// O funcionamento é o seguinte:
+    /// 1) A função pede o nome (campo comum a todas as entidades)
+    /// 2) A subclasse (Student, Course, etc.) fornece os seus campos específicos através de um delegate chamado "collectSpecificFields"
+    /// 3) No final, a função "factory" converte o dicionário de parâmetros num objeto real
+    /// 4) O objeto é gravado na base de dados automaticamente.
+    /// Isto permite eliminar código duplicado e centralizar toda a lógica de criação.
     /// </summary>
     protected static E? CreateEntity<E>(
-        string typeObject,
-        FileManager.DataBaseType dbType,
-        Action<Dictionary<string, object>> collectSpecificFields,
-        Func<Dictionary<string, object>, E> factory
+        string typeObject,                                 // Ex.: "curso", "estudante", "disciplina"
+        FileManager.DataBaseType dbType,                    // Tipo de BD onde o objeto será gravado
+        Action<Dictionary<string, object>> collectSpecificFields, // Função da SUBCLASSE que recolhe os campos dela
+        Func<Dictionary<string, object>, E> factory         // Função que transforma o dicionário num objeto real
     ) where E : BaseEntity
     {
-        var parameters = new Dictionary<string, object>();
-
-        // Nome padrão para todos
-        parameters["Name"] = InputParameters.InputName($"Escreva o nome {typeObject}");
-
-        // Campos específicos da subclasse
+        // 1) Criamos sempre um dicionário para armazenar os parâmetros. O objetivo é armazenar TODA a informação necessária antes de criar o objeto.
+        var parameters = new Dictionary<string, object>
+        {
+            // Campo comum a todas as entidades: Name
+            ["Name"] = InputParameters.InputName($"Escreva o nome {typeObject}")
+        };
+        /*2) Chamamos o delegate da subclasse para recolher os campos específicos.
+        Exemplo:
+        Para Course → Course.CollectFields(parameters)
+        Para Student → Student.CollectFields(parameters)
+        Isto injeta os campos adicionais dentro do dicionário, mas sem a função CreateEntity precisar saber quais são.
+        ESTE É O SEGREDO DO POLIMORFISMO AQUI.
+        */
         collectSpecificFields(parameters);
-
-        // Resumo final
+        /*3) Mostrar um resumo final antes de gravar.
+        O dicionário agora contém TUDO:
+        - Nome
+        - Campos específicos (ex.: Year, Major, Credits, Duration…)
+        - ID (ainda não gerado)
+        */
         WriteLine($"\nResumo {typeObject}:");
         foreach (var kv in parameters)
             WriteLine($" {kv.Key}: {FormatParameter(kv.Value)}");
 
-        // Confirmação
+        // 4) Confirmar se o utilizador realmente quer criar o objeto.
         while (true)
         {
             Write("Tem a certeza que quer criar? (S/N): ");
@@ -92,20 +108,29 @@ public abstract class BaseEntity(int id, string name)
             else WriteLine("Por favor, responda apenas 'S' ou 'N'.");
         }
 
-        // Criação do ID
+        // 5) Geração do ID automático.
         int newID = FileManager.GetTheNextAvailableID(dbType);
-        if (newID == -1) { WriteLine(InputParameters.ProblemGetTheId); return null; }
+        if (newID == -1)
+        {
+            WriteLine(InputParameters.ProblemGetTheId);
+            return null;
+        }
         parameters["ID"] = newID;
-
-        // Criação do objeto
+        /*6) Finalmente criamos o objeto real.
+        A função "factory" pega no dicionário e transforma em:
+        new Course(...)
+        new Student(...)
+        new Subject(...)
+        Dependendo da subclasse.
+        Isto permite usar uma única função CreateEntity para TODOS os tipos.
+        */       
         var obj = factory(parameters);
 
-        // Gravação na base de dados
+        // 7) Guardar no ficheiro da base de dados.
         FileManager.WriteOnDataBase(dbType, obj);
 
         return obj;
     }
-
 
     /// <summary> Remove um ou mais objetos de uma base de dados, dado o nome ou ID.Pode ser usado para qualquer classe que herde de BaseEntity. </summary>
     /// <typeparam name="E">Tipo da entidade (aluno, tutor, disciplina, etc.).</typeparam>
@@ -114,11 +139,23 @@ public abstract class BaseEntity(int id, string name)
     protected static void RemoveEntity<E>(string typeName, FileManager.DataBaseType dbType) where E : BaseEntity
     {
         // 1. Procurar entidades (já imprime resultados)
-        var matches = AskAndSearch<E>(typeName, dbType, returnAll: true, allowMultiple: true);
-        if (matches.Count == 0) return;
+        var searchResult = AskAndSearch<E>(typeName, dbType, allowListAll: true);
 
-        // 2. Permitir escolher múltiplos indices
-        Write($"Escolha os números dos {typeName}s a remover (ex: 1 2 3): ");
+        if (searchResult.IsDatabaseEmpty)
+        {
+            WriteLine($"A base de dados de {typeName} está vazia. Nada para remover.");
+            return;
+        }
+
+        var matches = searchResult.Results;
+        if (matches.Count == 0)
+        {
+            WriteLine($"Nenhum {typeName} encontrado. Operação cancelada.");
+            return;
+        }
+
+        // 2. Permitir escolher múltiplos índices
+        Write($"Escolha os números dos {typeName}s a remover (ex: 1 2,3): ");
         var indices = (ReadLine() ?? "")
             .Split([' ', ','], StringSplitOptions.RemoveEmptyEntries)
             .Select(s => int.TryParse(s, out int x) ? x : -1)
@@ -155,80 +192,106 @@ public abstract class BaseEntity(int id, string name)
         }
     }
 
-    // --- Pergunta ao usuário e pesquisa na base de dados ---
-    internal protected static List<T> AskAndSearch<T>(string typeName, FileManager.DataBaseType dbType, bool returnAll = false, bool allowMultiple = false) where T : BaseEntity
+    protected static void SelectEntity<E>(string entityName, FileManager.DataBaseType dbType, Action<E> editAction, bool allowListAll = true, bool allowUserSelection = true) where E : BaseEntity
     {
-        // Solicita input ao utilizador
-        Write($"Digite o nome ou ID do {typeName}: ");
-        string? input_s = ReadLine();
+        // Pesquisa entidades usando AskAndSearch
+        var searchResult = AskAndSearch<E>(
+            entityName,
+            dbType,
+            allowListAll: allowListAll,
+            allowUserSelection: allowUserSelection
+        );
 
-        bool isId_b = int.TryParse(input_s, out int idInput);
+        // Base de dados vazia ou usuário cancelou → nada a fazer
+        if (searchResult.IsDatabaseEmpty || searchResult.Results.Count == 0)
+            return;
 
-        // Pesquisa na base de dados
-        var matches = isId_b
-            ? FileManager.Search<T>(dbType, id: idInput)
-            : FileManager.Search<T>(dbType, name: input_s);
+        // Chama função de edição com a entidade selecionada
+        editAction(searchResult.Results[0]);
+    }
 
-        // Nenhum resultado
-        if (matches.Count == 0)
+
+    // Struct para resultado de busca, indicando se a base está vazia
+    internal protected struct SearchResult<T> where T : BaseEntity
+    {
+        public List<T> Results;
+        public bool IsDatabaseEmpty;
+        public SearchResult(List<T> results, bool isEmpty)
         {
-            WriteLine($"Nenhum {typeName} encontrado.");
-            return new List<T>();
-        }
-
-        // Caso 1: apenas 1 resultado ou returnAll
-        if (matches.Count == 1 || returnAll)
-        {
-            WriteLine($"{matches.Count} {typeName}(s) encontrado(s):");
-            for (int i = 0; i < matches.Count; i++)
-                WriteLine($"[{i + 1}]: {matches[i].FormatToString()}");
-
-            return allowMultiple ? matches : new List<T> { matches[0] };
-        }
-
-        // Caso 2: múltiplos resultados, não returnAll
-        WriteLine($"Foram encontrados {matches.Count} {typeName}s:");
-        for (int i = 0; i < matches.Count; i++)
-            WriteLine($"[{i + 1}]: {matches[i].FormatToString()}");
-
-        if (allowMultiple)
-        {
-            // Seleção múltipla
-            Write($"Escolha quais deseja selecionar (números separados por vírgula, Enter para cancelar): ");
-            string? multiInput = ReadLine()?.Trim();
-
-            if (string.IsNullOrEmpty(multiInput))
-                return new List<T>();
-
-            var selected = new List<T>();
-            foreach (var part in multiInput.Split(',').Select(s => s.Trim()))
-            {
-                if (int.TryParse(part, out int idx) && idx >= 1 && idx <= matches.Count)
-                {
-                    var item = matches[idx - 1];
-                    if (!selected.Contains(item))
-                        selected.Add(item);
-                }
-                else
-                {
-                    WriteLine($"Número inválido: {part}. Ignorado.");
-                }
-            }
-            return selected;
-        }
-        else
-        {
-            // Seleção única
-            Write($"Escolha qual deseja selecionar (1 - {matches.Count}): ");
-            if (!int.TryParse(ReadLine(), out int choice) || choice < 1 || choice > matches.Count)
-            {
-                WriteLine("Entrada inválida. Nenhum selecionado.");
-                return new List<T>();
-            }
-            return new List<T> { matches[choice - 1] };
+            Results = results;
+            IsDatabaseEmpty = isEmpty;
         }
     }
 
+    internal protected static SearchResult<T> AskAndSearch<T>(
+        string typeName,
+         FileManager.DataBaseType dbType,
+          string? prompt = null,
+           bool allowListAll = false,
+            bool allowUserSelection = false) where T : BaseEntity
+    {
+        string finalPrompt = prompt ?? $"Digite o nome ou ID do {typeName}" + (allowListAll ? " (ou '-a' para listar todos): " : ": ");
+
+        Write(finalPrompt);
+        string? input_s = ReadLine()?.Trim();
+
+        // --- Lógica para '-a' ---
+        if (allowListAll && !string.IsNullOrEmpty(input_s) && input_s.Equals("-a", StringComparison.OrdinalIgnoreCase))
+        {
+            var allItems = FileManager.GetAll<T>(dbType);
+            if (allItems.Count == 0)
+                WriteLine($"Nenhum(a) {typeName} na base de dados.");
+            else
+            {
+                WriteLine($"{allItems.Count} {typeName}(s) encontrados com '-a':");
+                for (int i = 0; i < allItems.Count; i++)
+                    WriteLine($"[{i + 1}]: {allItems[i].FormatToString()}");
+            }
+            return new SearchResult<T>(allItems, allItems.Count == 0);
+        }
+
+        // --- Verifica se o input é ID ---
+        bool isId_b = int.TryParse(input_s, out int idInput);
+
+        // --- Pesquisa na base de dados ---
+        bool isEmpty = false;
+        var matches = isId_b
+            ? FileManager.Search<T>(dbType, ref isEmpty, id: idInput)
+            : FileManager.Search<T>(dbType, ref isEmpty, name: input_s);
+
+        // --- Nenhum resultado ---
+        if (matches.Count == 0)
+        {
+            if (isEmpty)
+                WriteLine($"A base de dados de {typeName} está vazia.");
+            else
+                WriteLine($"Nenhum {typeName} encontrado.");
+            return new SearchResult<T>(new List<T>(), isEmpty);
+        }
+
+        // --- Permitir seleção do usuário se necessário ---
+        if (allowUserSelection && matches.Count > 1)
+        {
+            Write($"Digite o número do {typeName} desejado (1 - {matches.Count}, Enter para cancelar): ");
+            string? choiceInput = ReadLine()?.Trim();
+            if (string.IsNullOrEmpty(choiceInput))
+                return new SearchResult<T>(new List<T>(), false); // cancelou
+
+            if (!int.TryParse(choiceInput, out int choice) || choice < 1 || choice > matches.Count)
+            {
+                WriteLine("Entrada inválida. Operação cancelada.");
+                return new SearchResult<T>(new List<T>(), false);
+            }
+
+            matches = new List<T> { matches[choice - 1] }; // mantém apenas o selecionado
+        }
+
+        // --- Exibe resultados encontrados ---
+        WriteLine($"{matches.Count} {typeName}(s) encontrado(s):");
+        for (int i = 0; i < matches.Count; i++)
+            WriteLine($"[{i + 1}]: {matches[i].FormatToString()}");
+        return new SearchResult<T>(matches, false);
+    }
 
 
     // TODO:    
@@ -236,28 +299,6 @@ public abstract class BaseEntity(int id, string name)
     // Assumimos que o tipo 'E' (Atual) e o tipo 'E' (Original) são a mesma classe BaseEntity
     public delegate void PrintComparisonDelegate<E>(E current, E original);
 
-    // 2. Modificação da função Select para receber o delegado
-    internal protected static void Select<E>(
-        string typename,
-        FileManager.DataBaseType dataBaseType,
-        PrintComparisonDelegate<E> printComparison // <--- Recebe a função de comparação específica
-    ) where E : BaseEntity // Restrição para usar a funcionalidade de BaseEntity
-    {
-        // A lógica de Select<E> aqui seria:
-        // 1. Pesquisar e selecionar um objeto 'current' do tipo E.
-        // 2. Fazer uma cópia do original antes da edição (dynamic original = current.Clone() ou usar a própria lista).
-        // 3. Chamar a lógica de edição (Edit(current)).
-        // 4. Antes de salvar, chamar a função de comparação fornecida:
-
-        // Supondo que 'current' e 'original' são as instâncias:
-        // E current = ...;
-        // E original = ...;
-
-        // printComparison(current, original); // <--- Chamada modular
-
-        // ... Restante da lógica de seleção e salvamento
-
-    }
 
 
 

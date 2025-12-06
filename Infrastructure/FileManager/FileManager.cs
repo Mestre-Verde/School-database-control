@@ -8,7 +8,6 @@ namespace School_System.Infrastructure.FileManager;
 using static System.Console;
 using System.Text.Json;
 using System.Reflection;
-using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 
 using School_System.Domain.Base;
@@ -110,7 +109,7 @@ public static class FileManager
     }
 
     //---------------------
-    
+
     // Desenha uma barra de progresso simples no terminal
     private static void DrawProgressBar(int value, int max)
     {
@@ -310,10 +309,13 @@ public static class FileManager
             failedJsons.ForEach(j => WriteLine(" - " + j));
         }
 
-        if (failedJsons.Count == 0)
-            WriteLine("\n✅ Tudo OK.");
-        else
-            WriteLine("\n⚠ Atenção: Alguns JSON foram reconstruídos. Consulte os backups.");
+        if (setup)
+        {
+            if (failedJsons.Count == 0)
+                WriteLine("\n✅ Tudo OK.");
+            else
+                WriteLine("\n⚠ Atenção: Alguns JSON foram reconstruídos. Consulte os backups.");
+        }
 
         return failedJsons.Count == 0;
     }
@@ -332,8 +334,8 @@ public static class FileManager
 
         // Desserializa ou cria dicionário vazio
         var dict = string.IsNullOrWhiteSpace(json)
-            ? new Dictionary<int, T>()
-            : JsonSerializer.Deserialize<Dictionary<int, T>>(json) ?? new Dictionary<int, T>();
+            ? []
+            : JsonSerializer.Deserialize<Dictionary<int, T>>(json) ?? [];
 
         // Obtém ID via reflection
         var idProperty = typeof(T).GetProperty("ID_i",
@@ -343,8 +345,7 @@ public static class FileManager
         int id = (int)(idProperty.GetValue(obj) ?? -1);
         WriteLine($"DEBUG(FileManager.WriteOnDataBase): ID do objeto = {id}");
 
-        if (id < 0)
-            throw new InvalidOperationException("O ID do objeto é inválido.");
+        if (id < 0) throw new InvalidOperationException("O ID do objeto é inválido.");
 
         // Adiciona / atualiza
         dict[id] = obj;
@@ -451,7 +452,7 @@ public static class FileManager
         if (!File.Exists(path))
         {
             WriteLine($"[DEBUG] Arquivo não existe: {path}");
-            return new Dictionary<string, T>();
+            return [];
         }
 
         string json = File.ReadAllText(path);
@@ -502,7 +503,7 @@ public static class FileManager
     /// <param name="name">Nome a procurar. Ignorado se for nulo, vazio ou espaço.</param>
     /// <param name="id">ID a procurar. Ignorado se for nulo.</param>
     /// <returns>Lista de objetos encontrados.</returns>
-    internal static List<T> Search<T>(DataBaseType baseType, string? name = null, int? id = null) where T : BaseEntity
+    internal static List<T> Search<T>(DataBaseType baseType,ref bool isEmpty, string? name = null, int? id = null) where T : BaseEntity
     {
         string path = GetFilePath(baseType);
 
@@ -512,7 +513,8 @@ public static class FileManager
         if (dict.Count == 0)
         {
             WriteLine($"[DEBUG] Base de dados '{baseType}' está vazia ou não pôde ser carregada.");
-            return new List<T>();
+            isEmpty = true;
+            return [];
         }
 
         IEnumerable<T> list = dict.Values;
@@ -521,7 +523,6 @@ public static class FileManager
         if (name != null)
         {
             string trimmed = name.Trim();
-
             if (trimmed == "")
             {
                 list = list.Where(x =>
@@ -537,7 +538,6 @@ public static class FileManager
                         WriteLine($"[DEBUG] Objeto ID={x.ID_i} tem Name_s nulo.");
                         return false;
                     }
-
                     return x.Name_s == "";
                 });
             }
@@ -550,13 +550,11 @@ public static class FileManager
                         WriteLine("[DEBUG] Objeto nulo na lista de valores.");
                         return false;
                     }
-
                     if (x.Name_s == null)
                     {
                         WriteLine($"[DEBUG] Objeto ID={x.ID_i} tem Name_s nulo.");
                         return false;
                     }
-
                     return x.Name_s.Contains(trimmed, StringComparison.OrdinalIgnoreCase);
                 });
             }
@@ -572,7 +570,6 @@ public static class FileManager
                     WriteLine("[DEBUG] Objeto nulo na lista de valores.");
                     return false;
                 }
-
                 return x.ID_i == id.Value;
             });
         }
@@ -582,4 +579,14 @@ public static class FileManager
         return result;
     }
 
+    // Exemplo de uma função dedicada (fora do escopo de Search<T>)
+    internal static List<T> GetAll<T>(DataBaseType baseType) where T : BaseEntity
+    {
+        // Apenas obtém o caminho e chama SafeReadDatabase.
+        string path = GetFilePath(baseType);
+        var dict = SafeReadDatabase<T>(path);
+
+        WriteLine($"[DEBUG] Função GetAll retornou {dict.Count} objeto(s) de '{baseType}'.");
+        return [.. dict.Values];
+    }
 }
