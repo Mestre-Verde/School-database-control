@@ -8,6 +8,7 @@ using School_System.Infrastructure.FileManager;
 using School_System.Domain.Base;
 using School_System.Application.Utils;
 using Schoo_lSystem.Application.Menu;
+using System.Text.Json;
 
 public class Course : BaseEntity
 {
@@ -56,31 +57,10 @@ public class Course : BaseEntity
 
     internal static void Select() { SelectEntity<Course>("curso", FileManager.DataBaseType.Course, EditCourse); }
 
-    private static void PrintCourseComparison(Course current, dynamic original)
-    {
-        WriteLine("\n===== ESTADO DO CURSO =====");
-        WriteLine($"{"Campo",-15} | {"Atual",-25} | {"Original"}");
-        WriteLine(new string('-', 70));
-
-        void Show(string label, object? now, object? old) => WriteLine($"{label,-15} | {now,-25} | {old}");
-
-        Show("Nome", current.Name_s, original.Name_s);
-        Show("Tipo", current.Type_e, original.Type_e);
-        Show("Duração", current.Duration_f, original.Duration_f);
-
-        WriteLine(new string('=', 70));
-    }
-
     internal static void EditCourse(Course course)
     {
-        // 1. Guardar original
-        var original = new
-        {
-            course.Name_s,
-            course.Type_e,
-            course.Duration_f,
-        };
-
+        // 1. Guardar estado original (deep copy via JSON)
+        var original = JsonSerializer.Deserialize<Course>(JsonSerializer.Serialize(course))!;
         bool hasChanged = false;
 
         Write(Menu.GetMenuEditCourse());
@@ -93,7 +73,7 @@ public class Course : BaseEntity
             switch (option)
             {
                 case Menu.EditParamCourse_e.Help:
-                    PrintCourseComparison(course, original);
+                    PrintComparison(course, original);
                     break;
 
                 case Menu.EditParamCourse_e.Name:
@@ -113,7 +93,7 @@ public class Course : BaseEntity
             }
         }
 
-        // 3. Guardar
+        // 3. Guardar alterações
         if (!hasChanged) return;
 
         Write("\nGuardar alterações? (S/N): ");
@@ -125,11 +105,11 @@ public class Course : BaseEntity
         else
         {
             WriteLine("❌ Alterações descartadas.");
+
+            // 4. Reverter para o estado original
             course.Name_s = original.Name_s;
             course.Type_e = original.Type_e;
             course.Duration_f = original.Duration_f;
         }
     }
-
-
 }

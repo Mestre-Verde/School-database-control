@@ -2,16 +2,10 @@ namespace School_System.Domain.SchoolMembers;
 
 using static System.Console; // Permite usar Write e WriteLine diretamente
 using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
 
 using School_System.Infrastructure.FileManager;
 using Schoo_lSystem.Application.Menu;
-using School_System.Domain.Base;
-using School_System.Domain.CourseProgram;
-using School_System.Domain.SchoolMembers;
 using School_System.Application.Utils;
-
-
 
 internal class Teacher : SchoolMember
 {
@@ -26,8 +20,9 @@ internal class Teacher : SchoolMember
     protected override void Introduce() { Write($"\n👨‍🏫 New Teacher: "); WriteLine(FormatToString()); }
 
     public Teacher() : base() { }
-    private Teacher(string name, byte age, int id, char gender, DateTime birthDate, Nationality_e nat, string email, string department)
-     : base(id, name, age, gender, birthDate, nationality: nat, email)
+    private Teacher(string name, byte age, int id, char gender, DateTime birthDate, Nationality_e nat, string email,
+                    string department)
+                    : base(id, name, age, gender, birthDate, nationality: nat, email)
     {
         Department_s = department;
         Introduce();
@@ -72,32 +67,7 @@ internal class Teacher : SchoolMember
 
     internal static void Remove() { RemoveEntity<Teacher>("professor", FileManager.DataBaseType.Teacher); }
 
-    internal static void Select()
-    {
-        // Pesquisa um professor usando AskAndSearch
-        var searchResult = AskAndSearch<Teacher>(
-            "professor",
-            FileManager.DataBaseType.Teacher);
-
-        // Base de dados vazia → nada a fazer
-        if (searchResult.IsDatabaseEmpty)
-        {
-            WriteLine("A base de dados de professores está vazia.");
-            return;
-        }
-
-        var matches = searchResult.Results;
-
-        // Nenhum resultado → nada a fazer
-        if (matches.Count == 0) return;
-
-        // Seleciona apenas o primeiro professor encontrado
-        Teacher teacher = matches[0];
-
-        // Chama função de edição específica
-        EditTeacher(teacher);
-    }
-
+    internal static void Select() { SelectEntity<Teacher>("disciplina", FileManager.DataBaseType.Teacher, EditTeacher); }
 
     private static void PrintTeacherComparison(Teacher current, dynamic original)
     {

@@ -1,9 +1,39 @@
 {
   "0": {
-    "Major": null,
+    "Major": {
+      "Duration_f": 4,
+      "Type_e": 8,
+      "ID_i": 4,
+      "Name_s": "Doutoramento em Ci\u00EAncia da Computa\u00E7\u00E3o"
+    },
     "Year": 1,
     "GPA": 0,
-    "EnrolledSubjects": [],
+    "Tuition": 0,
+    "EnrolledSubjects": [
+      {
+        "ECTS_i": 6,
+        "Professor": {
+          "Department_s": "Engenharia Eletrot\u00E9cnica e de Computadores",
+          "Gender_c": "M",
+          "Nationality": 1,
+          "Email_s": "rui.pimentel@feup.pt",
+          "Age_by": 52,
+          "BirthDate_dt": "1973-11-12T00:00:00",
+          "ID_i": 4,
+          "Name_s": "Dr. Rui M. Pimentel"
+        },
+        "Grade": 15,
+        "ID_i": 0,
+        "Name_s": "Eletr\u00F3nica de Pot\u00EAncia Aplicada"
+      },
+      {
+        "ECTS_i": 4,
+        "Professor": null,
+        "Grade": 18,
+        "ID_i": 13,
+        "Name_s": "\u00C9tica e Responsabilidade Social"
+      }
+    ],
     "Scholarships": [],
     "Gender_c": "M",
     "Nationality": 1,
@@ -14,10 +44,24 @@
     "Name_s": "\u00C1lvaro Mend\u00E8s"
   },
   "1": {
-    "Major": null,
-    "Year": 2,
-    "GPA": 0,
-    "EnrolledSubjects": [],
+    "Major": {
+      "Duration_f": 3,
+      "Type_e": 6,
+      "ID_i": 1,
+      "Name_s": "Licenciatura em Engenharia de Software"
+    },
+    "Year": 1,
+    "GPA": 9,
+    "Tuition": 350,
+    "EnrolledSubjects": [
+      {
+        "ECTS_i": 7,
+        "Professor": null,
+        "Grade": 9,
+        "ID_i": 19,
+        "Name_s": "Aprendizagem de M\u00E1quina"
+      }
+    ],
     "Scholarships": [],
     "Gender_c": "F",
     "Nationality": 1,
@@ -25,12 +69,13 @@
     "Age_by": 32,
     "BirthDate_dt": "1993-08-12T00:00:00",
     "ID_i": 1,
-    "Name_s": "Ana Martins"
+    "Name_s": "Ana Martins Nogueira"
   },
   "2": {
     "Major": null,
     "Year": 1,
     "GPA": 0,
+    "Tuition": 0,
     "EnrolledSubjects": [],
     "Scholarships": [],
     "Gender_c": "M",
@@ -45,6 +90,7 @@
     "Major": null,
     "Year": 2,
     "GPA": 0,
+    "Tuition": 0,
     "EnrolledSubjects": [],
     "Scholarships": [],
     "Gender_c": "F",
@@ -59,7 +105,25 @@
     "Major": null,
     "Year": 1,
     "GPA": 0,
-    "EnrolledSubjects": [],
+    "Tuition": 300,
+    "EnrolledSubjects": [
+      {
+        "ECTS_i": 6,
+        "Professor": {
+          "Department_s": "Engenharia Eletrot\u00E9cnica e de Computadores",
+          "Gender_c": "M",
+          "Nationality": 1,
+          "Email_s": "rui.pimentel@feup.pt",
+          "Age_by": 52,
+          "BirthDate_dt": "1973-11-12T00:00:00",
+          "ID_i": 4,
+          "Name_s": "Dr. Rui M. Pimentel"
+        },
+        "Grade": 0,
+        "ID_i": 0,
+        "Name_s": "Eletr\u00F3nica de Pot\u00EAncia Aplicada"
+      }
+    ],
     "Scholarships": [],
     "Gender_c": "M",
     "Nationality": 1,
@@ -73,6 +137,7 @@
     "Major": null,
     "Year": 3,
     "GPA": 0,
+    "Tuition": 0,
     "EnrolledSubjects": [],
     "Scholarships": [],
     "Gender_c": "\u0000",
@@ -92,6 +157,7 @@
     },
     "Year": 1,
     "GPA": 0,
+    "Tuition": 0,
     "EnrolledSubjects": [],
     "Scholarships": [],
     "Gender_c": "F",
@@ -106,6 +172,7 @@
     "Major": null,
     "Year": 0,
     "GPA": 0,
+    "Tuition": 0,
     "EnrolledSubjects": [],
     "Scholarships": [],
     "Gender_c": "\u0000",
@@ -120,6 +187,7 @@
     "Major": null,
     "Year": 0,
     "GPA": 0,
+    "Tuition": 0,
     "EnrolledSubjects": [],
     "Scholarships": [],
     "Gender_c": "\u0000",

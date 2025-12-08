@@ -4,19 +4,19 @@ namespace School_System.Domain.CourseProgram;
 using static System.Console;
 using System.Text.Json.Serialization;
 
-
 using School_System.Infrastructure.FileManager;
 using Schoo_lSystem.Application.Menu;
 using School_System.Domain.Base;
 using School_System.Domain.SchoolMembers;
 using School_System.Application.Utils;
+using System.Text.Json;
 
 public class Subject : BaseEntity
 {
     [JsonInclude] internal short ECTS_i { get; private set; }
     [JsonInclude] internal Teacher? Professor { get; private set; }
     [JsonInclude] internal int Grade = default;
-    [JsonIgnore] private const short MinEct = 3;
+
 
     protected override string FormatToString()
     {
@@ -42,8 +42,10 @@ public class Subject : BaseEntity
         return CreateEntity("da Disciplina", FileManager.DataBaseType.Subject,
             dict =>
             {
-                dict["ECTS"] = InputParameters.InputSubjectsECTS("Escreva o número de ECTS da disciplina", MinEct);
-                dict["Professor"] = InputParameters.InputTeacher("Selecione o professor da disciplina");
+                dict["ECTS"] = InputParameters.InputSubjectsECTS("Escreva o número de ECTS da disciplina");
+                Teacher? teacher = InputParameters.InputTeacher("Selecione o professor da disciplina");
+                dict["Professor"] = teacher!;
+
             },
             factory: dict =>
             {
@@ -61,34 +63,10 @@ public class Subject : BaseEntity
 
     internal static void Select() { SelectEntity<Subject>("disciplina", FileManager.DataBaseType.Subject, EditSubject); }
 
-    private static void PrintSubjectComparison(Subject current, dynamic original)
-    {
-        WriteLine("\n===== ESTADO DA DISCIPLINA =====");
-        WriteLine($"{"Campo",-12} | {"Atual",-25} | {"Original"}");
-        WriteLine(new string('-', 60));
-
-        void Show(string label, object? now, object? old)
-            => WriteLine($"{label,-12} | {now,-25} | {old}");
-
-        Show("Nome", current.Name_s, original.Name_s);
-        Show("ECTS", current.ECTS_i, original.ECTS_i);
-        Show("Professor", current.Professor?.Name_s, original.Professor);
-        Show("Nota", current.Grade, original.Grade);
-
-        WriteLine(new string('=', 60));
-    }
-
     private static void EditSubject(Subject subject)
     {
-        // 1. Guardar estado original
-        var original = new
-        {
-            subject.Name_s,
-            subject.ECTS_i,
-            Professor = subject.Professor?.Name_s ?? "Nenhum",
-            subject.Grade
-        };
-
+        // 1. Guardar estado original (deep copy via JSON)
+        var original = JsonSerializer.Deserialize<Subject>(JsonSerializer.Serialize(subject))!;
         bool hasChanged = false;
 
         // 2. Mostrar menu inicial
@@ -103,26 +81,21 @@ public class Subject : BaseEntity
             switch (option)
             {
                 case Menu.EditParamSubject_e.Help:
-                    PrintSubjectComparison(subject, original);
+                    PrintComparison(subject, original);
                     break;
 
                 case Menu.EditParamSubject_e.Name:
-                    subject.Name_s = InputParameters.InputName("Escreva o nome da disciplina",
-                                                                subject.Name_s, true);
+                    subject.Name_s = InputParameters.InputName("Escreva o nome da disciplina", subject.Name_s, true);
                     hasChanged = true;
                     break;
 
                 case Menu.EditParamSubject_e.ECTS:
-                    subject.ECTS_i = InputParameters.InputSubjectsECTS(
-                        "Escreva o número de ECTS",
-                        MinEct,
-                        subject.ECTS_i,
-                        true);
+                    subject.ECTS_i = InputParameters.InputSubjectsECTS("Escreva o número de ECTS", currentValue: subject.ECTS_i, isToEdit: true);
                     hasChanged = true;
                     break;
 
                 case Menu.EditParamSubject_e.Professor:
-                    subject.Professor = InputParameters.InputTeacher("Selecione o professor");
+                    subject.Professor = InputParameters.InputTeacher("Selecione o professor")!;
                     hasChanged = true;
                     break;
 
@@ -146,10 +119,10 @@ public class Subject : BaseEntity
         {
             WriteLine("Alterações descartadas.");
 
-            // Reverter
+            // 5. Reverter o objeto inteiro para o estado original
             subject.Name_s = original.Name_s;
-            subject.ECTS_i = (short)original.ECTS_i;
-            subject.Professor = null;
+            subject.ECTS_i = original.ECTS_i;
+            subject.Professor = original.Professor;
             subject.Grade = original.Grade;
         }
     }

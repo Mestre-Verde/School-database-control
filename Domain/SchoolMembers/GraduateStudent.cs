@@ -7,11 +7,12 @@ using School_System.Infrastructure.FileManager;
 using Schoo_lSystem.Application.Menu;
 using School_System.Domain.CourseProgram;
 using School_System.Application.Utils;
+using System.Text.Json;
 
 internal class GraduateStudent : Student
 {
     // Propriedades deste objeto
-    [JsonInclude] protected string ThesisTopic { get; set; } = "";
+    [JsonInclude] protected string ThesisTopic { get; set; } = "";// para quando descerializar n\ao ter nome null
     [JsonInclude] protected Teacher? Advisor { get; set; }
 
     protected override string FormatToString() // Adiciona os campos específicos na descrição
@@ -26,9 +27,9 @@ internal class GraduateStudent : Student
     public GraduateStudent() : base() { }
 
     private GraduateStudent(int id, string name, byte age, char gender, DateTime? birthDate, Nationality_e nationality, string email,
-                            Course? major = null, int year = default, List<Subject>? enrolledSubjects = null,
+                            Course? major = null, int year = default,
                             string thesisTopic = default!, Teacher? advisor = default)
-        : base(id, name, age, gender, birthDate, nationality, email, major, year, enrolledSubjects)
+        : base(id, name, age, gender, birthDate, nationality, email, major, year)
     {
         ThesisTopic = thesisTopic;
         Advisor = advisor;
@@ -53,11 +54,13 @@ internal class GraduateStudent : Student
             parameters["Nationality"] = InputParameters.InputNationality($"Escreva a nacionalidade do(a) estudante");
             parameters["Email"] = InputParameters.InputEmail($"Escreva o email do(a) estudante");
             //Student
-            parameters["Major"] = InputParameters.InputCourse();
+            Course? course = InputParameters.InputCourse();
+            parameters["Major"] = course!;
             parameters["Year"] = InputParameters.InputInt($"Escreva ano atual do(a) estudante", 1, InputParameters.MaxCourseYear);
 
             parameters["ThesisTopic"] = InputParameters.InputName("Escreva o tema da dissertação/tese");
-            parameters["Advisor"] = InputParameters.InputTeacher("Selecione o(a) orientador(a)");
+            Teacher? teacher = InputParameters.InputTeacher("Selecione o(a) orientador(a)");
+            parameters["Advisor"] = teacher!;
         },
         dict => new GraduateStudent(
             (int)dict["ID"],
@@ -67,11 +70,12 @@ internal class GraduateStudent : Student
             dict["BirthDate"] is DateTime dt ? dt : DateTime.Now,
             (Nationality_e)dict["Nationality"],
             (string)dict["Email"],
-            dict["Major"] is Course c ? c : null,
+
+            (Course)dict["Major"],
             (int)dict["Year"],
-            null,
+
             (string)dict["ThesisTopic"],
-            dict["Advisor"] is Teacher t ? t : null
+            (Teacher)dict["Advisor"]
         ));
     }
 
@@ -79,51 +83,14 @@ internal class GraduateStudent : Student
 
     internal static void Select() { SelectEntity<GraduateStudent>("estudante de mestrado/doutoramento", FileManager.DataBaseType.GraduateStudent, EditGraduateStudent); }
 
-    private static void PrintGraduateStudentComparison(GraduateStudent current, dynamic original)
-    {
-        WriteLine("\n===== ESTADO DO ESTUDANTE Mestrado/Douturamento =====");
-        WriteLine($"{"Campo",-15} | {"Atual",-25} | {"Original"}");
-        WriteLine(new string('-', 60));
-
-        void Show(string label, object? now, object? old) => WriteLine($"{label,-15} | {now,-25} | {old}");
-
-        Show("Nome", current.Name_s, original.Name_s);
-        Show("Idade", current.Age_by, original.Age_by);
-        Show("Género", current.Gender_c, original.Gender_c);
-        Show("Nasc.", current.BirthDate_dt, original.BirthDate_dt);
-        Show("Nacionalidade", current.Nationality, original.Nationality);
-        Show("Email", current.Email_s, original.Email_s);
-        Show("Curso", current.Major?.Name_s, original.Major_s);
-        Show("Ano", current.Year, original.Year);
-        Show("Tese", current.ThesisTopic, original.ThesisTopic);
-        Show("Orientador", current.Advisor?.Name_s, original.Advisor);
-
-        WriteLine(new string('=', 60));
-    }
-
     private static void EditGraduateStudent(GraduateStudent student)
     {
-        // 1. Guardar estado original
-        var original = new
-        {
-            student.Name_s,
-            student.Age_by,
-            student.Gender_c,
-            student.BirthDate_dt,
-            student.Nationality,
-            student.Email_s,
-            Major_s = student.Major?.Name_s ?? "Nenhum",
-            student.Year,
-            student.ThesisTopic,
-            Advisor = student.Advisor?.Name_s ?? "Nenhum"
-        };
-
+        // 1. Guardar estado original (deep copy via JSON)
+        var original = JsonSerializer.Deserialize<GraduateStudent>(JsonSerializer.Serialize(student))!;
         bool hasChanged = false;
 
-        // 2. Mostrar menu inicial
         Write(Menu.GetMenuEditGraduateStudent());
 
-        // 3. Loop de edição
         while (true)
         {
             var option = Menu.MenuEditGraduateStudent();
@@ -132,7 +99,7 @@ internal class GraduateStudent : Student
             switch (option)
             {
                 case Menu.EditParamGraduateStudent_e.Help:
-                    PrintGraduateStudentComparison(student, original);
+                    PrintComparison(student, original);
                     break;
 
                 case Menu.EditParamGraduateStudent_e.Name:
@@ -169,6 +136,11 @@ internal class GraduateStudent : Student
                     hasChanged = true;
                     break;
 
+                case Menu.EditParamGraduateStudent_e.ManageSubjects:
+                    ManageStudentSubjects(student);
+                    hasChanged = true;
+                    break;
+
                 case Menu.EditParamGraduateStudent_e.Major:
                     student.Major = InputParameters.InputCourse(currentCourse: student.Major, isToEdit: true);
                     hasChanged = true;
@@ -198,28 +170,34 @@ internal class GraduateStudent : Student
         if ((ReadLine()?.Trim().ToUpper()) == "S")
         {
             FileManager.WriteOnDataBase(FileManager.DataBaseType.GraduateStudent, student);
-            WriteLine("Alterações salvas.");
+            WriteLine("✔️ Alterações salvas.");
         }
         else
         {
-            WriteLine("Alterações descartadas.");
+            WriteLine("❌ Alterações descartadas.");
 
+            // Reverter objeto inteiro para o original
             student.Name_s = original.Name_s;
             student.Age_by = original.Age_by;
             student.Gender_c = original.Gender_c;
             student.BirthDate_dt = original.BirthDate_dt;
             student.Nationality = original.Nationality;
             student.Email_s = original.Email_s;
-            student.Major = null;
+            student.Major = original.Major;
             student.Year = original.Year;
             student.ThesisTopic = original.ThesisTopic;
-            student.Advisor = null;
+            student.Advisor = original.Advisor;
+            student.EnrolledSubjects = original.EnrolledSubjects;
         }
     }
 
+    // calculo da propina
     protected override decimal CalculateTuition()
     {
-        // Propina mais alta
-        return 2000m;
+        const decimal pricePerEcts = 80m;
+        int totalEcts = 0;
+        // Somar os ECTS de cada disciplina inscrita
+        foreach (Subject subject in EnrolledSubjects) { totalEcts += subject.ECTS_i; }
+        return totalEcts * pricePerEcts;
     }
 }

@@ -1,32 +1,10 @@
-/// <summary>
-/// Class onde se encontra a maioria da lógica dos menus.
-/// </summary>
+/// <summary>Class onde se encontra a maioria da lógica dos menus. </summary>
 namespace Schoo_lSystem.Application.Menu;
 
 using static System.Console;
 
 using School_System.Domain.CourseProgram;
 using School_System.Domain.SchoolMembers;
-
-// enums de Course
-internal enum EditParamCourse_e
-{
-    Back,
-    Help,
-    Name,
-    Type,
-    Duration,
-    ManageSubjects,
-}
-internal enum EditParamSubjects_e
-{
-    Back,
-    Help,
-    Name,
-    ECTS,
-    ManageStudents,
-    ManageTeachers
-}
 
 public static class Menu
 {
@@ -79,8 +57,8 @@ public static class Menu
                 case MainMenuCommands_e.Add: MenuAddObject(); break;
                 case MainMenuCommands_e.Remove: MenuRemoveObject(); break;
                 case MainMenuCommands_e.Select: MenuSelectObject(); break;
-                case MainMenuCommands_e.Search: //FileManager.SuperSearch;
-                    WriteLine("📋  [ls] Mostrando todos os dados..."); break;
+                case MainMenuCommands_e.Search: 
+                                    WriteLine("📋  [ls] Mostrando todos os dados..."); break;
                 default: Write(UnknowonCommand_s); break;
             }
         }
@@ -239,7 +217,9 @@ public static class Menu
         BirthDate = 5,
         Nationality = 6,
         Email = 7,
-        Grades
+        Year = 8,
+        Major = 9,
+        ManageSubjects = 10
     }
     internal enum EditParamTeacher_e
     {
@@ -263,10 +243,11 @@ public static class Menu
         BirthDate = 5,
         Nationality = 6,
         Email = 7,
-        Major = 8,
-        Year = 9,
-        ThesisTopic = 10,
-        Advisor = 11
+        ManageSubjects,
+        Major,
+        Year,
+        ThesisTopic,
+        Advisor
     }
     internal enum EditParamInternationalStudent_e
     {
@@ -278,10 +259,11 @@ public static class Menu
         BirthDate = 5,
         Nationality = 6,
         Email = 7,
-        Major = 8,
-        Year = 9,
-        Country = 10,
-        VisaStatus = 11
+        ManageSubjects = 8,
+        Major = 9,
+        Year = 10,
+        Country = 11,
+        VisaStatus = 12
     }
     internal enum EditParamCourse_e
     {
@@ -353,15 +335,22 @@ public static class Menu
 
     // Textos específicos de cada tipo
     private const string MenuEditTeacherExtra = @"        [8] Department    -> Alterar o departamento";
-    private const string MenuEditUndergradExtra = @"";
-    private const string MenuEditGraduateExtra = @"        [8] Major         -> Alterar o curso
-        [9] Year          -> Alterar o ano atual
-        [10] ThesisTopic  -> Alterar o tema da dissertação/tese
-        [11] Advisor      -> Alterar o orientador";
-    private const string MenuEditInternationalExtra = @"        [8] Major        -> Alterar o curso
-        [9] Year         -> Alterar o ano atual
-        [10] Country     -> Alterar o país de origem
-        [11] VisaStatus  -> Alterar o estado do visto";
+    private const string MenuEditUndergradExtra = @"        [8] Year          -> Alterar o ano atual
+        [9] Major         -> Alterar o curso        
+        [10] ManageSubjects     -> Adicionar/Editar disciplinas(incluindo notas)
+";
+    private const string MenuEditGraduateExtra = @"        [8] ManageSubjects     -> Adicionar/Editar disciplinas(incluindo notas)
+        [9] Major         -> Alterar o curso
+        [10] Year          -> Alterar o ano atual
+        [11] ThesisTopic  -> Alterar o tema da dissertação/tese
+        [12] Advisor      -> Alterar o orientador
+";
+    private const string MenuEditInternationalExtra = @"        [8] ManageSubjects    -> Adicionar/Editar notas a dsiciplinas
+        [9] Major        -> Alterar o curso
+        [10] Year         -> Alterar o ano atual
+        [11] Country     -> Alterar o país de origem
+        [12] VisaStatus  -> Alterar o estado do visto
+";
 
     // GetMenus
     internal static string GetMenuEditTeacher() => GenerateSchoolMemberMenu("do Professor", MenuEditTeacherExtra);
@@ -373,11 +362,8 @@ public static class Menu
 
     // Chamadas genéricas
     internal static EditParamTeacher_e MenuEditTeacher() => AskMenu<EditParamTeacher_e>("edit teacher", GetMenuEditTeacher());
-
     internal static EditParamStudent_e MenuEditUndergraduateStudent() => AskMenu<EditParamStudent_e>("edit undergraduate student", GetMenuEditUndergraduateStudent());
-
     internal static EditParamGraduateStudent_e MenuEditGraduateStudent() => AskMenu<EditParamGraduateStudent_e>("edit graduate student", GetMenuEditGraduateStudent());
-
     internal static EditParamInternationalStudent_e MenuEditInternationalStudent() => AskMenu<EditParamInternationalStudent_e>("edit international student", GetMenuEditInternationalStudent());
 
     // ------------------ Subjects & Courses (3º grau) ------------------
@@ -405,8 +391,32 @@ public static class Menu
     internal static string GetMenuEditCourse() => MenuEditCourse_s;
 
     internal static EditParamSubject_e MenuEditSubject() => AskMenu<EditParamSubject_e>("edit subject", MenuEditSubject_s);
-
     internal static EditParamCourse_e MenuEditCourse() => AskMenu<EditParamCourse_e>("edit course", MenuEditCourse_s);
+
+    // Students Manage Subjects (4º grau)
+    internal enum EditParamStudentSubjects_e
+    {
+        Back = 0,
+        Help = 1,
+        ListSubjects = 2,
+        AddSubject = 3,
+        RemoveSubject = 4,
+        EditSubjectGrade = 5
+    }
+
+
+    private const string MenuStudentSubjects_s = @"
+    Gerir Disciplinas do Estudante:
+        [0] Back           -> Voltar ao menu de edição do estudante
+        [1] Help           -> Mostrar este texto
+        [2] ListSubjects   -> Mostrar disciplinas e notas do estudante
+        [3] AddSubject     -> Adicionar uma nova disciplina (com nota opcional)
+        [4] RemoveSubject  -> Remover uma disciplina
+        [5] EditSubjectGrade -> Alterar a nota de uma disciplina
+";
+
+    internal static string GetMenuStudentSubjects() => MenuStudentSubjects_s;
+    internal static EditParamStudentSubjects_e MenuStudentSubjects() => AskMenu<EditParamStudentSubjects_e>("manage student subjects", MenuStudentSubjects_s);
 
 }
 

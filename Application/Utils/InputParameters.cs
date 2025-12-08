@@ -7,6 +7,7 @@ using School_System.Infrastructure.FileManager;
 using School_System.Domain.Base;
 using School_System.Domain.CourseProgram;
 using School_System.Domain.SchoolMembers;
+using Schoo_lSystem.Application.Menu;
 
 public enum Nationality_e
 {
@@ -42,6 +43,8 @@ public enum CourseType_e
     Mestrado = 7,
     Doutoramento = 8
 }
+// enums de Course
+
 
 /// <summary>
 /// Contém funções estáticas para auxiliar na obtenção e validação de 
@@ -54,6 +57,7 @@ public static class InputParameters  // Nome da classe alterado
     private const string EmptyEntrance = "Entrada nula ou em branco, valor default utilizado.";
     internal const string ProblemGetTheId = "❗ Erro: Não foi possível obter um ID válido. Criação cancelada.❗";
 
+    internal const short MinEct = 3;
     internal const short MinCourseEct = 60;  // mínimo razoável para um curso
     internal const short MaxCourseEct = 360; // máximo típico de licenciatura prolongada
 
@@ -62,6 +66,7 @@ public static class InputParameters  // Nome da classe alterado
 
     internal const byte MinAge = 8;// variavel para defenir a idade minima que um estudante pode ter.
     internal const int MaxCourseYear = 4;
+
 
     /// <summary>  Pede ao usuário para inserir ou alterar um nome. </summary>
     /// <param name="prompt">Mensagem a exibir para o usuário.</param>
@@ -469,7 +474,6 @@ public static class InputParameters  // Nome da classe alterado
         }
     }
 
-
     //InternationalStudent
 
     public static VisaState_e InputVisaStatus(string prompt, VisaState_e? currentValue = null, bool isToEdit = false)
@@ -618,10 +622,9 @@ public static class InputParameters  // Nome da classe alterado
         }
     }
 
-
     // Disciplinas
 
-    public static short InputSubjectsECTS(string prompt, short minEct, short? currentValue = null, bool isToEdit = false)
+    public static short InputSubjectsECTS(string prompt, short minEct = MinEct, short? currentValue = null, bool isToEdit = false)
     {
         while (true)
         {
@@ -651,7 +654,6 @@ public static class InputParameters  // Nome da classe alterado
             }
         }
     }
-
 
     // Usam AskAndSearch
 
@@ -792,35 +794,4 @@ public static class InputParameters  // Nome da classe alterado
             WriteLine("Seleção cancelada. Pode tentar novamente.\n");
         }
     }
-
-    /// <summary>  Só deve ser usado no modo Edit</summary>
-    /// <param name="prompt"></param>
-    /// <param name="currentSubjects"></param>
-    /// <returns></returns>
-    public static List<Subject> InputSubjects(string prompt = "Editar disciplinas do curso.", List<Subject>? currentSubjects = null)
-    {
-        // A lista de disciplinas atual (as que estão no curso antes da edição).
-        var selectedSubjects = currentSubjects != null ? [.. currentSubjects] : new List<Subject>();
-
-        // 1. Apresentação inicial e instruções.
-        WriteLine("==========================================");
-        WriteLine(prompt);
-
-        if (selectedSubjects.Count > 0)
-        {
-            WriteLine($"Disciplinas atualmente selecionadas (Total: {selectedSubjects.Count}):");
-            foreach (var s in selectedSubjects)
-                WriteLine($" - {s.Name_s} (ID {s.ID_i})");
-        }
-        else
-        {
-            WriteLine("Nenhuma disciplina está atualmente selecionada.");
-        }
-
-
-
-        return selectedSubjects;
-    }
-
-
 }

@@ -2,6 +2,7 @@
 /// Nesta class ela é responsável por tudo que seja relacionado com a base de dados, nenhuma class sem ser esta pode manusiar nos ficheiros.
 /// Tambem é responsavel por verificar se os ficheiros existem 
 /// Também deve estar apar de todos os ficherios existentes, tendo o caminho como uma variavel.
+/// Esta class usa bastante acesso LINQ para percorrer JSONs e dicionários com Caminhos(PATHs).
 /// </summary>
 namespace School_System.Infrastructure.FileManager;
 
@@ -90,7 +91,7 @@ public static class FileManager
     }
     // function to get the FilePath.
     private static string GetFilePath(DataBaseType baseType) { return GetDataBaseInfo(baseType).path; }
-    // function to... return the path of the base type
+    // Função para devolver o caminho para uma base de dados e um Tipode de class
     private static (string path, Type type) GetDataBaseInfo(DataBaseType baseType)
     {
         return baseType switch
@@ -182,10 +183,9 @@ public static class FileManager
     }
 
 
-    /// <summary> Verifica se todos os ficheiros necessários existem e cria os que faltam </summary>
-    /// <param name="setup">True para mostrar strings, false para esconder</param>
-    /// <returns></returns>
     /// <summary> Verifica se todos os ficheiros necessários existem e cria/corrige os que faltam </summary>
+    /// <param name="setup">True para mostrar strings, false para esconder</param>
+    /// <returns>true se não houver problemas graves, false se houver um problema com os ficheiros</returns>
     internal static bool StartupCheckFilesWithProgress(bool setup = true)
     {
         var missing = new List<string>();
@@ -279,7 +279,7 @@ public static class FileManager
                         // ------------------------------------------------------
                         File.WriteAllText(file, "{}");
                         failedJsons.Add(file);
-                        WriteLine($"⚠ Corrupção séria. Novo JSON criado → {file}");
+                        WriteLine($"⚠ ficheiro em esatdo crítico. Novo JSON criado → {file}");
                     }
                 }
             }
@@ -320,8 +320,8 @@ public static class FileManager
         return failedJsons.Count == 0;
     }
 
-
     //-----------------------
+
     //  Lê o conteúdo de um ficheiro, devolvendo "{}" se não existir
     internal static string ReadFile(string path) { return File.Exists(path) ? File.ReadAllText(path) : "{}"; }
 
@@ -383,13 +383,13 @@ public static class FileManager
     {
         if (!StartupCheckFilesWithProgress(false)) return -1;
 
-        var info = GetDataBaseInfo(baseType);
+        var (path, type) = GetDataBaseInfo(baseType);
 
         var method = typeof(FileManager)
             .GetMethod(nameof(GetNextAvailableIDFromFile), BindingFlags.NonPublic | BindingFlags.Static)!
-            .MakeGenericMethod(info.type);
+            .MakeGenericMethod(type);
 
-        return (int)method.Invoke(null, new object[] { info.path })!;
+        return (int)method.Invoke(null, new object[] { path })!;
     }    //-----------------------
 
     //--------------
@@ -495,15 +495,28 @@ public static class FileManager
         return new Dictionary<string, T>();
     }
 
-    /// <summary> Restricted Search Engine
-    /// Pesquisa objetos em uma base de dados pelo nome ou ID.
+    /// <summary>Restricted Search Engine
+    /// Realiza uma pesquisa na base de dados correspondente,permitindo procurar objetos por nome e/ou ID. Indica também se a base de dados está vazia.
     /// </summary>
-    /// <typeparam name="T">Tipo do objeto armazenado.</typeparam>
-    /// <param name="baseType">Base de dados selecionada (Student, Teacher ou Course).</param>
-    /// <param name="name">Nome a procurar. Ignorado se for nulo, vazio ou espaço.</param>
-    /// <param name="id">ID a procurar. Ignorado se for nulo.</param>
-    /// <returns>Lista de objetos encontrados.</returns>
-    internal static List<T> Search<T>(DataBaseType baseType,ref bool isEmpty, string? name = null, int? id = null) where T : BaseEntity
+    /// <typeparam name="T"> Tipo do objeto armazenado, devendo herdar de <see cref="BaseEntity"/>. </typeparam>
+    /// <param name="baseType">
+    /// Tipo da base de dados selecionada (ex.: Student, Teacher, Course).
+    /// Determina qual ficheiro JSON será lido.
+    /// </param>
+    /// <param name="isEmpty">
+    /// Parâmetro por referência que é definido como <c>true</c> caso a base de dados esteja vazia ou não possa ser carregada.
+    /// Caso contrário mantém-se <c>false</c>.
+    /// </param>
+    /// <param name="name">
+    /// Nome a procurar. Se for <c>null</c>, vazio ou apenas espaços, o filtro por nome é ignorado ou adaptado conforme a lógica interna.
+    /// A pesquisa é parcial e insensível a maiúsculas/minúsculas.
+    /// </param>
+    /// <param name="id">ID a procurar. Se <c>null</c>, o filtro por ID é ignorado. </param>
+    /// <returns>
+    /// Lista de objetos encontrados após aplicar os filtros.
+    /// Retorna uma lista vazia caso nenhum item satisfaça os critérios ou caso a base de dados esteja vazia.
+    /// </returns>
+    internal static List<T> Search<T>(DataBaseType baseType, ref bool isEmpty, string? name = null, int? id = null) where T : BaseEntity
     {
         string path = GetFilePath(baseType);
 
@@ -590,3 +603,4 @@ public static class FileManager
         return [.. dict.Values];
     }
 }
+

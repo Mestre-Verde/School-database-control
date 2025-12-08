@@ -7,10 +7,11 @@ using School_System.Infrastructure.FileManager;
 using School_System.Domain.CourseProgram;
 using School_System.Application.Utils;
 using Schoo_lSystem.Application.Menu;
+using System.Text.Json;
 
 internal class InternationalStudent : Student
 {
-    // Propriedades Específicas
+    // Propriedades deste objeto
     [JsonInclude] protected Nationality_e Country { get; set; }
     [JsonInclude] protected VisaState_e VisaStatus { get; set; }
 
@@ -25,9 +26,9 @@ internal class InternationalStudent : Student
     public InternationalStudent() : base() { }
 
     private InternationalStudent(int id, string name, byte age, char gender, DateTime? birthDate, Nationality_e nationality, string email,
-                                Course? major = null, int year = default, List<Subject>? enrolledSubjects = null,
+                                Course? major = null, int year = default,
                                 Nationality_e country = default, VisaState_e visaStatus = default)
-    : base(id, name, age, gender, birthDate, nationality, email, major, year, enrolledSubjects)
+    : base(id, name, age, gender, birthDate, nationality, email, major, year)
     {
         Country = country;
         VisaStatus = visaStatus;
@@ -42,7 +43,6 @@ internal class InternationalStudent : Student
             // --- Variáveis temporárias ---
             DateTime? _trash = null;
 
-
             // --- Campos base ---
             byte age = InputParameters.InputAge($"Escreva a idade do(a) estudante", ref _trash, null, false, InputParameters.MinAge);
             DateTime birthDate = InputParameters.InputBirthDate($"Escreva a data de nascimento do(a) estudante", ref age, InputParameters.MinAge);
@@ -53,7 +53,8 @@ internal class InternationalStudent : Student
             parameters["Nationality"] = InputParameters.InputNationality($"Escreva a nacionalidade do(a) estudante");
             parameters["Email"] = InputParameters.InputEmail($"Escreva o email do(a) estudante");
             // Student 
-            parameters["Major"] = InputParameters.InputCourse();
+            Course? course = InputParameters.InputCourse();
+            parameters["Major"] = course!;
             parameters["Year"] = InputParameters.InputInt($"Escreva ano atual do(a) estudante", 1, 4);
             // --- Campos específicos do InternationalStudent ---
             parameters["Country"] = InputParameters.InputNationality("Escreva o país de origem do(a) estudante");
@@ -65,14 +66,13 @@ internal class InternationalStudent : Student
             (string)dict["Name"],
             (byte)dict["Age"],
             (char)dict["Gender"],
-            dict["BirthDate"] is DateTime dt ? dt : DateTime.Now,
+            (DateTime)dict["BirthDate"],
             (Nationality_e)dict["Nationality"],
             (string)dict["Email"],
-            dict["Major"] is Course c ? c : null,
+            (Course)dict["Major"],
             (int)dict["Year"],
-            null,
 
-            dict["Country"] is Nationality_e country ? country : Nationality_e.Other,
+            (Nationality_e)dict["Country"],
             (VisaState_e)dict["VisaStatus"]
         ));
     }
@@ -81,44 +81,10 @@ internal class InternationalStudent : Student
 
     internal static void Select() { SelectEntity<InternationalStudent>("estudante internacional", FileManager.DataBaseType.InternationalStudent, EditInternationalStudent); }
 
-    private static void PrintInternationalStudentComparison(InternationalStudent current, dynamic original)
-    {
-        WriteLine("\n===== 🛈 ESTADO DO ESTUDANTE INTERNACIONAL =====");
-        WriteLine($"{"Campo",-15} | {"Atual",-25} | {"Original"}");
-        WriteLine(new string('-', 60));
-
-        void Show(string label, object? now, object? old) => WriteLine($"{label,-15} | {now,-25} | {old}");
-
-        Show("Nome", current.Name_s, original.Name_s);
-        Show("Idade", current.Age_by, original.Age_by);
-        Show("Género", current.Gender_c, original.Gender_c);
-        Show("Nasc.", current.BirthDate_dt, original.BirthDate_dt);
-        Show("Nacionalidade", current.Nationality, original.Nationality);
-        Show("Email", current.Email_s, original.Email_s);
-        Show("Curso", current.Major?.Name_s, original.Major_s);
-        Show("Ano", current.Year, original.Year);
-        Show("País Origem", current.Country, original.Country);
-        Show("Visto", current.VisaStatus, original.VisaStatus);
-
-        WriteLine(new string('=', 60));
-    }
-
     private static void EditInternationalStudent(InternationalStudent student)
     {
         // 1. Guardar estado original
-        var original = new
-        {
-            student.Name_s,
-            student.Age_by,
-            student.Gender_c,
-            student.BirthDate_dt,
-            student.Nationality,
-            student.Email_s,
-            Major_s = student.Major?.Name_s ?? "Nenhum",
-            student.Year,
-            student.Country,
-            student.VisaStatus
-        };
+        var original = JsonSerializer.Deserialize<InternationalStudent>(JsonSerializer.Serialize(student))!;
 
         bool hasChanged = false;
 
@@ -134,7 +100,7 @@ internal class InternationalStudent : Student
             switch (option)
             {
                 case Menu.EditParamInternationalStudent_e.Help:
-                    PrintInternationalStudentComparison(student, original);
+                    PrintComparison(student, original);
                     break;
 
                 case Menu.EditParamInternationalStudent_e.Name:
@@ -168,6 +134,11 @@ internal class InternationalStudent : Student
 
                 case Menu.EditParamInternationalStudent_e.Email:
                     student.Email_s = InputParameters.InputEmail("Escreva o email do(a) estudante", student.Email_s, true);
+                    hasChanged = true;
+                    break;
+
+                case Menu.EditParamInternationalStudent_e.ManageSubjects:
+                    ManageStudentSubjects(student);
                     hasChanged = true;
                     break;
 
@@ -213,16 +184,20 @@ internal class InternationalStudent : Student
             student.BirthDate_dt = original.BirthDate_dt;
             student.Nationality = original.Nationality;
             student.Email_s = original.Email_s;
-            student.Major = null; // nome não volta, mas não tinhas referência ao objeto original
+            student.Major = original.Major;
             student.Year = original.Year;
             student.Country = original.Country;
             student.VisaStatus = original.VisaStatus;
         }
     }
 
+    // Propina internacional (mais cara)
     protected override decimal CalculateTuition()
     {
-        // Propina internacional (mais cara)
-        return 3000m;
+        const decimal pricePerEcts = 110m;
+        int totalEcts = 0;
+        // Somar os ECTS de cada disciplina inscrita
+        foreach (Subject subject in EnrolledSubjects) { totalEcts += subject.ECTS_i; }
+        return totalEcts * pricePerEcts;
     }
 }

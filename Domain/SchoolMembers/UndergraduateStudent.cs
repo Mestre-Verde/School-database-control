@@ -6,9 +6,11 @@ using School_System.Infrastructure.FileManager;
 using School_System.Domain.CourseProgram;
 using School_System.Application.Utils;
 using Schoo_lSystem.Application.Menu;
+using System.Text.Json;
 
 internal class UndergraduateStudent : Student
 {
+    // Propriedades deste objeto
     protected override string FormatToString() { return base.FormatToString(); }
     protected override void Introduce() { base.Introduce(); }
 
@@ -16,8 +18,8 @@ internal class UndergraduateStudent : Student
     public UndergraduateStudent() { }
 
     private UndergraduateStudent(int id, string name, byte age, char gender, DateTime? birthDate, Nationality_e nationality, string email,
-                                Course? major = null, int year = default, List<Subject>? enrolledSubjects = null)
-        : base(id, name, age, gender, birthDate, nationality, email, major, year, enrolledSubjects)
+                                Course? major = null, int year = default)
+        : base(id, name, age, gender, birthDate, nationality, email, major, year)
     {
         Introduce();
     }
@@ -38,7 +40,9 @@ internal class UndergraduateStudent : Student
             parameters["BirthDate"] = birthDate;
             parameters["Nationality"] = InputParameters.InputNationality($"Escreva a nacionalidade do(a) estudante");
             parameters["Email"] = InputParameters.InputEmail($"Escreva o email do(a) estudante");
-            parameters["Major"] = InputParameters.InputCourse();
+
+            Course? course = InputParameters.InputCourse();
+            parameters["Major"] = course!;
             parameters["Year"] = InputParameters.InputInt($"Escreva o ano atual do(a) estudante", 1, InputParameters.MaxCourseYear);
         },
         dict => new UndergraduateStudent(
@@ -50,8 +54,7 @@ internal class UndergraduateStudent : Student
             (Nationality_e)dict["Nationality"],
             (string)dict["Email"],
             dict["Major"] is Course c ? c : null,
-            (int)dict["Year"],
-            null
+            (int)dict["Year"]
         ));
     }
 
@@ -59,42 +62,14 @@ internal class UndergraduateStudent : Student
 
     internal static void Select() { SelectEntity<UndergraduateStudent>("estudante CETEsP/Licenciatura", FileManager.DataBaseType.UndergraduateStudent, EditUndergraduateStudent); }
 
-    private static void PrintUndergraduateStudentComparison(UndergraduateStudent current, dynamic original)
-    {
-        WriteLine("\n===== 🛈 ESTADO DO ESTUDANTE =====");
-        WriteLine($"{"Campo",-15} | {"Atual",-25} | {"Original"}");
-        WriteLine(new string('-', 60));
-
-        void Show(string label, object? now, object? old) => WriteLine($"{label,-15} | {now,-25} | {old}");
-
-        Show("Nome", current.Name_s, original.Name_s);
-        Show("Idade", current.Age_by, original.Age_by);
-        Show("Género", current.Gender_c, original.Gender_c);
-        Show("Nascimento", current.BirthDate_dt, original.BirthDate_dt);
-        Show("Nacionalidade", current.Nationality, original.Nationality);
-        Show("Email", current.Email_s, original.Email_s);
-
-        WriteLine(new string('=', 60));
-    }
-
     private static void EditUndergraduateStudent(UndergraduateStudent student)
     {
-        // 1. Guardar estado original
-        var original = new
-        {
-            student.Name_s,
-            student.Age_by,
-            student.Gender_c,
-            student.BirthDate_dt,
-            student.Nationality,
-            student.Email_s,
-        };
+        // 1. Guardar estado original (deep copy via JSON)
+        var original = JsonSerializer.Deserialize<UndergraduateStudent>(JsonSerializer.Serialize(student))!;
         bool hasChanged = false;
 
-        // 2. Mostrar menu inicial
         Write(Menu.GetMenuEditUndergraduateStudent());
 
-        // 3. Loop de edição
         while (true)
         {
             var option = Menu.MenuEditUndergraduateStudent();
@@ -103,7 +78,7 @@ internal class UndergraduateStudent : Student
             switch (option)
             {
                 case Menu.EditParamStudent_e.Help:
-                    PrintUndergraduateStudentComparison(student, original);
+                    PrintComparison(student, original);
                     break;
 
                 case Menu.EditParamStudent_e.Name:
@@ -113,36 +88,50 @@ internal class UndergraduateStudent : Student
 
                 case Menu.EditParamStudent_e.Age:
                     DateTime? tmp = student.BirthDate_dt;
-                    student.Age_by = InputParameters.InputAge("Escreva a idade do estudante", ref tmp, student.Age_by, true, InputParameters.MinAge);
+                    student.Age_by = InputParameters.InputAge("Escreva a idade", ref tmp, student.Age_by, true, InputParameters.MinAge);
                     if (tmp.HasValue) student.BirthDate_dt = tmp.Value;
                     hasChanged = true;
                     break;
 
                 case Menu.EditParamStudent_e.Gender:
-                    student.Gender_c = InputParameters.InputGender("Escreva o gênero do estudante", student.Gender_c, true);
+                    student.Gender_c = InputParameters.InputGender("Escreva o gênero", student.Gender_c, true);
                     hasChanged = true;
                     break;
 
                 case Menu.EditParamStudent_e.BirthDate:
                     byte ageTemp = student.Age_by;
-                    student.BirthDate_dt = InputParameters.InputBirthDate("Escreva a data de nascimento do estudante", ref ageTemp, InputParameters.MinAge, student.BirthDate_dt, true);
+                    student.BirthDate_dt = InputParameters.InputBirthDate("Escreva a data de nascimento", ref ageTemp, InputParameters.MinAge, student.BirthDate_dt, true);
                     student.Age_by = ageTemp;
                     hasChanged = true;
                     break;
 
                 case Menu.EditParamStudent_e.Nationality:
-                    student.Nationality = InputParameters.InputNationality("Escreva a nacionalidade do estudante", student.Nationality, true);
+                    student.Nationality = InputParameters.InputNationality("Escreva a nacionalidade", student.Nationality, true);
                     hasChanged = true;
                     break;
 
                 case Menu.EditParamStudent_e.Email:
-                    student.Email_s = InputParameters.InputEmail("Escreva o email do estudante", student.Email_s, true);
+                    student.Email_s = InputParameters.InputEmail("Escreva o email", student.Email_s, true);
+                    hasChanged = true;
+                    break;
+
+                case Menu.EditParamStudent_e.Major:
+                    student.Major = InputParameters.InputCourse(currentCourse: student.Major, isToEdit: true);
+                    hasChanged = true;
+                    break;
+
+                case Menu.EditParamStudent_e.Year:
+                    student.Year = InputParameters.InputInt("Escreva o ano atual", 1, InputParameters.MaxCourseYear, student.Year, true);
+                    hasChanged = true;
+                    break;
+
+                case Menu.EditParamStudent_e.ManageSubjects:
+                    ManageStudentSubjects(student);
                     hasChanged = true;
                     break;
             }
         }
 
-        // 4. Concluir alterações
         if (!hasChanged) return;
 
         Write("\nGuardar alterações? (S/N): ");
@@ -154,19 +143,27 @@ internal class UndergraduateStudent : Student
         else
         {
             WriteLine("❌ Alterações descartadas.");
-            // Reverter para valores originais
+
+            // reverte o objeto inteiro (copia cada campo mas para ficar igual ao original)
             student.Name_s = original.Name_s;
             student.Age_by = original.Age_by;
             student.Gender_c = original.Gender_c;
             student.BirthDate_dt = original.BirthDate_dt;
             student.Nationality = original.Nationality;
             student.Email_s = original.Email_s;
+            student.Major = original.Major;
+            student.Year = original.Year;
+            student.EnrolledSubjects = original.EnrolledSubjects;
         }
     }
 
+    // calculo da propina
     protected override decimal CalculateTuition()
     {
-        // Propina base
-        return 1000m;
+        const decimal pricePerEcts = 50m;
+        int totalEcts = 0;
+        // Somar os ECTS de cada disciplina inscrita
+        foreach (Subject subject in EnrolledSubjects) { totalEcts += subject.ECTS_i; }
+        return totalEcts * pricePerEcts;
     }
 }

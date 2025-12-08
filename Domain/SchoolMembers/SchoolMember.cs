@@ -4,7 +4,6 @@ namespace School_System.Domain.SchoolMembers;
 using System.Text.Json.Serialization;
 using School_System.Domain.Base;
 using School_System.Application.Utils;
-using School_System.Domain.Scholarship;
 
 internal abstract class SchoolMember : BaseEntity
 {
@@ -33,7 +32,7 @@ internal abstract class SchoolMember : BaseEntity
     {
         Age_by = age;
         Gender_c = gender;
-        BirthDate_dt = birthDate ?? DateTime.Now;
+        BirthDate_dt = (DateTime)birthDate!;
         Nationality = nationality;
         Email_s = email;
     }
