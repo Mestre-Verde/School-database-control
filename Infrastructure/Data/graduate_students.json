@@ -1,112 +1,194 @@
 {
   "0": {
-    "ThesisTopic": "Quatidiano em Portugal",
-    "Advisor": null,
-    "Major": null,
-    "Year": 1,
-    "GPA": 0,
-    "EnrolledSubjects": [],
-    "Scholarships": [],
-    "Gender_c": "F",
-    "Nationality": 8,
-    "Email_s": "maria.oliveira01@example.com",
-    "Age_by": 24,
-    "BirthDate_dt": "2001-11-03T00:00:00",
-    "ID_i": 0,
-    "Name_s": "Maria Oliveira"
-  },
-  "1": {
-    "ThesisTopic": "Intelig\u00EAncia Artificial em Rob\u00F3tica",
-    "Advisor": null,
-    "Major": null,
-    "Year": 2,
-    "GPA": 0,
-    "EnrolledSubjects": [],
-    "Scholarships": [],
-    "Gender_c": "M",
-    "Nationality": 3,
-    "Email_s": "daniel.novak90@example.com",
-    "Age_by": 35,
-    "BirthDate_dt": "1990-06-14T00:00:00",
-    "ID_i": 1,
-    "Name_s": "Daniel Novak"
-  },
-  "2": {
-    "ThesisTopic": "Estudos de Clima e Sustentabilidade",
-    "Advisor": null,
-    "Major": null,
-    "Year": 1,
-    "GPA": 0,
-    "EnrolledSubjects": [],
-    "Scholarships": [],
-    "Gender_c": "F",
-    "Nationality": 5,
-    "Email_s": "emily.carter02@example.com",
-    "Age_by": 23,
-    "BirthDate_dt": "2002-02-05T00:00:00",
-    "ID_i": 2,
-    "Name_s": "Emily Carter"
-  },
-  "3": {
-    "ThesisTopic": "Seguran\u00E7a em blocos operat\u00F3rios",
+    "ThesisTopic": "How i have married electricity",
     "Advisor": {
-      "Department_s": "Q\u00EDmica",
-      "Gender_c": "F",
+      "Department_s": "Energia",
+      "Gender_c": "M",
       "Nationality": 1,
-      "Email_s": "TorresMFR9@exemple.com",
-      "Age_by": 34,
-      "BirthDate_dt": "1991-05-06T00:00:00",
-      "ID_i": 0,
-      "Name_s": "Mafalda Torres"
+      "Email_s": "ruiM192@ipvc.pt",
+      "Age_by": 38,
+      "BirthDate_dt": "1987-01-01T00:00:00",
+      "ID_i": 2,
+      "Name_s": "Rui Moreira"
     },
-    "Major": null,
-    "Year": 2,
-    "GPA": 0,
-    "EnrolledSubjects": [],
-    "Scholarships": [],
-    "Gender_c": "F",
-    "Nationality": 1,
-    "Email_s": "joanabEB36@ess.pt",
-    "Age_by": 20,
-    "BirthDate_dt": "2005-01-12T00:00:00",
-    "ID_i": 3,
-    "Name_s": "Joana Barbosa"
-  },
-  "4": {
-    "ThesisTopic": "Vai a AI aniquilar o ser Humano",
-    "Advisor": null,
     "Major": {
       "Duration_f": 4,
       "Type_e": 8,
       "ID_i": 3,
-      "Name_s": "Doutoramento em Intelig\u00EAncia Artificial Aplicada"
+      "Name_s": "Doutoramento em Eletrecidade"
+    },
+    "Year": 1,
+    "GPA": 20,
+    "Tuition": 320,
+    "EnrolledSubjects": [
+      {
+        "ECTS_i": 4,
+        "Professor": {
+          "Department_s": "Informática",
+          "Gender_c": "M",
+          "Nationality": 1,
+          "Email_s": "pedrogon34@ipvc.pt",
+          "Age_by": 32,
+          "BirthDate_dt": "1993-05-24T00:00:00",
+          "ID_i": 3,
+          "Name_s": "Pedro Gonçalves"
+        },
+        "Grade": 20,
+        "ID_i": 0,
+        "Name_s": "Programação orientada a objetos"
+      }
+    ],
+    "Scholarships": [],
+    "Gender_c": "M",
+    "Nationality": 1,
+    "Email_s": "gomes.carlos@ipvc.pt",
+    "Age_by": 20,
+    "BirthDate_dt": "2005-03-16T00:00:00",
+    "ID_i": 0,
+    "Name_s": "Carlos Gomes"
+  },
+  "1": {
+    "ThesisTopic": "O Impacto da AI na Gestão de Redes Elétricas",
+    "Advisor": {
+      "Department_s": "Informática",
+      "Gender_c": "F",
+      "Nationality": 1,
+      "Email_s": "carinap@ipvc.pt",
+      "Age_by": 30,
+      "BirthDate_dt": "1995-09-01T00:00:00",
+      "ID_i": 7,
+      "Name_s": "Carina Pinheiro"
+    },
+    "Major": {
+      "Duration_f": 4,
+      "Type_e": 8,
+      "ID_i": 3,
+      "Name_s": "Doutoramento em Eletrecidade"
+    },
+    "Year": 3,
+    "GPA": 18,
+    "Tuition": 320,
+    "EnrolledSubjects": [
+      {
+        "ECTS_i": 20,
+        "Professor": {
+          "Department_s": "Física",
+          "Gender_c": "M",
+          "Nationality": 8,
+          "Email_s": "itaMR9@ipvc.pt",
+          "Age_by": 34,
+          "BirthDate_dt": "1991-06-14T00:00:00",
+          "ID_i": 1,
+          "Name_s": "Caldas Caldinhas"
+        },
+        "Grade": 18,
+        "ID_i": 6,
+        "Name_s": "Tese de Doutoramento (Fase Experimental)"
+      }
+    ],
+    "Scholarships": [],
+    "Gender_c": "F",
+    "Nationality": 5,
+    "Email_s": "susana.a@ipvc.pt",
+    "Age_by": 40,
+    "BirthDate_dt": "1985-07-20T00:00:00",
+    "ID_i": 1,
+    "Name_s": "Susana Almeida"
+  },
+  "2": {
+    "ThesisTopic": "Otimização de Sistemas de Controlo por Microcontroladores",
+    "Advisor": {
+      "Department_s": "Física",
+      "Gender_c": "M",
+      "Nationality": 8,
+      "Email_s": "itaMR9@ipvc.pt",
+      "Age_by": 34,
+      "BirthDate_dt": "1991-06-14T00:00:00",
+      "ID_i": 1,
+      "Name_s": "Caldas Caldinhas"
+    },
+    "Major": {
+      "Duration_f": 1.5,
+      "Type_e": 7,
+      "ID_i": 6,
+      "Name_s": "Mestrado em Eletrónica Industrial"
+    },
+    "Year": 2,
+    "GPA": 17,
+    "Tuition": 200,
+    "EnrolledSubjects": [
+      {
+        "ECTS_i": 12,
+        "Professor": {
+          "Department_s": "Química",
+          "Gender_c": "F",
+          "Nationality": 5,
+          "Email_s": "leirab@ipvc.pt",
+          "Age_by": 55,
+          "BirthDate_dt": "1970-07-20T00:00:00",
+          "ID_i": 5,
+          "Name_s": "Maria Leira"
+        },
+        "Grade": 17,
+        "ID_i": 5,
+        "Name_s": "Dissertação de Mestrado"
+      }
+    ],
+    "Scholarships": [],
+    "Gender_c": "M",
+    "Nationality": 1,
+    "Email_s": "ricardo.s@ipvc.pt",
+    "Age_by": 24,
+    "BirthDate_dt": "2001-01-01T00:00:00",
+    "ID_i": 2,
+    "Name_s": "Ricardo Silva"
+  },
+  "3": {
+    "ThesisTopic": "Análise da Viabilidade de Redes de Sensores em Ambientes Extremos",
+    "Advisor": {
+      "Department_s": "Matemática",
+      "Gender_c": "M",
+      "Nationality": 1,
+      "Email_s": "mariosuares@ipvc.pt",
+      "Age_by": 46,
+      "BirthDate_dt": "1979-03-04T00:00:00",
+      "ID_i": 0,
+      "Name_s": "Mário Suares"
+    },
+    "Major": {
+      "Duration_f": 1.5,
+      "Type_e": 7,
+      "ID_i": 6,
+      "Name_s": "Mestrado em Eletrónica Industrial"
     },
     "Year": 1,
     "GPA": 0,
-    "EnrolledSubjects": [],
-    "Scholarships": [],
-    "Gender_c": "F",
-    "Nationality": 2,
-    "Email_s": "quinteriamourao@ese.pt",
-    "Age_by": 24,
-    "BirthDate_dt": "2001-01-01T00:00:00",
-    "ID_i": 4,
-    "Name_s": "Quinteria"
-  },
-  "5": {
-    "ThesisTopic": "",
-    "Advisor": null,
-    "Major": null,
-    "Year": 1,
-    "GPA": 0,
-    "EnrolledSubjects": [],
+    "Tuition": 200,
+    "EnrolledSubjects": [
+      {
+        "ECTS_i": 5,
+        "Professor": {
+          "Department_s": "Informática",
+          "Gender_c": "M",
+          "Nationality": 1,
+          "Email_s": "pedrogon34@ipvc.pt",
+          "Age_by": 32,
+          "BirthDate_dt": "1993-05-24T00:00:00",
+          "ID_i": 3,
+          "Name_s": "Pedro Gonçalves"
+        },
+        "Grade": 0,
+        "ID_i": 3,
+        "Name_s": "Redes e Telecomunicações"
+      }
+    ],
     "Scholarships": [],
     "Gender_c": "F",
     "Nationality": 1,
-    "Email_s": "mafald34@esdl.pt",
-    "Age_by": 20,
-    "BirthDate_dt": "2005-03-02T00:00:00",
-    "ID_i": 5,
-    "Name_s": "Mafalda Torres"
+    "Email_s": "joana.f@ipvc.pt",
+    "Age_by": 23,
+    "BirthDate_dt": "2002-12-10T00:00:00",
+    "ID_i": 3,
+    "Name_s": "Joana Ferreira"
   }
 }

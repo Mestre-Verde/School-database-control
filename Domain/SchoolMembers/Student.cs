@@ -96,14 +96,12 @@ internal abstract class Student : SchoolMember
         for (int i = 0; i < student.EnrolledSubjects.Count; i++)
         {
             var subj = student.EnrolledSubjects[i];
-            WriteLine($"[{i}] {subj.Name_s} | ECTS: {subj.ECTS_i} | Professor: {subj.Professor?.Name_s}, Valor da propina:{student.Tuition}, GPA:{student.GPA}");
+            WriteLine($"[{i}] {subj.Name_s} | ECTS: {subj.ECTS_i} | Professor: {subj.Professor?.Name_s}");
         }
     }
 
     protected static void AddSubjectToStudent(Student student)
     {
-        WriteLine("\nSelecionar disciplina para adicionar:");
-
         var search = AskAndSearch<Subject>("disciplina", FileManager.DataBaseType.Subject, allowListAll: true, allowUserSelection: true);
 
         if (search.IsDatabaseEmpty || search.Results.Count == 0) return;
@@ -134,20 +132,42 @@ internal abstract class Student : SchoolMember
         // Atualiza Tuition
         student.Tuition = student.CalculateTuition();
 
-        WriteLine($"✔️ Disciplina '{subject.Name_s}' adicionada. Total de ECTS agora: {totalEctsAfterAdd}.");
+        WriteLine($"✅ Disciplina '{subject.Name_s}' adicionada. Total de ECTS agora: {totalEctsAfterAdd}.");
     }
 
     protected static void RemoveSubjectFromStudent(Student student)
     {
-        if (student.EnrolledSubjects.Count == 0) { WriteLine("O estudante não possui disciplinas."); return; }
+        if (student.EnrolledSubjects.Count == 0)
+        {
+            WriteLine("O estudante não possui disciplinas.");
+            return;
+        }
 
         ListStudentSubjects(student);
 
-        int index = InputParameters.InputInt("Escolha o índice da disciplina a remover", 0, student.EnrolledSubjects.Count - 1);
+        // O prompt deve indicar ao utilizador que 0 ou vazio cancela.
+        int userInput = InputParameters.InputInt(
+            $"Escolha o índice da disciplina a remover (1 a {student.EnrolledSubjects.Count}, ou vazio para CANCELAR):",
+            0,
+            student.EnrolledSubjects.Count // Máximo é o número total de itens (Count)
+        );
 
-        var removed = student.EnrolledSubjects[index];
-        student.EnrolledSubjects.RemoveAt(index);
+        // Verifica se o utilizador cancelou (input vazio, ou se introduziu 0).
+        if (userInput == 0)
+        {
+            WriteLine("\nOperação de remoção cancelada.");
+            return;
+        }
 
+        // 4. Converte o input de base 1 para índice de base 0
+        // Como 1 é o primeiro item válido, ele deve mapear para o índice 0.
+        int listIndex = userInput - 1;
+
+        // 5. Remove a disciplina usando o índice de base 0
+        var removed = student.EnrolledSubjects[listIndex];
+        student.EnrolledSubjects.RemoveAt(listIndex);
+
+        // 6. Atualiza dados
         student.GPA = student.CalculateGPA();
         student.Tuition = student.CalculateTuition();
 

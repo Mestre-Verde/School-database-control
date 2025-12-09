@@ -3,30 +3,60 @@
     "Duration_f": 2,
     "Type_e": 5,
     "ID_i": 0,
-    "Name_s": "CTeSP em Automa\u00E7\u00E3o Industrial"
+    "Name_s": "Mecatrónica"
   },
   "1": {
     "Duration_f": 3,
     "Type_e": 6,
     "ID_i": 1,
-    "Name_s": "Licenciatura em Engenharia de Software"
+    "Name_s": "Engenharia Mecânica"
   },
   "2": {
-    "Duration_f": 1.5,
-    "Type_e": 7,
+    "Duration_f": 3,
+    "Type_e": 6,
     "ID_i": 2,
-    "Name_s": "Mestrado em Sistemas de Energia Sustent\u00E1vel"
+    "Name_s": "Mecânica Automóvel"
   },
   "3": {
     "Duration_f": 4,
     "Type_e": 8,
     "ID_i": 3,
-    "Name_s": "Doutoramento em Intelig\u00EAncia Artificial Aplicada"
+    "Name_s": "Doutoramento em Eletricidade"
   },
   "4": {
+    "Duration_f": 3,
+    "Type_e": 6,
+    "ID_i": 4,
+    "Name_s": "Engenharia Eletrotécnica e de Computadores"
+  },
+  "5": {
+    "Duration_f": 2,
+    "Type_e": 5,
+    "ID_i": 5,
+    "Name_s": "Técnicas de Instalações Elétricas"
+  },
+  "6": {
+    "Duration_f": 1.5,
+    "Type_e": 7,
+    "ID_i": 6,
+    "Name_s": "Mestrado em Eletrónica Industrial"
+  },
+  "7": {
+    "Duration_f": 3,
+    "Type_e": 6,
+    "ID_i": 7,
+    "Name_s": "Energias Renováveis"
+  },
+  "8": {
+    "Duration_f": 2,
+    "Type_e": 5,
+    "ID_i": 8,
+    "Name_s": "Manutenção Industrial - Eletricidade"
+  },
+  "9": {
     "Duration_f": 4,
     "Type_e": 8,
-    "ID_i": 4,
-    "Name_s": "Doutoramento em Ci\u00EAncia da Computa\u00E7\u00E3o"
+    "ID_i": 9,
+    "Name_s": "Doutoramento em Sistemas de Energia"
   }
 }

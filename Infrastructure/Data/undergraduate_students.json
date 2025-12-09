@@ -1,141 +1,172 @@
 {
   "0": {
     "Major": {
-      "Duration_f": 4,
-      "Type_e": 8,
-      "ID_i": 4,
-      "Name_s": "Doutoramento em Ci\u00EAncia da Computa\u00E7\u00E3o"
+      "Duration_f": 3,
+      "Type_e": 6,
+      "ID_i": 1,
+      "Name_s": "Engenharia Mec\u00E2nica"
     },
-    "Year": 1,
-    "GPA": 0,
-    "Tuition": 0,
+    "Year": 2,
+    "GPA": 16.75,
+    "Tuition": 1350,
     "EnrolledSubjects": [
       {
         "ECTS_i": 6,
         "Professor": {
-          "Department_s": "Engenharia Eletrot\u00E9cnica e de Computadores",
+          "Department_s": "Matem\u00E1tica",
           "Gender_c": "M",
           "Nationality": 1,
-          "Email_s": "rui.pimentel@feup.pt",
-          "Age_by": 52,
-          "BirthDate_dt": "1973-11-12T00:00:00",
-          "ID_i": 4,
-          "Name_s": "Dr. Rui M. Pimentel"
+          "Email_s": "mariosuares@ipvc.pt",
+          "Age_by": 46,
+          "BirthDate_dt": "1979-03-04T00:00:00",
+          "ID_i": 0,
+          "Name_s": "M\u00E1rio Suares"
         },
-        "Grade": 15,
-        "ID_i": 0,
-        "Name_s": "Eletr\u00F3nica de Pot\u00EAncia Aplicada"
+        "Grade": 19,
+        "ID_i": 2,
+        "Name_s": "\u00C1lgebra Linear e Geometria Anal\u00EDtica"
       },
       {
-        "ECTS_i": 4,
-        "Professor": null,
-        "Grade": 18,
-        "ID_i": 13,
-        "Name_s": "\u00C9tica e Responsabilidade Social"
+        "ECTS_i": 5,
+        "Professor": {
+          "Department_s": "Inform\u00E1tica",
+          "Gender_c": "F",
+          "Nationality": 1,
+          "Email_s": "carinap@ipvc.pt",
+          "Age_by": 30,
+          "BirthDate_dt": "1995-09-01T00:00:00",
+          "ID_i": 7,
+          "Name_s": "Carina Pinheiro"
+        },
+        "Grade": 20,
+        "ID_i": 7,
+        "Name_s": "T\u00E9cnicas Laboratoriais B\u00E1sicas"
+      },
+      {
+        "ECTS_i": 7,
+        "Professor": {
+          "Department_s": "Energia",
+          "Gender_c": "M",
+          "Nationality": 1,
+          "Email_s": "ruiM192@ipvc.pt",
+          "Age_by": 38,
+          "BirthDate_dt": "1987-01-01T00:00:00",
+          "ID_i": 2,
+          "Name_s": "Rui Moreira"
+        },
+        "Grade": 14,
+        "ID_i": 8,
+        "Name_s": "Desenho T\u00E9cnico e CAD"
+      },
+      {
+        "ECTS_i": 9,
+        "Professor": {
+          "Department_s": "F\u00EDsica",
+          "Gender_c": "M",
+          "Nationality": 8,
+          "Email_s": "itaMR9@ipvc.pt",
+          "Age_by": 34,
+          "BirthDate_dt": "1991-06-14T00:00:00",
+          "ID_i": 1,
+          "Name_s": "Caldas Caldinhas"
+        },
+        "Grade": 14,
+        "ID_i": 1,
+        "Name_s": "F\u00EDsica aplicada"
       }
     ],
     "Scholarships": [],
     "Gender_c": "M",
     "Nationality": 1,
-    "Email_s": "ajjj232@gmail.com",
-    "Age_by": 25,
-    "BirthDate_dt": "2000-08-24T00:00:00",
+    "Email_s": "duduMoreira@ipvc.pt",
+    "Age_by": 20,
+    "BirthDate_dt": "2005-11-26T00:00:00",
     "ID_i": 0,
-    "Name_s": "\u00C1lvaro Mend\u00E8s"
+    "Name_s": "Duarte Moreira"
   },
   "1": {
     "Major": {
       "Duration_f": 3,
       "Type_e": 6,
-      "ID_i": 1,
-      "Name_s": "Licenciatura em Engenharia de Software"
+      "ID_i": 4,
+      "Name_s": "Engenharia Eletrot\u00E9cnica e de Computadores"
     },
-    "Year": 1,
-    "GPA": 9,
-    "Tuition": 350,
-    "EnrolledSubjects": [
-      {
-        "ECTS_i": 7,
-        "Professor": null,
-        "Grade": 9,
-        "ID_i": 19,
-        "Name_s": "Aprendizagem de M\u00E1quina"
-      }
-    ],
-    "Scholarships": [],
-    "Gender_c": "F",
-    "Nationality": 1,
-    "Email_s": "ana.martins92@example.com",
-    "Age_by": 32,
-    "BirthDate_dt": "1993-08-12T00:00:00",
-    "ID_i": 1,
-    "Name_s": "Ana Martins Nogueira"
-  },
-  "2": {
-    "Major": null,
     "Year": 1,
     "GPA": 0,
     "Tuition": 0,
     "EnrolledSubjects": [],
     "Scholarships": [],
-    "Gender_c": "M",
+    "Gender_c": "F",
     "Nationality": 1,
-    "Email_s": "joao.silva95@example.com",
-    "Age_by": 29,
-    "BirthDate_dt": "1995-12-09T00:00:00",
-    "ID_i": 2,
-    "Name_s": "Jo\u00E3o Silva"
+    "Email_s": "anacatarina@ipvc.pt",
+    "Age_by": 18,
+    "BirthDate_dt": "2007-09-10T00:00:00",
+    "ID_i": 1,
+    "Name_s": "Ana Catarina Silva"
   },
-  "3": {
-    "Major": null,
+  "2": {
+    "Major": {
+      "Duration_f": 2,
+      "Type_e": 5,
+      "ID_i": 5,
+      "Name_s": "T\u00E9cnicas de Instala\u00E7\u00F5es El\u00E9tricas"
+    },
     "Year": 2,
     "GPA": 0,
     "Tuition": 0,
     "EnrolledSubjects": [],
     "Scholarships": [],
-    "Gender_c": "F",
-    "Nationality": 1,
-    "Email_s": "sofia.anderson97@example.com",
-    "Age_by": 27,
-    "BirthDate_dt": "1997-04-29T00:00:00",
-    "ID_i": 3,
-    "Name_s": "Sofia Anderson"
-  },
-  "4": {
-    "Major": null,
-    "Year": 1,
-    "GPA": 0,
-    "Tuition": 300,
-    "EnrolledSubjects": [
-      {
-        "ECTS_i": 6,
-        "Professor": {
-          "Department_s": "Engenharia Eletrot\u00E9cnica e de Computadores",
-          "Gender_c": "M",
-          "Nationality": 1,
-          "Email_s": "rui.pimentel@feup.pt",
-          "Age_by": 52,
-          "BirthDate_dt": "1973-11-12T00:00:00",
-          "ID_i": 4,
-          "Name_s": "Dr. Rui M. Pimentel"
-        },
-        "Grade": 0,
-        "ID_i": 0,
-        "Name_s": "Eletr\u00F3nica de Pot\u00EAncia Aplicada"
-      }
-    ],
-    "Scholarships": [],
     "Gender_c": "M",
     "Nationality": 1,
-    "Email_s": "DuduCripto@ipvc.pt",
-    "Age_by": 20,
-    "BirthDate_dt": "2005-11-16T00:00:00",
+    "Email_s": "joaogomes@ipvc.pt",
+    "Age_by": 25,
+    "BirthDate_dt": "2000-02-15T00:00:00",
+    "ID_i": 2,
+    "Name_s": "Jo\u00E3o Gomes"
+  },
+  "3": {
+    "Major": {
+      "Duration_f": 3,
+      "Type_e": 6,
+      "ID_i": 7,
+      "Name_s": "Energias Renov\u00E1veis"
+    },
+    "Year": 3,
+    "GPA": 0,
+    "Tuition": 0,
+    "EnrolledSubjects": [],
+    "Scholarships": [],
+    "Gender_c": "F",
+    "Nationality": 1,
+    "Email_s": "ritamartins@ipvc.pt",
+    "Age_by": 21,
+    "BirthDate_dt": "2004-04-05T00:00:00",
+    "ID_i": 3,
+    "Name_s": "Rita Martins"
+  },
+  "4": {
+    "Major": {
+      "Duration_f": 2,
+      "Type_e": 5,
+      "ID_i": 8,
+      "Name_s": "Manuten\u00E7\u00E3o Industrial - Eletricidade"
+    },
+    "Year": 1,
+    "GPA": 0,
+    "Tuition": 0,
+    "EnrolledSubjects": [],
+    "Scholarships": [],
+    "Gender_c": "M",
+    "Nationality": 5,
+    "Email_s": "carlossantos@ipvc.pt",
+    "Age_by": 29,
+    "BirthDate_dt": "1996-08-08T00:00:00",
     "ID_i": 4,
-    "Name_s": "Duarte da Cruz Moreira"
+    "Name_s": "Carlos Santos"
   },
   "5": {
     "Major": null,
-    "Year": 3,
+    "Year": 0,
     "GPA": 0,
     "Tuition": 0,
     "EnrolledSubjects": [],
@@ -149,24 +180,19 @@
     "Name_s": ""
   },
   "6": {
-    "Major": {
-      "Duration_f": 2,
-      "Type_e": 5,
-      "ID_i": 0,
-      "Name_s": "CTeSP em Automa\u00E7\u00E3o Industrial"
-    },
-    "Year": 1,
+    "Major": null,
+    "Year": 0,
     "GPA": 0,
     "Tuition": 0,
     "EnrolledSubjects": [],
     "Scholarships": [],
-    "Gender_c": "F",
-    "Nationality": 14,
-    "Email_s": "marg3@ipvc.pt",
-    "Age_by": 18,
-    "BirthDate_dt": "2007-11-10T00:00:00",
+    "Gender_c": "\u0000",
+    "Nationality": 0,
+    "Email_s": "",
+    "Age_by": 0,
+    "BirthDate_dt": "0001-01-01T00:00:00",
     "ID_i": 6,
-    "Name_s": "Margarida Alves"
+    "Name_s": ""
   },
   "7": {
     "Major": null,
@@ -181,21 +207,6 @@
     "Age_by": 0,
     "BirthDate_dt": "0001-01-01T00:00:00",
     "ID_i": 7,
-    "Name_s": ""
-  },
-  "8": {
-    "Major": null,
-    "Year": 0,
-    "GPA": 0,
-    "Tuition": 0,
-    "EnrolledSubjects": [],
-    "Scholarships": [],
-    "Gender_c": "\u0000",
-    "Nationality": 0,
-    "Email_s": "",
-    "Age_by": 0,
-    "BirthDate_dt": "0001-01-01T00:00:00",
-    "ID_i": 8,
     "Name_s": ""
   }
 }

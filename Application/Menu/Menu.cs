@@ -5,6 +5,7 @@ using static System.Console;
 
 using School_System.Domain.CourseProgram;
 using School_System.Domain.SchoolMembers;
+using School_System.Infrastructure.FileManager;
 
 public static class Menu
 {
@@ -19,7 +20,7 @@ public static class Menu
         Add,        // Adicionar algo
         Remove,     // Remover algo
         Select,     // Selecionar um item
-        Search,       // Mostrar todos os dados
+        AllEntitys,       // Mostrar todos os dados
         None       // Caso não reconheça o comando
     }
     private const string MainMenuCommands_s = @"
@@ -29,7 +30,6 @@ public static class Menu
         [2] Add       -> Adicionar aluno, professor, etc.
         [3] Remove    -> Remover item
         [4] Select    -> Selecionar item
-        [5] Search    -> Mostrar todos os dados
     ";
     internal static void MainMenu()
     {
@@ -45,8 +45,6 @@ public static class Menu
                 case "2": input_s = "Add"; break;
                 case "3": input_s = "Remove"; break;
                 case "4": input_s = "Select"; break;
-                case "5": input_s = "Search"; break;
-
             }
             // Agora tenta converter para enum
             if (!Enum.TryParse(input_s, true, out MainMenuCommands_e command)) { command = MainMenuCommands_e.None; }
@@ -57,8 +55,6 @@ public static class Menu
                 case MainMenuCommands_e.Add: MenuAddObject(); break;
                 case MainMenuCommands_e.Remove: MenuRemoveObject(); break;
                 case MainMenuCommands_e.Select: MenuSelectObject(); break;
-                case MainMenuCommands_e.Search: 
-                                    WriteLine("📋  [ls] Mostrando todos os dados..."); break;
                 default: Write(UnknowonCommand_s); break;
             }
         }

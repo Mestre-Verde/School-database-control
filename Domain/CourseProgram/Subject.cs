@@ -98,11 +98,6 @@ public class Subject : BaseEntity
                     subject.Professor = InputParameters.InputTeacher("Selecione o professor")!;
                     hasChanged = true;
                     break;
-
-                case Menu.EditParamSubject_e.Grade:
-                    subject.Grade = (byte)InputParameters.InputInt("Escreva a nota (0-20)", 0, 20, subject.Grade, true);
-                    hasChanged = true;
-                    break;
             }
         }
 
@@ -123,7 +118,6 @@ public class Subject : BaseEntity
             subject.Name_s = original.Name_s;
             subject.ECTS_i = original.ECTS_i;
             subject.Professor = original.Professor;
-            subject.Grade = original.Grade;
         }
     }
 }

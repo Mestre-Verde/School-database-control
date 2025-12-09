@@ -657,27 +657,22 @@ public static class InputParameters  // Nome da classe alterado
 
     // Usam AskAndSearch
 
-    internal static Teacher? InputTeacher(string prompt = "Escreva o nome ou id do Tutor", Teacher? currentTeacher = null, bool isEditing = false)
+    internal static Teacher? InputTeacher(string prompt = "", Teacher? currentTeacher = null, bool isEditing = false)
     {
         while (true)
         {
             // 1. Calcula prompt final
             string finalPrompt = isEditing && currentTeacher != null
                 ? $"{prompt} (Enter para manter '{currentTeacher.Name_s}'): "
-                : $"{prompt} (Enter para default): ";
+                : $"";
 
             // 2. Chama AskAndSearch (allowListAll = true para suportar '-a')
-            var searchResult = BaseEntity.AskAndSearch<Teacher>(
-                typeName: "professor",
-                dbType: FileManager.DataBaseType.Teacher,
-                prompt: finalPrompt,
-                allowListAll: true
-            );
+            var searchResult = BaseEntity.AskAndSearch<Teacher>(typeName: "professor", dbType: FileManager.DataBaseType.Teacher, allowListAll: true);
 
             // 3. Base vazia → mantém valor atual / null
             if (searchResult.IsDatabaseEmpty)
             {
-                WriteLine("A base de dados de professores está vazia.");
+                // não precisa de dizer que está vazia porque a função askandSearch já faz isso.
                 return currentTeacher;
             }
 
@@ -741,7 +736,6 @@ public static class InputParameters  // Nome da classe alterado
             var searchResult = BaseEntity.AskAndSearch<Course>(
                 typeName: "curso",
                 dbType: FileManager.DataBaseType.Course,
-                prompt: finalPrompt,
                 allowListAll: true
             );
 

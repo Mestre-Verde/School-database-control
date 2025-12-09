@@ -1,5 +1,1 @@
-{"Type_e":0,"Duration_f":0,"Subjects_l":[],"ID_i":1,"Name_s":""}
-{"Type_e":0,"Duration_f":0,"Subjects_l":[],"ID_i":4,"Name_s":""}
-{"Type_e":0,"Duration_f":0,"Subjects_l":[],"ID_i":5,"Name_s":""}
-{"Type_e":0,"Duration_f":0,"Subjects_l":[],"ID_i":6,"Name_s":""}
-{"Type_e":0,"Duration_f":0,"Subjects_l":[],"ID_i":7,"Name_s":""}
+{"Duration_f":2,"Type_e":7,"ID_i":2,"Name_s":"Mestrado em Gest\u00E3o"}

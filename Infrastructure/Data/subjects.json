@@ -1,173 +1,194 @@
 {
-  "0": {
-    "ECTS_i": 6,
-    "Professor": {
-      "Department_s": "Engenharia Eletrot\u00E9cnica e de Computadores",
-      "Gender_c": "M",
-      "Nationality": 1,
-      "Email_s": "rui.pimentel@feup.pt",
-      "Age_by": 52,
-      "BirthDate_dt": "1973-11-12T00:00:00",
-      "ID_i": 4,
-      "Name_s": "Dr. Rui M. Pimentel"
+    "0": {
+        "ECTS_i": 4,
+        "Professor": {
+            "Department_s": "Informática",
+            "Gender_c": "M",
+            "Nationality": 1,
+            "Email_s": "pedrogon34@ipvc.pt",
+            "Age_by": 32,
+            "BirthDate_dt": "1993-05-24T00:00:00",
+            "ID_i": 3,
+            "Name_s": "Pedro Gonçalves"
+        },
+        "Grade": 0,
+        "ID_i": 0,
+        "Name_s": "Programação orientada a objetos"
     },
-    "Grade": 0,
-    "ID_i": 0,
-    "Name_s": "Eletr\u00F3nica de Pot\u00EAncia Aplicada"
-  },
-  "1": {
-    "ECTS_i": 5,
-    "Professor": {
-      "Department_s": "Ci\u00EAncia e Engenharia Inform\u00E1tica",
-      "Gender_c": "F",
-      "Nationality": 1,
-      "Email_s": "carlastav@it.uni.pt",
-      "Age_by": 41,
-      "BirthDate_dt": "1984-12-09T00:00:00",
-      "ID_i": 5,
-      "Name_s": "Dra. Carla S. Tavares"
+    "1": {
+        "ECTS_i": 9,
+        "Professor": {
+            "Department_s": "Física",
+            "Gender_c": "M",
+            "Nationality": 8,
+            "Email_s": "itaMR9@ipvc.pt",
+            "Age_by": 34,
+            "BirthDate_dt": "1991-06-14T00:00:00",
+            "ID_i": 1,
+            "Name_s": "Caldas Caldinhas"
+        },
+        "Grade": 0,
+        "ID_i": 1,
+        "Name_s": "Física aplicada"
     },
-    "Grade": 0,
-    "ID_i": 1,
-    "Name_s": "Seguran\u00E7a e Auditoria de Sistemas de Informa\u00E7\u00E3o"
-  },
-  "2": {
-    "ECTS_i": 7,
-    "Professor": {
-      "Department_s": "Telecomunica\u00E7\u00F5es e Redes",
-      "Gender_c": "M",
-      "Nationality": 8,
-      "Email_s": "sjcruz@mail.politec.pt",
-      "Age_by": 36,
-      "BirthDate_dt": "1989-01-03T00:00:00",
-      "ID_i": 6,
-      "Name_s": "Dr. S\u00E9rgio J. Cruz"
+    "2": {
+        "ECTS_i": 6,
+        "Professor": {
+            "Department_s": "Matemática",
+            "Gender_c": "M",
+            "Nationality": 1,
+            "Email_s": "mariosuares@ipvc.pt",
+            "Age_by": 46,
+            "BirthDate_dt": "1979-03-04T00:00:00",
+            "ID_i": 0,
+            "Name_s": "Mário Suares"
+        },
+        "Grade": 0,
+        "ID_i": 2,
+        "Name_s": "Álgebra Linear e Geometria Analítica"
     },
-    "Grade": 0,
-    "ID_i": 2,
-    "Name_s": "Comunica\u00E7\u00F5es Sem Fios e 5G"
-  },
-  "3": {
-    "ECTS_i": 6,
-    "Professor": {
-      "Department_s": "Automa\u00E7\u00E3o, Controlo e Eletricidade",
-      "Gender_c": "F",
-      "Nationality": 1,
-      "Email_s": "leonor.neves@eletro.pt",
-      "Age_by": 0,
-      "BirthDate_dt": "1977-01-20T00:00:00",
-      "ID_i": 7,
-      "Name_s": "Dra. Leonor D. Neves"
+    "3": {
+        "ECTS_i": 3,
+        "Professor": {
+            "Department_s": "Design",
+            "Gender_c": "F",
+            "Nationality": 1,
+            "Email_s": "sofiaalves@ipvc.pt",
+            "Age_by": 41,
+            "BirthDate_dt": "1984-11-10T00:00:00",
+            "ID_i": 4,
+            "Name_s": "Sofia Alves"
+        },
+        "Grade": 0,
+        "ID_i": 3,
+        "Name_s": "Redes e Telecomunicações"
     },
-    "Grade": 0,
-    "ID_i": 3,
-    "Name_s": "Sistemas de Controlo em Tempo Real"
-  },
-  "6": {
-    "ECTS_i": 5,
-    "Professor": null,
-    "Grade": 0,
-    "ID_i": 6,
-    "Name_s": "Rob\u00F3tica e Sistemas de Manipula\u00E7\u00E3o"
-  },
-  "7": {
-    "ECTS_i": 6,
-    "Professor": null,
-    "Grade": 0,
-    "ID_i": 7,
-    "Name_s": "Otimiza\u00E7\u00E3o em Sistemas de Pot\u00EAncia"
-  },
-  "8": {
-    "ECTS_i": 5,
-    "Professor": null,
-    "Grade": 0,
-    "ID_i": 8,
-    "Name_s": "Gest\u00E3o de Projeto de Software"
-  },
-  "9": {
-    "ECTS_i": 6,
-    "Professor": null,
-    "Grade": 0,
-    "ID_i": 9,
-    "Name_s": "C\u00E1lculo Num\u00E9rico"
-  },
-  "10": {
-    "ECTS_i": 7,
-    "Professor": null,
-    "Grade": 0,
-    "ID_i": 10,
-    "Name_s": "Sistemas de Energia Renov\u00E1vel"
-  },
-  "11": {
-    "ECTS_i": 5,
-    "Professor": null,
-    "Grade": 0,
-    "ID_i": 11,
-    "Name_s": "T\u00F3picos em Bases de Dados NoSQL"
-  },
-  "12": {
-    "ECTS_i": 6,
-    "Professor": null,
-    "Grade": 0,
-    "ID_i": 12,
-    "Name_s": "Mec\u00E2nica Aplicada"
-  },
-  "13": {
-    "ECTS_i": 4,
-    "Professor": null,
-    "Grade": 0,
-    "ID_i": 13,
-    "Name_s": "\u00C9tica e Responsabilidade Social"
-  },
-  "14": {
-    "ECTS_i": 7,
-    "Professor": null,
-    "Grade": 0,
-    "ID_i": 14,
-    "Name_s": "Desenvolvimento Mobile (Android/iOS)"
-  },
-  "15": {
-    "ECTS_i": 5,
-    "Professor": null,
-    "Grade": 0,
-    "ID_i": 15,
-    "Name_s": "Controlo por L\u00F3gica Difusa"
-  },
-  "16": {
-    "ECTS_i": 6,
-    "Professor": null,
-    "Grade": 0,
-    "ID_i": 16,
-    "Name_s": "Processamento de Linguagem Natural (NLP)"
-  },
-  "17": {
-    "ECTS_i": 5,
-    "Professor": null,
-    "Grade": 0,
-    "ID_i": 17,
-    "Name_s": "Circuitos Eletr\u00F3nicos II"
-  },
-  "18": {
-    "ECTS_i": 6,
-    "Professor": {
-      "Department_s": "Engenharia Eletrot\u00E9cnica e de Computadores",
-      "Gender_c": "M",
-      "Nationality": 1,
-      "Email_s": "rui.pimentel@feup.pt",
-      "Age_by": 52,
-      "BirthDate_dt": "1973-11-12T00:00:00",
-      "ID_i": 4,
-      "Name_s": "Dr. Rui M. Pimentel"
+    "4": {
+        "ECTS_i": 10,
+        "Professor": {
+            "Department_s": "Energia",
+            "Gender_c": "M",
+            "Nationality": 1,
+            "Email_s": "ruiM192@ipvc.pt",
+            "Age_by": 38,
+            "BirthDate_dt": "1987-01-01T00:00:00",
+            "ID_i": 2,
+            "Name_s": "Rui Moreira"
+        },
+        "Grade": 0,
+        "ID_i": 4,
+        "Name_s": "Energias Renováveis e Sustentabilidade"
     },
-    "Grade": 0,
-    "ID_i": 18,
-    "Name_s": "Arquitetura de Microprocessadores"
-  },
-  "19": {
-    "ECTS_i": 7,
-    "Professor": null,
-    "Grade": 0,
-    "ID_i": 19,
-    "Name_s": "Aprendizagem de M\u00E1quina"
-  }
+    "5": {
+        "ECTS_i": 12,
+        "Professor": {
+            "Department_s": "Química",
+            "Gender_c": "F",
+            "Nationality": 5,
+            "Email_s": "leirab@ipvc.pt",
+            "Age_by": 55,
+            "BirthDate_dt": "1970-07-20T00:00:00",
+            "ID_i": 5,
+            "Name_s": "Maria Leira"
+        },
+        "Grade": 0,
+        "ID_i": 5,
+        "Name_s": "Dissertação de Mestrado"
+    },
+    "6": {
+        "ECTS_i": 18,
+        "Professor": {
+            "Department_s": "Gestão",
+            "Gender_c": "M",
+            "Nationality": 1,
+            "Email_s": "fernandom@ipvc.pt",
+            "Age_by": 50,
+            "BirthDate_dt": "1975-01-25T00:00:00",
+            "ID_i": 6,
+            "Name_s": "Fernando Marques"
+        },
+        "Grade": 0,
+        "ID_i": 6,
+        "Name_s": "Tese de Doutoramento (Fase Experimental)"
+    },
+    "7": {
+        "ECTS_i": 5,
+        "Professor": {
+            "Department_s": "Informática",
+            "Gender_c": "F",
+            "Nationality": 1,
+            "Email_s": "carinap@ipvc.pt",
+            "Age_by": 30,
+            "BirthDate_dt": "1995-09-01T00:00:00",
+            "ID_i": 7,
+            "Name_s": "Carina Pinheiro"
+        },
+        "Grade": 0,
+        "ID_i": 7,
+        "Name_s": "Técnicas Laboratoriais Básicas"
+    },
+    "8": {
+        "ECTS_i": 7,
+        "Professor": {
+            "Department_s": "Energia",
+            "Gender_c": "M",
+            "Nationality": 1,
+            "Email_s": "ruiM192@ipvc.pt",
+            "Age_by": 38,
+            "BirthDate_dt": "1987-01-01T00:00:00",
+            "ID_i": 2,
+            "Name_s": "Rui Moreira"
+        },
+        "Grade": 0,
+        "ID_i": 8,
+        "Name_s": "Desenho Técnico e CAD"
+    },
+    "9": {
+        "ECTS_i": 8,
+        "Professor": {
+            "Department_s": "Física",
+            "Gender_c": "M",
+            "Nationality": 8,
+            "Email_s": "itaMR9@ipvc.pt",
+            "Age_by": 34,
+            "BirthDate_dt": "1991-06-14T00:00:00",
+            "ID_i": 1,
+            "Name_s": "Caldas Caldinhas"
+        },
+        "Grade": 0,
+        "ID_i": 9,
+        "Name_s": "Resistência de Materiais"
+    },
+    "10": {
+        "ECTS_i": 6,
+        "Professor": {
+            "Department_s": "Matemática",
+            "Gender_c": "M",
+            "Nationality": 1,
+            "Email_s": "mariosuares@ipvc.pt",
+            "Age_by": 46,
+            "BirthDate_dt": "1979-03-04T00:00:00",
+            "ID_i": 0,
+            "Name_s": "Mário Suares"
+        },
+        "Grade": 0,
+        "ID_i": 10,
+        "Name_s": "Termodinâmica Aplicada"
+    },
+    "11": {
+        "ECTS_i": 5,
+        "Professor": {
+            "Department_s": "Química",
+            "Gender_c": "F",
+            "Nationality": 5,
+            "Email_s": "leirab@ipvc.pt",
+            "Age_by": 55,
+            "BirthDate_dt": "1970-07-20T00:00:00",
+            "ID_i": 5,
+            "Name_s": "Maria Leira"
+        },
+        "Grade": 0,
+        "ID_i": 11,
+        "Name_s": "Sistemas Hidráulicos e Pneumáticos"
+    }
 }

@@ -12,8 +12,8 @@ using System.Text.Json;
 internal class GraduateStudent : Student
 {
     // Propriedades deste objeto
-    [JsonInclude] protected string ThesisTopic { get; set; } = "";// para quando descerializar n\ao ter nome null
-    [JsonInclude] protected Teacher? Advisor { get; set; }
+    [JsonInclude] protected string ThesisTopic = "";// para quando descerializar n\ao ter nome null
+    [JsonInclude] protected Teacher? Advisor = null;
 
     protected override string FormatToString() // Adiciona os campos específicos na descrição
     {

@@ -201,7 +201,10 @@ public abstract class BaseEntity(int id, string name)
 
         var type = typeof(T);
         var members = type.GetMembers(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic)
-            .Where(m => m.MemberType == System.Reflection.MemberTypes.Property || m.MemberType == System.Reflection.MemberTypes.Field);
+            .Where(m =>
+                (m.MemberType == System.Reflection.MemberTypes.Property || m.MemberType == System.Reflection.MemberTypes.Field)
+                && !(m.Name.StartsWith("<") && m.Name.EndsWith("k__BackingField")) // Ignora backing fields
+            );
 
         foreach (var member in members)
         {
