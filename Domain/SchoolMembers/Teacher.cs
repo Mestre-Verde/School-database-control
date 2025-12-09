@@ -1,3 +1,4 @@
+///<summary> Classe que cria objetos do tipo Teacher </summary>
 namespace School_System.Domain.SchoolMembers;
 
 using static System.Console; // Permite usar Write e WriteLine diretamente

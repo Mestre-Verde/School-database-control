@@ -21,7 +21,7 @@ public class Subject : BaseEntity
     protected override string FormatToString()
     {
         string baseDesc = BaseFormat();
-        return $"{baseDesc}, ECTS={ECTS_i}, Professores={Professor}.";
+        return $"{baseDesc}, ECTS={ECTS_i}, Professore:[{Professor}].";
     }
 
     protected override void Introduce() { Write("\nNova disciplina: "); WriteLine(FormatToString()); }
@@ -53,7 +53,7 @@ public class Subject : BaseEntity
                     id: (int)dict["ID"],
                     name: (string)dict["Name"],
                     ects: (short)dict["ECTS"],
-                    professor: dict["Professor"] as Teacher
+                    professor: (Teacher)dict["Professor"]
                 );
             }
         );

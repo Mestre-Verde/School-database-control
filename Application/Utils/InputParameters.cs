@@ -1,3 +1,7 @@
+/// <summary>
+/// Class static que contem as funções para Inputs de parámetros das classes de baixo grau.
+/// A maioria das funções que aqui se encontram podem tanto ser usadas para a criação de objetos como tambem para a sua edição.
+/// </summary>
 namespace School_System.Application.Utils;
 
 using static System.Console; // Permite usar Write e WriteLine diretamente
@@ -7,7 +11,6 @@ using School_System.Infrastructure.FileManager;
 using School_System.Domain.Base;
 using School_System.Domain.CourseProgram;
 using School_System.Domain.SchoolMembers;
-using Schoo_lSystem.Application.Menu;
 
 public enum Nationality_e
 {

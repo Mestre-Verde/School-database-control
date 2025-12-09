@@ -1,17 +1,23 @@
-/// <summary>Class onde se encontra a maioria da lógica dos menus. </summary>
+/// <summary>
+/// Class onde se encontra a maioria da lógica dos menus. 
+/// Contem os menus do primeiro, segundo e terceiro grau e tambem alguma logica do 4º grau.
+/// 
+/// São usados enums para definir os comandos disponíveis em cada menu,
+/// Usa -se strings com @ para uma melhor formatação dos menus.
+/// Cada menu é um loop infinito que lê a entrada do utilizador e executa ações
+/// usando switch para interpretar a entrada do utilizador.
+/// </summary>
 namespace Schoo_lSystem.Application.Menu;
 
 using static System.Console;
 
 using School_System.Domain.CourseProgram;
 using School_System.Domain.SchoolMembers;
-using School_System.Infrastructure.FileManager;
 
 public static class Menu
 {
     private const string UnknowonCommand_s = "❌ Comando desconhecido.\n";
     private const string BackToMenu_s = "🔙 A voltar ao menu anterior...\n";
-
     // Menu 1º grau , funções principais
     private enum MainMenuCommands_e
     {

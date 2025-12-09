@@ -3,19 +3,19 @@
     "Duration_f": 2,
     "Type_e": 5,
     "ID_i": 0,
-    "Name_s": "Mecatrónica"
+    "Name_s": "Mecatr\u00F3nica"
   },
   "1": {
     "Duration_f": 3,
     "Type_e": 6,
     "ID_i": 1,
-    "Name_s": "Engenharia Mecânica"
+    "Name_s": "Engenharia Mec\u00E2nica"
   },
   "2": {
     "Duration_f": 3,
     "Type_e": 6,
     "ID_i": 2,
-    "Name_s": "Mecânica Automóvel"
+    "Name_s": "Mec\u00E2nica Autom\u00F3vel"
   },
   "3": {
     "Duration_f": 4,
@@ -27,36 +27,48 @@
     "Duration_f": 3,
     "Type_e": 6,
     "ID_i": 4,
-    "Name_s": "Engenharia Eletrotécnica e de Computadores"
+    "Name_s": "Engenharia Eletrot\u00E9cnica e de Computadores"
   },
   "5": {
     "Duration_f": 2,
     "Type_e": 5,
     "ID_i": 5,
-    "Name_s": "Técnicas de Instalações Elétricas"
+    "Name_s": "T\u00E9cnicas de Instala\u00E7\u00F5es El\u00E9tricas"
   },
   "6": {
     "Duration_f": 1.5,
     "Type_e": 7,
     "ID_i": 6,
-    "Name_s": "Mestrado em Eletrónica Industrial"
+    "Name_s": "Mestrado em Eletr\u00F3nica Industrial"
   },
   "7": {
     "Duration_f": 3,
     "Type_e": 6,
     "ID_i": 7,
-    "Name_s": "Energias Renováveis"
+    "Name_s": "Energias Renov\u00E1veis"
   },
   "8": {
     "Duration_f": 2,
     "Type_e": 5,
     "ID_i": 8,
-    "Name_s": "Manutenção Industrial - Eletricidade"
+    "Name_s": "Manuten\u00E7\u00E3o Industrial - Eletricidade"
   },
   "9": {
     "Duration_f": 4,
     "Type_e": 8,
     "ID_i": 9,
     "Name_s": "Doutoramento em Sistemas de Energia"
+  },
+  "10": {
+    "Duration_f": 4,
+    "Type_e": 8,
+    "ID_i": 10,
+    "Name_s": "Electricity with M.V."
+  },
+  "11": {
+    "Duration_f": 3,
+    "Type_e": 6,
+    "ID_i": 11,
+    "Name_s": "Licenciatura em Mecatr\u00F3nica"
   }
 }

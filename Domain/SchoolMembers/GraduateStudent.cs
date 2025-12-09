@@ -1,3 +1,4 @@
+/// <summary>Class que cria objetos do tipo GraduateStudent</summary>
 namespace School_System.Domain.SchoolMembers;
 
 using static System.Console; // Permite usar Write e WriteLine diretamente

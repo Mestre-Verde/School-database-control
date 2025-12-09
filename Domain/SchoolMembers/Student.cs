@@ -42,7 +42,7 @@ internal abstract class Student : SchoolMember
     //----------------------------------
     protected abstract decimal CalculateTuition();
 
-    // esta função vai buscar as notas de cada dsiciplina, armazena em uma lista e faz a média.
+    // esta função vai buscar as notas de cada disciplina, armazena em uma lista e faz a média.
     protected decimal CalculateGPA()
     {
         if (EnrolledSubjects.Count == 0) return 0m;

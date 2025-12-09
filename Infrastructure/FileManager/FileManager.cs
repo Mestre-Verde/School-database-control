@@ -1,7 +1,8 @@
 /// <summary>
-/// Nesta class ela é responsável por tudo que seja relacionado com a base de dados, nenhuma class sem ser esta pode manusiar nos ficheiros.
-/// Tambem é responsavel por verificar se os ficheiros existem 
-/// Também deve estar apar de todos os ficherios existentes, tendo o caminho como uma variavel.
+/// Esta class é estática e é responsavel por gerir os ficheiros de base de dados deste sistema.
+/// Sendo que , a sua função principal é ler e escrever nos ficheiros JSON que servem de base de dados.
+/// Sen esquecer que tambem é responsável por garantir que os ficheiros e diretórios existem no arranque do programa e duante a sua execução.
+/// Também fornece funcionalidades para obter o próximo ID disponível para novos objetos, remover registos por ID e pesquisar registos com filtros específicos.
 /// Esta class usa bastante acesso LINQ para percorrer JSONs e dicionários com Caminhos(PATHs).
 /// Ao remover dados e a tentar reparar ficheiros josn, cria um backup com o nome do json.
 /// </summary>
@@ -10,7 +11,6 @@ namespace School_System.Infrastructure.FileManager;
 using static System.Console;
 using System.Text.Json;
 using System.Reflection;
-using System.Text.RegularExpressions;
 
 using School_System.Domain.Base;
 using School_System.Domain.SchoolMembers;
@@ -54,9 +54,12 @@ public static class FileManager
     };
 
     // Combina todos os diretórios definidos nos dicionários individuais e devolve como uma sequência (IEnumerable<string>) de caminhos.
-    private static IEnumerable<string> AllDirectories => DomainDirectories.Values// Pega todos os valores do dicionário DomainDirectories
-        .Concat(ApplicationDirectories.Values)   // Concatena os valores do ApplicationDirectories
-        .Concat(InfrastructureDirectories.Values); // Concatena os valores do InfrastructureDirectories
+    private static IEnumerable<string> GetAllDirectories()
+    {
+        return DomainDirectories.Values// Pega todos os valores do dicionário DomainDirectories
+    .Concat(ApplicationDirectories.Values)   // Concatena os valores do ApplicationDirectories
+    .Concat(InfrastructureDirectories.Values); // Concatena os valores do InfrastructureDirectories
+    }
 
     private static readonly Dictionary<string, string> Files = new()
     {
@@ -111,7 +114,7 @@ public static class FileManager
     }
 
     // function to get the FilePath.
-    private static string GetFilePath(DataBaseType baseType) { return GetDataBaseInfo(baseType).path; }
+    private static string GetFilePath(DataBaseType baseType) => GetDataBaseInfo(baseType).path;
 
     // Desenha uma barra de progresso simples no terminal
     private static void DrawProgressBar(int value, int max)
@@ -146,7 +149,7 @@ public static class FileManager
         // Define que se houver falha no I/O, a flag de erro grave é ativada.
         bool ioErrorOccurred = false;
 
-        var dirs = AllDirectories.ToList();
+        var dirs = GetAllDirectories().ToList();
         var files = AllFiles.ToList();
 
         int total = dirs.Count + files.Count;
@@ -394,7 +397,6 @@ public static class FileManager
         return nextID;//  Retorna o menor ID que ainda não foi usado.
     }
 
-    // -------------------------------------------------------------
     // Função principal para obter o próximo ID disponível
     // O retorno é INT (o próximo ID disponível)
     internal static int GetTheNextAvailableID(DataBaseType baseType)
@@ -423,55 +425,70 @@ public static class FileManager
 
     //--------------
 
-    // Remove pelo enum e ID
-    internal static bool RemoveById<T>(DataBaseType baseType, int id)
+    // Remove um objeto de uma base de dados pelo ID
+    internal static bool RemoveById<T>(DataBaseType baseType, int id) where T : BaseEntity
     {
-        string path = GetFilePath(baseType);
-        WriteLine($"[DEBUG] Tentando remover ID={id} do arquivo {path}");
-
-        if (!File.Exists(path))
+        try
         {
-            WriteLine("[DEBUG] Arquivo não existe!");
+            string path = GetFilePath(baseType);
+
+            if (!File.Exists(path))
+            {
+                WriteLine("[DEBUG] Arquivo não existe!");
+                return false;
+            }
+
+            string json = File.ReadAllText(path);
+
+            Dictionary<string, T>? dict = JsonSerializer.Deserialize<Dictionary<string, T>>(json);
+            if (dict == null)
+            {
+                WriteLine("[DEBUG] Dicionário nulo!");
+                return false;
+            }
+
+            string keyToRemove = dict.FirstOrDefault(kvp =>
+            {
+                try
+                {
+                    PropertyInfo? prop = kvp.Value?.GetType().GetProperty("ID_i", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                    if (prop == null) { return false; }
+
+                    object? valObj = prop.GetValue(kvp.Value);
+                    return valObj != null && Convert.ToInt32(valObj) == id;
+                }
+                catch (Exception ex)
+                {
+                    WriteLine($"[DEBUG] Erro ao ler propriedade: {ex.Message}");
+                    return false;
+                }
+            }).Key;
+
+            if (keyToRemove != null)
+            {
+                // Backup
+                string backupDir = InfrastructureDirectories["Backup"];
+                _ = Directory.CreateDirectory(backupDir);
+                string backupPath = Path.Combine(backupDir, $"{baseType}.txt");
+
+                string backupEntry = JsonSerializer.Serialize(dict[keyToRemove]);
+                File.AppendAllText(backupPath, backupEntry + Environment.NewLine);
+
+                // Remove e salva
+                _ = dict.Remove(keyToRemove);
+                File.WriteAllText(path, JsonSerializer.Serialize(dict, JsonOptions));
+
+                return true;
+            }
+
+            WriteLine("[DEBUG] Nenhum objeto correspondente encontrado.");
             return false;
         }
-
-        string json = File.ReadAllText(path);
-        var dict = JsonSerializer.Deserialize<Dictionary<string, T>>(json);
-        if (dict == null)
+        catch (Exception ex)
         {
-            WriteLine("[DEBUG] Dicionário nulo!");
+            WriteLine($"[ERROR] RemoveById falhou: {ex.Message}");
             return false;
         }
-
-        var keyToRemove = dict.FirstOrDefault(kvp =>
-        {
-            var prop = kvp.Value?.GetType().GetProperty(
-                "ID_i", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
-            );
-            if (prop == null) return false;
-
-            var valObj = prop.GetValue(kvp.Value);
-            return valObj != null && Convert.ToInt32(valObj) == id;
-
-        }).Key;
-        if (keyToRemove != null)
-        {
-            // --- Backup sem indentação ---
-            string backupDir = InfrastructureDirectories["Backup"]; // "Infrastructure/Data/backup"
-            Directory.CreateDirectory(backupDir); // garante que a pasta existe
-
-            string backupPath = Path.Combine(backupDir, $"{baseType}.txt"); // caminho completo do backup
-            string backupEntry = JsonSerializer.Serialize(dict[keyToRemove]); // sem WriteIndented
-            File.AppendAllText(backupPath, backupEntry + Environment.NewLine);
-
-            // --- Remove do arquivo principal (mantendo indentação) ---
-            dict.Remove(keyToRemove);
-            File.WriteAllText(path, JsonSerializer.Serialize(dict, new JsonSerializerOptions { WriteIndented = true }));
-
-            return true;
-        }
-        WriteLine("[DEBUG] Nenhum objeto correspondente encontrado.");
-        return false;
     }
 
     //--------------------
@@ -489,10 +506,14 @@ public static class FileManager
         // Tenta desserializar normalmente
         try
         {
-            var dict = JsonSerializer.Deserialize<Dictionary<string, T>>(json);
-            if (dict != null) return dict;
+            Dictionary<string, T>? dict = JsonSerializer.Deserialize<Dictionary<string, T>>(json);
+            if (dict != null)
+            {
+                return dict;
+            }
+
             WriteLine($"[DEBUG] Dicionário vazio após desserialização: {path}");
-            return new Dictionary<string, T>();
+            return [];
         }
         catch (JsonException ex)
         {
@@ -502,14 +523,14 @@ public static class FileManager
         // Tentativa de reparo simples: remove vírgulas iniciais ou finais, linhas em branco
         string cleaned = string.Join("\n",
             json.Split('\n')
-                .Select(line => line.Trim())
-                .Where(line => !string.IsNullOrWhiteSpace(line))
-                .Select(line => line.TrimStart(',').TrimEnd(','))
+                .Select(static line => line.Trim())
+                .Where(static line => !string.IsNullOrWhiteSpace(line))
+                .Select(static line => line.TrimStart(',').TrimEnd(','))
         );
 
         try
         {
-            var dict = JsonSerializer.Deserialize<Dictionary<string, T>>(cleaned);
+            Dictionary<string, T>? dict = JsonSerializer.Deserialize<Dictionary<string, T>>(cleaned);
             if (dict != null)
             {
                 WriteLine($"[INFO] JSON reparado com sucesso: {path}");
@@ -521,7 +542,7 @@ public static class FileManager
             WriteLine($"[ERROR] Falha ao reparar JSON em {path}. Base vazia retornada.");
         }
 
-        return new Dictionary<string, T>();
+        return [];
     }
 
     /// <summary>Restricted Search Engine
@@ -548,9 +569,9 @@ public static class FileManager
     internal static List<T> Search<T>(DataBaseType baseType, ref bool isEmpty, string? name = null, int? id = null) where T : BaseEntity
     {
         string path = GetFilePath(baseType);
-
         // Lê a base de dados de forma segura
-        var dict = SafeReadDatabase<T>(path);
+
+        Dictionary<string, T> dict = SafeReadDatabase<T>(path);
 
         if (dict.Count == 0)
         {
@@ -565,9 +586,8 @@ public static class FileManager
         if (name != null)
         {
             string trimmed = name.Trim();
-            if (trimmed == "")
-            {
-                list = list.Where(x =>
+            list = trimmed == ""
+                ? list.Where(x =>
                 {
                     if (x == null)
                     {
@@ -581,11 +601,8 @@ public static class FileManager
                         return false;
                     }
                     return x.Name_s == "";
-                });
-            }
-            else
-            {
-                list = list.Where(x =>
+                })
+                : list.Where(x =>
                 {
                     if (x == null)
                     {
@@ -599,7 +616,6 @@ public static class FileManager
                     }
                     return x.Name_s.Contains(trimmed, StringComparison.OrdinalIgnoreCase);
                 });
-            }
         }
 
         // --- Filtro por ID ---
@@ -616,7 +632,7 @@ public static class FileManager
             });
         }
 
-        var result = list.ToList();
+        List<T> result = [.. list];
         WriteLine($"[DEBUG] Pesquisa retornou {result.Count} objeto(s).");
         return result;
     }
@@ -626,9 +642,9 @@ public static class FileManager
     {
         // Apenas obtém o caminho e chama SafeReadDatabase.
         string path = GetFilePath(baseType);
-        var dict = SafeReadDatabase<T>(path);
+        Dictionary<string, T> dict = SafeReadDatabase<T>(path);
 
-        WriteLine($"[DEBUG] Função GetAll retornou {dict.Count} objeto(s) de '{baseType}'.");
+        //WriteLine($"[DEBUG] Função GetAll retornou {dict.Count} objeto(s) de '{baseType}'.");
         return [.. dict.Values];
     }
 }

@@ -1,3 +1,4 @@
+///<summary> Class que cria um onjeto UndergraduateStudent que herda de Student </summary>
 namespace School_System.Domain.SchoolMembers;
 
 using static System.Console;

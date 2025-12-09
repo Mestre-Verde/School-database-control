@@ -14,28 +14,92 @@
     "Major": {
       "Duration_f": 4,
       "Type_e": 8,
-      "ID_i": 3,
-      "Name_s": "Doutoramento em Eletrecidade"
+      "ID_i": 10,
+      "Name_s": "Electricity with M.V."
     },
-    "Year": 1,
-    "GPA": 20,
-    "Tuition": 320,
+    "Year": 4,
+    "GPA": 18.666666666666666666666666667,
+    "Tuition": 2240,
     "EnrolledSubjects": [
       {
         "ECTS_i": 4,
         "Professor": {
-          "Department_s": "Informática",
+          "Department_s": "Inform\u00E1tica",
           "Gender_c": "M",
           "Nationality": 1,
           "Email_s": "pedrogon34@ipvc.pt",
           "Age_by": 32,
           "BirthDate_dt": "1993-05-24T00:00:00",
           "ID_i": 3,
-          "Name_s": "Pedro Gonçalves"
+          "Name_s": "Pedro Gon\u00E7alves"
         },
         "Grade": 20,
         "ID_i": 0,
-        "Name_s": "Programação orientada a objetos"
+        "Name_s": "Programa\u00E7\u00E3o orientada a objetos"
+      },
+      {
+        "ECTS_i": 3,
+        "Professor": {
+          "Department_s": "Design",
+          "Gender_c": "F",
+          "Nationality": 1,
+          "Email_s": "sofiaalves@ipvc.pt",
+          "Age_by": 41,
+          "BirthDate_dt": "1984-11-10T00:00:00",
+          "ID_i": 4,
+          "Name_s": "Sofia Alves"
+        },
+        "Grade": 19,
+        "ID_i": 3,
+        "Name_s": "Redes e Telecomunica\u00E7\u00F5es"
+      },
+      {
+        "ECTS_i": 10,
+        "Professor": {
+          "Department_s": "Energia",
+          "Gender_c": "M",
+          "Nationality": 1,
+          "Email_s": "ruiM192@ipvc.pt",
+          "Age_by": 38,
+          "BirthDate_dt": "1987-01-01T00:00:00",
+          "ID_i": 2,
+          "Name_s": "Rui Moreira"
+        },
+        "Grade": 17,
+        "ID_i": 4,
+        "Name_s": "Energias Renov\u00E1veis e Sustentabilidade"
+      },
+      {
+        "ECTS_i": 5,
+        "Professor": {
+          "Department_s": "Qu\u00EDmica",
+          "Gender_c": "F",
+          "Nationality": 5,
+          "Email_s": "leirab@ipvc.pt",
+          "Age_by": 55,
+          "BirthDate_dt": "1970-07-20T00:00:00",
+          "ID_i": 5,
+          "Name_s": "Maria Leira"
+        },
+        "Grade": 0,
+        "ID_i": 11,
+        "Name_s": "Sistemas Hidr\u00E1ulicos e Pneum\u00E1ticos"
+      },
+      {
+        "ECTS_i": 6,
+        "Professor": {
+          "Department_s": "Matem\u00E1tica",
+          "Gender_c": "M",
+          "Nationality": 1,
+          "Email_s": "mariosuares@ipvc.pt",
+          "Age_by": 46,
+          "BirthDate_dt": "1979-03-04T00:00:00",
+          "ID_i": 0,
+          "Name_s": "M\u00E1rio Suares"
+        },
+        "Grade": 0,
+        "ID_i": 2,
+        "Name_s": "\u00C1lgebra Linear e Geometria Anal\u00EDtica"
       }
     ],
     "Scholarships": [],
@@ -48,9 +112,9 @@
     "Name_s": "Carlos Gomes"
   },
   "1": {
-    "ThesisTopic": "O Impacto da AI na Gestão de Redes Elétricas",
+    "ThesisTopic": "O Impacto da AI na Gest\u00E3o de Redes El\u00E9tricas",
     "Advisor": {
-      "Department_s": "Informática",
+      "Department_s": "Inform\u00E1tica",
       "Gender_c": "F",
       "Nationality": 1,
       "Email_s": "carinap@ipvc.pt",
@@ -72,7 +136,7 @@
       {
         "ECTS_i": 20,
         "Professor": {
-          "Department_s": "Física",
+          "Department_s": "F\u00EDsica",
           "Gender_c": "M",
           "Nationality": 8,
           "Email_s": "itaMR9@ipvc.pt",
@@ -96,9 +160,9 @@
     "Name_s": "Susana Almeida"
   },
   "2": {
-    "ThesisTopic": "Otimização de Sistemas de Controlo por Microcontroladores",
+    "ThesisTopic": "Otimiza\u00E7\u00E3o de Sistemas de Controlo por Microcontroladores",
     "Advisor": {
-      "Department_s": "Física",
+      "Department_s": "F\u00EDsica",
       "Gender_c": "M",
       "Nationality": 8,
       "Email_s": "itaMR9@ipvc.pt",
@@ -111,7 +175,7 @@
       "Duration_f": 1.5,
       "Type_e": 7,
       "ID_i": 6,
-      "Name_s": "Mestrado em Eletrónica Industrial"
+      "Name_s": "Mestrado em Eletr\u00F3nica Industrial"
     },
     "Year": 2,
     "GPA": 17,
@@ -120,7 +184,7 @@
       {
         "ECTS_i": 12,
         "Professor": {
-          "Department_s": "Química",
+          "Department_s": "Qu\u00EDmica",
           "Gender_c": "F",
           "Nationality": 5,
           "Email_s": "leirab@ipvc.pt",
@@ -131,7 +195,7 @@
         },
         "Grade": 17,
         "ID_i": 5,
-        "Name_s": "Dissertação de Mestrado"
+        "Name_s": "Disserta\u00E7\u00E3o de Mestrado"
       }
     ],
     "Scholarships": [],
@@ -144,22 +208,22 @@
     "Name_s": "Ricardo Silva"
   },
   "3": {
-    "ThesisTopic": "Análise da Viabilidade de Redes de Sensores em Ambientes Extremos",
+    "ThesisTopic": "An\u00E1lise da Viabilidade de Redes de Sensores em Ambientes Extremos",
     "Advisor": {
-      "Department_s": "Matemática",
+      "Department_s": "Matem\u00E1tica",
       "Gender_c": "M",
       "Nationality": 1,
       "Email_s": "mariosuares@ipvc.pt",
       "Age_by": 46,
       "BirthDate_dt": "1979-03-04T00:00:00",
       "ID_i": 0,
-      "Name_s": "Mário Suares"
+      "Name_s": "M\u00E1rio Suares"
     },
     "Major": {
       "Duration_f": 1.5,
       "Type_e": 7,
       "ID_i": 6,
-      "Name_s": "Mestrado em Eletrónica Industrial"
+      "Name_s": "Mestrado em Eletr\u00F3nica Industrial"
     },
     "Year": 1,
     "GPA": 0,
@@ -168,18 +232,18 @@
       {
         "ECTS_i": 5,
         "Professor": {
-          "Department_s": "Informática",
+          "Department_s": "Inform\u00E1tica",
           "Gender_c": "M",
           "Nationality": 1,
           "Email_s": "pedrogon34@ipvc.pt",
           "Age_by": 32,
           "BirthDate_dt": "1993-05-24T00:00:00",
           "ID_i": 3,
-          "Name_s": "Pedro Gonçalves"
+          "Name_s": "Pedro Gon\u00E7alves"
         },
         "Grade": 0,
         "ID_i": 3,
-        "Name_s": "Redes e Telecomunicações"
+        "Name_s": "Redes e Telecomunica\u00E7\u00F5es"
       }
     ],
     "Scholarships": [],

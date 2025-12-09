@@ -1,5 +1,7 @@
 /// <summary>
-/// Class abstarta de primeiro grau, todas as entidades têm acesso, herdam esta base.
+/// Class abstrata de primeiro grau, todas as entidades têm acesso, herdam esta base.
+/// Contém funções universais para criação, remoção, pesquisa e exibição de entidades.
+/// Também contém propriedades comuns como ID e Name.   
 /// </summary>
 namespace School_System.Domain.Base;
 
@@ -8,7 +10,7 @@ using System.Text.Json.Serialization;
 using School_System.Application.Utils;
 
 using School_System.Infrastructure.FileManager;
-using System.Text.Json;
+
 
 public abstract class BaseEntity(int id, string name)
 {
@@ -30,8 +32,10 @@ public abstract class BaseEntity(int id, string name)
     //-----------------------------
 
     // função helper para poder imprimir qualquer tipo de variavel
+    // Esta função formata diferentes tipos de valores para exibição legível.
     private static string FormatParameter(object? value)
     {
+        // Valor nulo
         if (value == null) return "Nenhum";
 
         // Lista de BaseEntity
@@ -326,67 +330,5 @@ public abstract class BaseEntity(int id, string name)
 
         return new SearchResult<E>(matches, false);
     }
-
-    // TODO: not implemented , ignore this function
-    protected static void EditEntity<T>(
-        T entity,                                  // O objeto que vai ser editado
-        Func<T, string> getMenu,                   // Função que retorna o menu como string para este objeto
-        Func<T, Enum> getOption,                   // Função que lê a opção escolhida pelo utilizador e retorna como Enum
-        Dictionary<Enum, Action<T>> editActions,  // Dicionário: cada opção do menu tem a sua ação correspondente
-        FileManager.DataBaseType dbType,           // Tipo de base de dados onde gravar a entidade
-        Action<T, T>? revertAction = null          // Ação opcional para reverter alterações caso o utilizador cancele
-    ) where T : BaseEntity
-    {
-        // Criar uma cópia profunda do objeto para backup (usando JSON)
-        var original = JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(entity))!;
-
-        bool hasChanged = false; // Flag para saber se o objeto foi alterado
-
-        // Mostrar menu inicial
-        Write(getMenu(entity));
-
-        while (true)
-        {
-            // Lê a opção do utilizador
-            var option = getOption(entity);
-
-            // Se o utilizador escolher "Back", sair do loop
-            if (option.ToString() == "Back") break;
-
-            // Se a opção existir no dicionário de ações, executa a ação correspondente
-            if (editActions.TryGetValue(option, out var action))
-            {
-                action(entity);   // Executa a ação
-                hasChanged = true; // Marca que houve alteração
-            }
-            else if (option.ToString() == "Help")
-            {
-                // Se o utilizador pedir ajuda, imprime comparação entre estado atual e original
-                PrintComparison(entity, original);
-            }
-        }
-
-        // Se não houve alteração, apenas sai
-        if (!hasChanged) return;
-
-        // Perguntar ao utilizador se quer guardar alterações
-        Write("\nGuardar alterações? (S/N): ");
-        if ((ReadLine()?.Trim().ToUpper()) == "S")
-        {
-            // Grava o objeto alterado na base de dados
-            FileManager.WriteOnDataBase(dbType, entity);
-            WriteLine("✔️ Alterações salvas.");
-        }
-        else
-        {
-            // Cancelou: mostrar mensagem
-            WriteLine("❌ Alterações descartadas.");
-
-            // Se a função de revert estiver definida, invoca para restaurar estado original
-            revertAction?.Invoke(entity, original);
-        }
-    }
-
-
 
 }
